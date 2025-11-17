@@ -1,0 +1,29 @@
+*/.env
+*/node_modules
+*.docx
+
+server/prisma/dev.db
+
+# backups
+/backups
+/temp_extract
+
+# Husky
+.husky/_
+
+# Logs
+*.log
+npm-debug.log*
+
+
+# OS
+.DS_Store
+
+node_modules/
+package-lock.json
+
+# Documentation - ignored on deploy branch only
+docs
+
+.cursor
+.github/prompts

@@ -1,0 +1,499 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, deploy]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: 'Target to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - client
+          - server
+
+jobs:
+  ci:
+    runs-on: ubuntu-22.04
+    outputs:
+      server-changed: ${{ steps.check-server.outputs.server }}
+      client-changed: ${{ steps.check-client.outputs.client }}
+      build-id: ${{ steps.generate-id.outputs.build_id }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Generate unique build ID
+        id: generate-id
+        run: echo "build_id=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Check server changes
+        id: check-server
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            server:
+              - 'server/**'
+              - 'ecosystem.config.js'
+
+      - name: Check client changes
+        id: check-client
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            client:
+              - 'client/**'
+              - 'ecosystem.config.js'
+
+      # Create environment files for CI
+      - name: Create environment files for CI
+        run: |
+          if [[ "${{ steps.check-client.outputs.client }}" == "true" ]]; then
+            echo "${{ secrets.CLIENT_ENV_PROD }}" > client/.env
+          fi
+
+          if [[ "${{ steps.check-server.outputs.server }}" == "true" ]]; then
+            echo "${{ secrets.SERVER_ENV_PROD }}" > server/.env
+          fi
+
+      # CLIENT PROCESS
+      - name: Install client dependencies
+        if: steps.check-client.outputs.client == 'true'
+        run: |
+          cd client
+          echo "📦 Installing client dependencies..."
+
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci || {
+            echo "⚠️ Lock file out of sync, running npm install..."
+            npm install
+            echo "✅ Dependencies installed and lock file updated"
+          }
+
+          echo "🔍 Linting client code..."
+          npm run lint
+
+      # CLIENT SECURITY SCAN - Using official Snyk action
+      - name: Client SAST scan
+        if: steps.check-client.outputs.client == 'true'
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          command: code test
+          args: ./client
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || '' }}
+
+      - name: Client SCA scan
+        if: steps.check-client.outputs.client == 'true'
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high ./client
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || '' }}
+
+      - name: Build client
+        if: steps.check-client.outputs.client == 'true'
+        run: |
+          cd client
+          echo "🔨 Building client..."
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          export CI=true
+          export NEXT_TELEMETRY_DISABLED=1
+          export NEXT_DISABLE_SOURCEMAPS=1
+          npm run build --no-progress
+
+      # SERVER PROCESS
+      - name: Install server dependencies
+        if: steps.check-server.outputs.server == 'true'
+        run: |
+          cd server
+          echo "📦 Installing server dependencies..."
+
+          # Try npm ci first, fallback to npm install if lock file is out of sync
+          npm ci || {
+            echo "⚠️ Lock file out of sync, running npm install..."
+            npm install
+            echo "✅ Dependencies installed and lock file updated"
+          }
+
+          echo "🔍 Linting server code..."
+          npm run lint
+
+      # SERVER SECURITY SCAN - Using official Snyk action
+      - name: Server SAST scan
+        if: steps.check-server.outputs.server == 'true'
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          command: code test
+          args: ./server
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || '' }}
+
+      - name: Server SCA scan
+        if: steps.check-server.outputs.server == 'true'
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          command: test
+          args: --severity-threshold=high ./server
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || '' }}
+
+      - name: Build server
+        if: steps.check-server.outputs.server == 'true'
+        run: |
+          cd server
+          echo "🔨 Building server..."
+          npm run build
+
+      # CREATE ARTIFACT
+      - name: Package deployment artifacts
+        if: success() && (github.ref == 'refs/heads/deploy' || github.event_name == 'workflow_dispatch')
+        run: |
+          BUILD_ID="${{ steps.generate-id.outputs.build_id }}"
+          echo "📦 Creating deployment package with ID: $BUILD_ID"
+
+          # Create artifact structure
+          mkdir -p artifacts
+          echo "$BUILD_ID" > artifacts/VERSION
+          cp ecosystem.config.js artifacts/
+
+          # Copy client files if changed
+          if [[ "${{ steps.check-client.outputs.client }}" == "true" ]]; then
+            mkdir -p artifacts/client
+            cp -r client/.next client/public client/package.json client/package-lock.json artifacts/client/
+            echo "✅ Client files packaged"
+          fi
+
+          # Copy server files if changed
+          if [[ "${{ steps.check-server.outputs.server }}" == "true" ]]; then
+            mkdir -p artifacts/server
+            cp -r server/dist server/package.json server/package-lock.json server/prisma server/uploads artifacts/server/
+            echo "✅ Server files packaged"
+          fi
+
+          # Create archive
+          tar -czf "deployment-$BUILD_ID.tar.gz" -C artifacts .
+          echo "📦 Artifact created: deployment-$BUILD_ID.tar.gz"
+
+      # UPLOAD ARTIFACT
+      - name: Upload deployment artifact
+        if: success() && (github.ref == 'refs/heads/deploy' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package
+          path: deployment-*.tar.gz
+          retention-days: 7
+
+  cd:
+    runs-on: ubuntu-latest
+    needs: ci
+    if: success() && (github.ref == 'refs/heads/deploy' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Download deployment package
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-package
+
+      - name: Extract version info
+        run: |
+          # Listar contenido para depurar
+            echo "📦 Files in current directory:"
+            ls -la
+            
+            # Extraer el archivo VERSION del paquete descargado
+            mkdir -p temp_extract
+            tar -xzf deployment-*.tar.gz -C temp_extract
+            
+            # Leer la versión si existe
+            if [ -f "temp_extract/VERSION" ]; then
+              cat temp_extract/VERSION > version.txt
+              echo "📦 Deploying version: $(cat version.txt)"
+            else
+              # Valor predeterminado si no hay archivo VERSION
+              echo "unknown-$(date +%Y%m%d%H%M%S)" > version.txt
+              echo "⚠️ No VERSION file found, using fallback: $(cat version.txt)"
+            fi
+
+      - name: Upload package to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: 'deployment-*.tar.gz'
+          target: '/tmp'
+          overwrite: true
+
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 30m
+          script: |
+            #!/bin/bash
+            set -e  # Exit on any error
+
+            echo "🔧 Setting up environment..."
+
+            # Load environment
+            source ~/.profile || true
+            source ~/.bashrc || true
+
+            # Setup NVM if available
+            export NVM_DIR="$HOME/.nvm"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then
+              source "$NVM_DIR/nvm.sh"
+              nvm use 20 || nvm install 20
+            fi
+
+            # Check for Node.js and PM2
+            if ! command -v node &> /dev/null; then
+              echo "⚠️ Node.js not found, installing..."
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+
+            if ! command -v pm2 &> /dev/null; then
+              echo "⚠️ PM2 not found, installing..."
+              sudo npm install -g pm2
+            fi
+
+            echo "✅ Environment ready:"
+            echo "Node: $(which node) ($(node -v))"
+            echo "NPM: $(which npm) ($(npm -v))"
+            echo "PM2: $(which pm2) ($(pm2 -v))"
+
+            # Prepare deployment
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
+            BACKUP_DIR="$DEPLOY_PATH/backups/$(date +%Y%m%d%H%M%S)"
+
+            # Create backup directory
+            mkdir -p "$DEPLOY_PATH/backups"
+
+            # Backup current deployment
+            echo "💾 Creating backup..."
+            if [ -d "$DEPLOY_PATH" ]; then
+              mkdir -p "$BACKUP_DIR"
+              [ -d "$DEPLOY_PATH/client" ] && cp -r "$DEPLOY_PATH/client" "$BACKUP_DIR/"
+              [ -d "$DEPLOY_PATH/server" ] && cp -r "$DEPLOY_PATH/server" "$BACKUP_DIR/"
+              [ -f "$DEPLOY_PATH/ecosystem.config.js" ] && cp "$DEPLOY_PATH/ecosystem.config.js" "$BACKUP_DIR/"
+            fi
+
+            # Extract the package
+            cd "$DEPLOY_PATH"
+            echo "📦 Extracting deployment package..."
+            mkdir -p temp_extract
+
+
+            # Search for the latest deployment file
+            LATEST_DEPLOYMENT=$(ls -t /tmp/deployment-*.tar.gz | head -1)
+            echo "📦 Using latest deployment package: $LATEST_DEPLOYMENT"
+            tar -xzf "$LATEST_DEPLOYMENT" -C temp_extract
+
+            # Add environment files
+            if [ -d "temp_extract/client" ]; then
+              echo "🔑 Setting client environment variables..."
+              echo "${{ secrets.CLIENT_ENV_PROD }}" > temp_extract/client/.env
+            fi
+
+            if [ -d "temp_extract/server" ]; then
+              echo "🔑 Setting server environment variables..."
+              echo "${{ secrets.SERVER_ENV_PROD }}" > temp_extract/server/.env
+            fi
+
+            # Install production dependencies
+            if [ -d "temp_extract/client" ]; then
+              echo "📦 Installing client dependencies..."
+              cd temp_extract/client
+              # Set memory limits to prevent OOM errors
+              export NODE_OPTIONS="--max-old-space-size=2048"
+              npm ci --prefer-offline --no-audit --no-fund
+              cd ../..
+            fi
+
+            if [ -d "temp_extract/server" ]; then
+              echo "📦 Installing server dependencies..."
+              cd temp_extract/server
+              # Set memory limits to prevent OOM errors
+              export NODE_OPTIONS="--max-old-space-size=2048"
+              npm ci --prefer-offline --no-audit --no-fund
+              cd ../..
+            fi
+
+            # Run Prisma migrations before deploying
+            if [ -d "temp_extract/server" ]; then
+              echo "🗄️ Running database migrations..."
+              cd temp_extract/server
+              
+              # Set memory limits for Prisma commands
+              export NODE_OPTIONS="--max-old-space-size=2048"
+              
+              # Generate Prisma Client
+              npx prisma generate
+              
+              # Check migration status
+              MIGRATE_STATUS=$(npx prisma migrate status 2>&1 || true)
+              
+              if echo "$MIGRATE_STATUS" | grep -q "P3005"; then
+                echo "⚠️ Database needs baselining..."
+                FIRST_MIGRATION=$(ls prisma/migrations | head -n 1)
+                npx prisma migrate resolve --applied "$FIRST_MIGRATION"
+              fi
+              
+              # Try migrate deploy first
+              if ! npx prisma migrate deploy 2>&1; then
+                echo "⚠️ Migration deploy failed, trying db push..."
+                # Fallback to db push if migration fails
+                npx prisma db push --accept-data-loss --skip-generate
+              fi
+              
+              echo "✅ Database schema updated"
+              cd ../..
+            fi    
+
+            # Create log directories
+            mkdir -p /var/log/qr-order/{client,server} || sudo mkdir -p /var/log/qr-order/{client,server}
+
+            # Stop current services before deploying new versions
+            if [ -d "temp_extract/client" ] && pm2 list | grep -q "qr-order-client"; then
+              echo "⏸️ Stopping client service..."
+              pm2 stop qr-order-client
+            fi
+
+            if [ -d "temp_extract/server" ] && pm2 list | grep -q "qr-order-server"; then
+              echo "⏸️ Stopping server service..."
+              pm2 stop qr-order-server
+            fi
+
+            # Move new files into place
+            echo "🚚 Deploying new files..."
+            [ -f "temp_extract/ecosystem.config.js" ] && cp temp_extract/ecosystem.config.js .
+
+            if [ -d "temp_extract/client" ]; then
+              echo "🔄 Updating client..."
+              rm -rf client
+              mv temp_extract/client .
+            fi
+
+            if [ -d "temp_extract/server" ]; then
+              echo "🔄 Updating server..."
+
+              # Step 1: Backup Prisma database file and uploads directory
+              if [ -f "server/prisma/dev.db" ]; then
+                echo "📦 Backing up Prisma database file..."
+                mkdir -p temp_prisma_backup
+                cp server/prisma/dev.db temp_prisma_backup/
+              fi
+
+              # Backup uploads directory if it exists
+              if [ -d "server/uploads" ]; then
+                echo "📦 Backing up uploads directory..."
+                mkdir -p temp_uploads_backup
+                cp -r server/uploads temp_uploads_backup/
+              fi
+              
+              # Step 2: Remove the server directory completely and recreate it
+              rm -rf server
+              mkdir -p server/prisma
+
+              # Step 3: Move all new code from temp_extract
+              cp -r temp_extract/server/. server/
+
+              # Step 4: Restore database file if it existed before
+              if [ -f "temp_prisma_backup/dev.db" ]; then
+                echo "🔄 Restoring Prisma database file..."
+                cp temp_prisma_backup/dev.db server/prisma/
+              fi
+              
+              # Step 5: Restore uploads directory if it exists
+              if [ -d "temp_uploads_backup/uploads" ]; then
+                echo "🔄 Restoring uploads directory..."
+                # Remove new uploads directory (if it exists) and replace with backup
+                rm -rf server/uploads
+                cp -r temp_uploads_backup/uploads server/
+              fi
+
+              # Remove temporary backups
+              rm -rf temp_prisma_backup temp_uploads_backup
+              
+              # Step 6: Verify database migration status
+              echo "🔍 Verifying database migration status..."
+              cd server
+              npx prisma migrate status || echo "⚠️ Migration status check completed"
+              cd ..
+            fi
+
+
+            # Start services with PM2
+            echo "🚀 Starting services..."
+
+            if [ -d "client" ]; then
+              if pm2 list | grep -q "qr-order-client"; then
+                pm2 restart qr-order-client --update-env
+              else
+                pm2 start ecosystem.config.js --only qr-order-client
+              fi
+            fi
+
+            if [ -d "server" ]; then
+              if pm2 list | grep -q "qr-order-server"; then
+                pm2 restart qr-order-server --update-env
+              else
+                pm2 start ecosystem.config.js --only qr-order-server
+              fi
+            fi
+
+            # Health check
+            # echo "🔍 Performing health checks..."
+            # sleep 15
+
+            # if [ -d "server" ]; then
+            #   if curl -s https://164181.msk.web.highserver.ru/api-fastify/healthz | grep  "ok"; then
+            #     echo "✅ Server health check passed"
+            #   else
+            #     echo "❌ Server health check failed! Rolling back..."
+            #     rm -rf server
+            #     [ -d "$BACKUP_DIR/server" ] && cp -r "$BACKUP_DIR/server" .
+            #     pm2 restart qr-order-server || pm2 start ecosystem.config.js --only qr-order-server
+            #     exit 1
+            #   fi
+            # fi
+
+            # if [ -d "client" ]; then
+            #   if pm2 list | grep -q "qr-order-client.*online"; then
+            #     echo "✅ Client started successfully"
+            #   else
+            #     echo "❌ Client failed to start! Rolling back..."
+            #     rm -rf client
+            #     [ -d "$BACKUP_DIR/client" ] && cp -r "$BACKUP_DIR/client" .
+            #     pm2 restart qr-order-client || pm2 start ecosystem.config.js --only qr-order-client
+            #     exit 1
+            #   fi
+            # fi
+
+            # Clean up
+            rm -rf temp_extract /tmp/deployment-*.tar.gz
+
+            # Save PM2 config
+            pm2 save
+
+            echo "✅ Deployment completed successfully!"

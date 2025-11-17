@@ -1,0 +1,28 @@
+{
+  "name": "qr-order-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QR Order Management System",
+  "scripts": {
+    "prepare": "husky",
+    "client:dev": "cd client && npm run dev",
+    "server:dev": "cd server && npm run dev",
+    "client:build": "cd client && npm run build",
+    "server:build": "cd server && npm run build",
+    "client:lint": "cd client && npm run lint",
+    "server:lint": "cd server && npm run lint",
+    "client:prettier": "cd client && npx prettier --write --ignore-unknown",
+    "server:prettier": "cd server && npx prettier --write --ignore-unknown"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14"
+  },
+  "lint-staged": {
+    "client/**/*.{ts,tsx,js,jsx}": "npm run client:prettier --",
+    "server/**/*.{ts,js}": "npm run server:prettier --",
+    "*.{json,md,yml,yaml}": "npx prettier --write"
+  }
+}
