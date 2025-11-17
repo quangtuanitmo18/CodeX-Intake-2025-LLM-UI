@@ -19,16 +19,16 @@ export const accountService = {
   async initOwnerAccount() {
     const accountCount = await accountRepository.count()
     if (accountCount === 0) {
-      const hashedPassword = await hashPassword(envConfig.INITIAL_PASSWORD_OWNER)
+      const hashedPassword = await hashPassword(envConfig.INITIAL_PASSWORD_USER)
       await accountRepository.createAccount({
         name: 'Admin',
-        email: envConfig.INITIAL_EMAIL_OWNER,
+        email: envConfig.INITIAL_EMAIL_USER,
         password: hashedPassword,
         role: Role.Admin
       })
       const chalk = await getChalk()
       console.log(
-        chalk.bgCyan(`Created admin account: ${envConfig.INITIAL_EMAIL_OWNER}|${envConfig.INITIAL_PASSWORD_OWNER}`)
+        chalk.bgCyan(`Created admin account: ${envConfig.INITIAL_EMAIL_USER}|${envConfig.INITIAL_PASSWORD_USER}`)
       )
     }
   },

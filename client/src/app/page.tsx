@@ -29,7 +29,7 @@ export default function HomePage() {
       <div className="mx-auto mt-8 grid w-full max-w-2xl gap-4 rounded-2xl border bg-muted/30 p-6 text-left sm:grid-cols-2">
         <div>
           <p className="text-sm font-semibold text-muted-foreground">Server</p>
-          <p className="text-lg font-medium">Fastify · Prisma · Sentry</p>
+          <p className="text-lg font-medium">Fastify · Prisma</p>
         </div>
         <div>
           <p className="text-sm font-semibold text-muted-foreground">Client</p>

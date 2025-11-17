@@ -1,6 +1,4 @@
-import envConfig from '@/config'
 import NextBundleAnalyzer from '@next/bundle-analyzer'
-import { SentryBuildOptions, withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const isCI = process.env.CI === 'true'
@@ -45,20 +43,4 @@ const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
-// Rest of your configuration remains the same
-const sentryWebpackPluginOptions: SentryBuildOptions = {
-  authToken: envConfig.SENTRY_AUTH_TOKEN,
-  org: envConfig.SENTRY_ORG,
-  project: envConfig.SENTRY_PROJECT,
-
-  release: envConfig.NEXT_PUBLIC_RELEASE ? { name: envConfig.NEXT_PUBLIC_RELEASE } : undefined,
-  sourcemaps: {
-    disable: true,
-    assets: ['**/*.js', '**/*.js.map'],
-    ignore: ['**/node_modules/**'],
-    deleteSourcemapsAfterUpload: false,
-  },
-  silent: true,
-}
-
-export default withSentryConfig(withBundleAnalyzer(nextConfig), sentryWebpackPluginOptions)
+export default withBundleAnalyzer(nextConfig)

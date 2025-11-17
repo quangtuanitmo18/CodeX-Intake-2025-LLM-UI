@@ -1,6 +1,8 @@
+import authApiRequest from '@/apiRequests/auth'
 import envConfig from '@/config'
 import {
   getAccessTokenFromLocalStorage,
+  getRefreshTokenFromLocalStorage,
   normalizePath,
   removeTokensFromLocalStorage,
   setAccessTokenToLocalStorage,
@@ -15,6 +17,9 @@ type CustomOptions = Omit<RequestInit, 'method'> & {
 
 const ENTITY_ERROR_STATUS = 422
 const AUTH_ERROR_STATUS = 401
+
+// Track ongoing refresh token request to prevent multiple simultaneous refreshes
+let refreshTokenPromise: Promise<{ accessToken: string; refreshToken: string }> | null = null
 
 type EntityErrorPayload = {
   message: string
@@ -45,7 +50,13 @@ export class HttpError extends Error {
 export class EntityError extends HttpError {
   status: typeof ENTITY_ERROR_STATUS
   payload: EntityErrorPayload
-  constructor({ status, payload }: { status: typeof ENTITY_ERROR_STATUS; payload: EntityErrorPayload }) {
+  constructor({
+    status,
+    payload,
+  }: {
+    status: typeof ENTITY_ERROR_STATUS
+    payload: EntityErrorPayload
+  }) {
     super({ status, payload, message: 'Entity Error' })
     this.status = status
     this.payload = payload
@@ -57,8 +68,9 @@ const isClient = typeof window !== 'undefined'
 const request = async <Response>(
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   url: string,
-  options?: CustomOptions
-) => {
+  options?: CustomOptions,
+  retryCount = 0
+): Promise<{ status: number; payload: Response }> => {
   let body: FormData | string | undefined
   if (options?.body instanceof FormData) {
     body = options.body
@@ -79,7 +91,7 @@ const request = async <Response>(
   }
 
   const baseUrl =
-    options?.baseUrl === undefined ? envConfig.NEXT_PUBLIC_API_ENDPOINT : options.baseUrl ?? ''
+    options?.baseUrl === undefined ? envConfig.NEXT_PUBLIC_API_ENDPOINT : (options.baseUrl ?? '')
 
   let fullUrl = `${baseUrl}/${normalizePath(url)}`
   if (options?.params) {
@@ -120,6 +132,54 @@ const request = async <Response>(
     }
 
     if (res.status === AUTH_ERROR_STATUS && isClient) {
+      const normalizedUrl = normalizePath(url)
+
+      // Don't retry refresh token endpoint or login endpoint
+      if (normalizedUrl === 'api/auth/refresh-token' || normalizedUrl === 'api/auth/login') {
+        removeTokensFromLocalStorage()
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = '/login'
+        }
+        return data
+      }
+
+      // Try to refresh token if we haven't retried yet
+      if (retryCount === 0) {
+        const refreshToken = getRefreshTokenFromLocalStorage()
+        if (refreshToken) {
+          try {
+            // Use existing refresh promise if available to prevent multiple simultaneous refreshes
+            if (!refreshTokenPromise) {
+              refreshTokenPromise = (async () => {
+                try {
+                  const res = await authApiRequest.refreshToken()
+                  const { accessToken, refreshToken: newRefreshToken } = res.payload.data
+                  setAccessTokenToLocalStorage(accessToken)
+                  setRefreshTokenToLocalStorage(newRefreshToken)
+                  return { accessToken, refreshToken: newRefreshToken }
+                } finally {
+                  refreshTokenPromise = null
+                }
+              })()
+            }
+
+            await refreshTokenPromise
+
+            // Retry the original request with new token
+            return request<Response>(method, url, options, retryCount + 1)
+          } catch (error) {
+            // Refresh failed, clear tokens and redirect to login
+            removeTokensFromLocalStorage()
+            refreshTokenPromise = null
+            if (!window.location.pathname.startsWith('/login')) {
+              window.location.href = '/login'
+            }
+            return data
+          }
+        }
+      }
+
+      // No refresh token or retry failed, redirect to login
       removeTokensFromLocalStorage()
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login'

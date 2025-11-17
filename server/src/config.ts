@@ -23,8 +23,8 @@ const configSchema = z.object({
   ACCESS_TOKEN_EXPIRES_IN: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
-  INITIAL_EMAIL_OWNER: z.string(),
-  INITIAL_PASSWORD_OWNER: z.string(),
+  INITIAL_EMAIL_USER: z.string(),
+  INITIAL_PASSWORD_USER: z.string(),
   DOMAIN: z.string(),
   PROTOCOL: z.string(),
   UPLOAD_FOLDER: z.string(),
@@ -33,9 +33,9 @@ const configSchema = z.object({
   DOCKER: z.enum(['true', 'false']).transform((val) => val === 'true'),
   PRODUCTION_URL: z.string(),
   NODE_ENV: z.enum(['development', 'test', 'production']),
-  SENTRY_DSN: z.string().optional().default(''),
-  SENTRY_RELEASE: z.string().optional().default('v1.0.0'),
-  SERVER_NAME: z.string().optional().default('boilerplate-server')
+  LLM_API_URL: z.string().optional().default(''),
+  LLM_API_TOKEN: z.string().optional().default(''),
+  LLM_API_MODEL: z.string().optional().default('atlas-2.1')
 })
 
 const configServer = configSchema.safeParse(process.env)
