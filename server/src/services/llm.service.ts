@@ -1,4 +1,5 @@
 import envConfig from '@/config'
+import { messageService } from './message.service'
 
 export type LLMStreamChunk = {
   type: 'thinking' | 'answer' | 'complete' | 'error'
@@ -11,6 +12,8 @@ export type LLMStreamChunk = {
 type StreamParams = {
   prompt: string
   sessionId?: string
+  conversationId?: string
+  accountId?: number
   signal?: AbortSignal
   onChunk: (chunk: LLMStreamChunk) => void
 }
@@ -22,9 +25,14 @@ type AiProxyEvent =
   | { type: 'error'; error: string }
 
 class LLMService {
-  async stream({ prompt, sessionId, signal, onChunk }: StreamParams) {
+  async stream({ prompt, sessionId, conversationId, accountId, signal, onChunk }: StreamParams) {
     if (!envConfig.LLM_API_URL || !envConfig.LLM_API_TOKEN) {
       throw new Error('LLM provider is not configured')
+    }
+
+    // Save user message if conversationId and accountId provided
+    if (conversationId && accountId) {
+      await messageService.createUserMessage(conversationId, accountId, prompt)
     }
 
     const response = await fetch(`${envConfig.LLM_API_URL}/stream`, {
@@ -51,6 +59,11 @@ class LLMService {
     const decoder = new TextDecoder()
     let buffer = ''
 
+    // Accumulate content and reasoning for saving after streaming
+    let fullContent = ''
+    let fullReasoning = ''
+    const startTime = Date.now()
+
     while (true) {
       const { value, done } = await reader.read()
       if (done) break
@@ -61,31 +74,66 @@ class LLMService {
         const line = buffer.slice(0, newlineIndex).trim()
         buffer = buffer.slice(newlineIndex + 1)
         if (line) {
-          this.handleProxyEvent(line, onChunk)
+          const accumulated = this.handleProxyEvent(line, onChunk)
+          if (accumulated.content) fullContent += accumulated.content
+          if (accumulated.reasoning) fullReasoning += accumulated.reasoning
         }
         newlineIndex = buffer.indexOf('\n')
       }
     }
+
+    // Save assistant message if conversationId and accountId provided
+    if (conversationId && accountId && fullContent) {
+      try {
+        const duration = Date.now() - startTime
+        await messageService.createAssistantMessage(
+          conversationId,
+          accountId,
+          fullContent,
+          fullReasoning || undefined,
+          {
+            model: envConfig.LLM_API_MODEL,
+            duration
+          }
+        )
+      } catch (error) {
+        console.error('Failed to save assistant message to database:', {
+          conversationId,
+          accountId,
+          contentLength: fullContent.length,
+          error: error instanceof Error ? error.message : error
+        })
+        // Don't throw - streaming already completed successfully for user
+        // Could implement retry logic or dead letter queue here
+      }
+    }
   }
 
-  private handleProxyEvent(rawLine: string, onChunk: (chunk: LLMStreamChunk) => void) {
+  private handleProxyEvent(
+    rawLine: string,
+    onChunk: (chunk: LLMStreamChunk) => void
+  ): { content?: string; reasoning?: string } {
     let event: AiProxyEvent | null = null
     try {
       event = JSON.parse(rawLine) as AiProxyEvent
     } catch (error) {
       console.error('Unable to parse NDJSON line from ai-proxy', { rawLine, error })
-      return
+      return {}
     }
+
+    const result: { content?: string; reasoning?: string } = {}
 
     switch (event.type) {
       case 'text-delta':
         if (event.delta) {
           onChunk({ type: 'answer', delta: event.delta })
+          result.content = event.delta
         }
         break
       case 'reasoning-delta':
         if (event.delta) {
           onChunk({ type: 'thinking', reasoning: event.delta })
+          result.reasoning = event.delta
         }
         break
       case 'text-start':
@@ -107,6 +155,8 @@ class LLMService {
         onChunk({ type: 'thinking', metadata: { event: (event as any).type } })
         break
     }
+
+    return result
   }
 }
 

@@ -22,6 +22,8 @@ class LLMController {
       await llmService.stream({
         prompt: request.body.prompt,
         sessionId: request.body.sessionId,
+        conversationId: request.body.conversationId,
+        accountId: request.account?.userId,
         signal: abortController.signal,
         onChunk: sendChunk
       })

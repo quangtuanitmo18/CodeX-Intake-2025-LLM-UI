@@ -9,6 +9,7 @@ export const requireLoginedHook = async (request: FastifyRequest) => {
   try {
     const decodedAccessToken = verifyAccessToken(accessToken)
     request.decodedAccessToken = decodedAccessToken
+    request.account = decodedAccessToken // Add account property
   } catch (error) {
     throw new AuthError('Access token không hợp lệ')
   }

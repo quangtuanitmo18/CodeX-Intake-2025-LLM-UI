@@ -51,7 +51,9 @@ export function useLLMStream() {
       switch (chunk!.type) {
         case 'thinking': {
           if (!chunk?.reasoning) {
-            return prev.status === 'thinking' ? prev : { ...prev, status: prev.status === 'idle' ? 'thinking' : prev.status }
+            return prev.status === 'thinking'
+              ? prev
+              : { ...prev, status: prev.status === 'idle' ? 'thinking' : prev.status }
           }
           return {
             ...prev,
@@ -82,7 +84,7 @@ export function useLLMStream() {
   }, [])
 
   const start = useCallback(
-    async (prompt: string) => {
+    async (prompt: string, conversationId?: string) => {
       const trimmed = prompt.trim()
       if (!trimmed) return
 
@@ -106,7 +108,10 @@ export function useLLMStream() {
             Accept: 'text/event-stream',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ prompt: trimmed }),
+          body: JSON.stringify({
+            prompt: trimmed,
+            conversationId,
+          }),
           signal: controller.signal,
         })
 
@@ -171,5 +176,3 @@ export function useLLMStream() {
     reset,
   }
 }
-
-

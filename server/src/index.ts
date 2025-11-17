@@ -5,8 +5,10 @@ import { errorHandlerPlugin } from '@/plugins/errorHandler.plugins'
 import validatorCompilerPlugin from '@/plugins/validatorCompiler.plugins'
 import accountRoutes from '@/routes/account.route'
 import authRoutes from '@/routes/auth.route'
+import conversationRoutes from '@/routes/conversation.route'
 import llmRoutes from '@/routes/llm.route'
 import mediaRoutes from '@/routes/media.route'
+import messageRoutes from '@/routes/message.route'
 import staticRoutes from '@/routes/static.route'
 import { createFolder } from '@/utils/helpers'
 import fastifyAuth from '@fastify/auth'
@@ -60,6 +62,12 @@ const start = async () => {
     })
     fastify.register(mediaRoutes, {
       prefix: '/media'
+    })
+    fastify.register(conversationRoutes, {
+      prefix: '/api/conversations'
+    })
+    fastify.register(messageRoutes, {
+      prefix: '/api/conversations'
     })
     fastify.register(llmRoutes, {
       prefix: '/llm'
