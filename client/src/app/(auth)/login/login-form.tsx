@@ -41,7 +41,7 @@ function LoginFormContent() {
       toast({
         description: result.payload.message,
       })
-      router.push('/dashboard')
+      router.push('/llm')
     } catch (error: any) {
       handleErrorApi({
         error,

@@ -1,12 +1,13 @@
 import http from '@/lib/http'
 import {
-  AccountListResType,
-  AccountResType,
-  ChangePasswordBodyType,
-  CreateAccountBodyType,
-  UpdateAccountBodyType,
-  UpdateMeBodyType,
+    AccountListResType,
+    AccountResType,
+    ChangePasswordBodyType,
+    CreateAccountBodyType,
+    UpdateAccountBodyType,
+    UpdateMeBodyType,
 } from '@/schemaValidations/account.schema'
+import { MessageResType } from '@/schemaValidations/common.schema'
 
 const prefix = '/accounts'
 
@@ -20,7 +21,7 @@ const accountApiRequest = {
     }),
   updateMe: (body: UpdateMeBodyType) => http.patch<AccountResType>(`${prefix}/me`, body),
   changePassword: (body: ChangePasswordBodyType) =>
-    http.patch(`${prefix}/me/change-password`, body),
+    http.patch<MessageResType>(`${prefix}/me/change-password`, body),
   list: () => http.get<AccountListResType>(prefix),
   createAccount: (body: CreateAccountBodyType) => http.post<AccountResType>(prefix, body),
   getAccount: (id: number) => http.get<AccountResType>(`${prefix}/${id}`),

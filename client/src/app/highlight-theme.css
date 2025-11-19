@@ -1,0 +1,143 @@
+/* Custom Highlight.js theme matching the design system */
+/* Override github-dark theme with design system colors */
+
+.hljs {
+  background: #0e0e0e !important;
+  color: #f97583 !important; /* Default red color for code */
+  font-family:
+    'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+  font-size: 12px !important;
+  line-height: 150% !important; /* 18px */
+  font-weight: 400 !important;
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: #8b949e !important;
+  font-style: italic !important;
+}
+
+/* Keywords */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #ff7b72 !important;
+}
+
+/* Strings */
+.hljs-string,
+.hljs-attr,
+.hljs-attribute {
+  color: #a5d6ff !important;
+}
+
+/* Numbers */
+.hljs-number,
+.hljs-literal,
+.hljs-doctag {
+  color: #79c0ff !important;
+}
+
+/* Function names */
+.hljs-title,
+.hljs-function .hljs-title,
+.hljs-title.function_ {
+  color: #d2a8ff !important;
+}
+
+/* Variables */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params {
+  color: #ffa657 !important;
+}
+
+/* Class names */
+.hljs-class .hljs-title,
+.hljs-title.class_ {
+  color: #ffa657 !important;
+}
+
+/* Built-ins */
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #ffa657 !important;
+}
+
+/* Operators */
+.hljs-operator,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #ff7b72 !important;
+}
+
+/* Meta (like decorators in Python) */
+.hljs-meta,
+.hljs-meta .hljs-keyword {
+  color: #d2a8ff !important;
+}
+
+/* Types */
+.hljs-type,
+.hljs-typename {
+  color: #ffa657 !important;
+}
+
+/* Sections (like function headers) */
+.hljs-section {
+  color: #79c0ff !important;
+  font-weight: bold !important;
+}
+
+/* Names */
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #7ee787 !important;
+}
+
+/* Symbols */
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: #a5d6ff !important;
+}
+
+/* Tags (HTML/XML) */
+.hljs-tag {
+  color: #7ee787 !important;
+}
+
+/* Regular expressions */
+.hljs-regexp {
+  color: #a5d6ff !important;
+}
+
+/* Additions (in diffs) */
+.hljs-addition {
+  color: #7ee787 !important;
+  background-color: rgba(46, 160, 67, 0.15) !important;
+}
+
+/* Deletions (in diffs) */
+.hljs-deletion {
+  color: #ffa198 !important;
+  background-color: rgba(248, 81, 73, 0.15) !important;
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic !important;
+}
+
+/* Strong emphasis */
+.hljs-strong {
+  font-weight: bold !important;
+}
+
+/* Override any background on code elements inside pre */
+pre code.hljs {
+  background: transparent !important;
+  padding: 0 !important;
+}

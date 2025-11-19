@@ -30,10 +30,8 @@ class LLMService {
       throw new Error('LLM provider is not configured')
     }
 
-    // Save user message if conversationId and accountId provided
-    if (conversationId && accountId) {
-      await messageService.createUserMessage(conversationId, accountId, prompt)
-    }
+    // Note: User message is created by the client before calling this stream endpoint
+    // We only need to save the assistant's response after streaming completes
 
     const response = await fetch(`${envConfig.LLM_API_URL}/stream`, {
       method: 'POST',
@@ -64,6 +62,7 @@ class LLMService {
     let fullReasoning = ''
     const startTime = Date.now()
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value, done } = await reader.read()
       if (done) break

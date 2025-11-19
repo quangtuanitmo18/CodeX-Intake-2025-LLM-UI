@@ -88,6 +88,8 @@ export function useLLMStream() {
       const trimmed = prompt.trim()
       if (!trimmed) return
 
+      console.log('🚀 Starting LLM stream:', { prompt: trimmed, conversationId })
+
       abortControllerRef.current?.abort()
       const controller = new AbortController()
       abortControllerRef.current = controller

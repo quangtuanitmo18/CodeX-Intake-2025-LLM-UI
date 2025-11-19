@@ -8,7 +8,33 @@
 
 body {
   min-height: 100vh;
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont;
+  font-family:
+    var(--font-sans),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont;
 }
 
+/* Custom Scrollbar - ChatGPT Style */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
 
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
