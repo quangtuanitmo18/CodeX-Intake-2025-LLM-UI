@@ -31,8 +31,8 @@ const configSchema = z.object({
   CLIENT_URL: z.string(),
   PRODUCTION: z.enum(['true', 'false']).transform((val) => val === 'true'),
   DOCKER: z.enum(['true', 'false']).transform((val) => val === 'true'),
-  PRODUCTION_URL: z.string(),
-  NODE_ENV: z.enum(['development', 'test', 'production']),
+  PRODUCTION_URL: z.string().optional().default(''),
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LLM_API_URL: z.string().optional().default(''),
   LLM_API_TOKEN: z.string().optional().default(''),
   LLM_API_MODEL: z.string().optional().default('atlas-2.1')
@@ -45,7 +45,7 @@ if (!configServer.success) {
   throw new Error('Invalid environment variables')
 }
 const envConfig = configServer.data
-export const API_URL = envConfig.PRODUCTION
+export const API_URL = envConfig.PRODUCTION && envConfig.PRODUCTION_URL
   ? envConfig.PRODUCTION_URL
   : `${envConfig.PROTOCOL}://${envConfig.DOMAIN}:${envConfig.PORT}`
 export default envConfig

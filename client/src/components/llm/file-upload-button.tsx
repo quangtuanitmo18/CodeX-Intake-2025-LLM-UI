@@ -1,8 +1,9 @@
 'use client'
 
-import { Paperclip, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useRef } from 'react'
 
+import AttachIcon from '@/assets/icons/attach'
 import { Button } from '@/components/ui/button'
 
 interface FileUploadButtonProps {
@@ -65,7 +66,7 @@ export function FileUploadButton({
         disabled={disabled}
         className="h-9 w-9 p-0 text-white/60 hover:text-white"
       >
-        <Paperclip className="h-4 w-4" />
+        <AttachIcon />
       </Button>
     </>
   )

@@ -47,7 +47,7 @@ export default function LLMConversationPage({
 
       <div className="flex flex-1 overflow-hidden">
         <LLMSidebar activeConversationId={activeConversationId} activeProjectId={activeProjectId} />
-        <div className="flex flex-1 flex-col border-l border-white/5 bg-[#050b18]">
+        <div className="flex flex-1 flex-col border-l border-white/5">
           {activeConversationId ? (
             <LLMChatArea conversationId={activeConversationId} />
           ) : (

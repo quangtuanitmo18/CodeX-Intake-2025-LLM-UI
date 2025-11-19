@@ -1,7 +1,6 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ZodError } from 'zod'
 
@@ -27,10 +26,12 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   const [attachments, setAttachments] = useState<Array<{ id: string; file: File }>>([])
   const [composerError, setComposerError] = useState<string | null>(null)
   const [activeAssistantMessage, setActiveAssistantMessage] = useState<ChatMessage | null>(null)
-  const [isReasoningExpanded, setIsReasoningExpanded] = useState(true)
+  const [thinkingSeconds, setThinkingSeconds] = useState(0)
+  const [savedThinkingSeconds, setSavedThinkingSeconds] = useState(0)
 
   const transcriptRef = useRef<HTMLDivElement | null>(null)
   const isSubmittingRef = useRef(false)
+  const thinkingStartTimeRef = useRef<number | null>(null)
 
   const queryClient = useQueryClient()
   const { data: conversationData } = useConversation(conversationId || null)
@@ -64,6 +65,42 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       cancelAnimationFrame(rafId)
     }
   }, [historicalMessages.length, activeAssistantMessage?.content, conversationId])
+
+  // Track thinking time
+  useEffect(() => {
+    if (status === 'thinking' && reasoning.length > 0) {
+      // Start tracking when thinking begins
+      if (!thinkingStartTimeRef.current) {
+        thinkingStartTimeRef.current = Date.now()
+        setThinkingSeconds(0)
+        setSavedThinkingSeconds(0)
+      }
+
+      // Update seconds every second
+      const interval = setInterval(() => {
+        if (thinkingStartTimeRef.current) {
+          const elapsed = Math.floor((Date.now() - thinkingStartTimeRef.current) / 1000)
+          setThinkingSeconds(elapsed)
+        }
+      }, 1000)
+
+      return () => clearInterval(interval)
+    } else if (status === 'streaming' && thinkingStartTimeRef.current) {
+      // Thinking finished, save final time
+      const elapsed = Math.floor((Date.now() - thinkingStartTimeRef.current) / 1000)
+      setThinkingSeconds(elapsed)
+      setSavedThinkingSeconds(elapsed)
+      thinkingStartTimeRef.current = null
+    } else if (status === 'idle' || status === 'complete') {
+      // Reset when starting new message or stream completes
+      thinkingStartTimeRef.current = null
+      setThinkingSeconds(0)
+      if (status === 'idle') {
+        setSavedThinkingSeconds(0)
+      }
+    }
+  }, [status, reasoning])
+
   // Handle streaming assistant message - optimized, no parsing
   useEffect(() => {
     if (status === 'idle') {
@@ -283,9 +320,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       {/* Header */}
       <header className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">
-            {conversation?.title || 'New Conversation'}
-          </h1>
+          <h1 className="text-2xl font-semibold text-white">{conversation?.title || 'New Chat'}</h1>
           <p className="mt-1 text-sm text-white/60">{conversation?.model || 'Atlas-2.1'}</p>
         </div>
         {conversationId && (
@@ -305,50 +340,26 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
             </div>
           )}
 
-          {allMessages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))}
+          {allMessages.map((message) => {
+            // Check if this is the active streaming message
+            const isActiveStreaming = message.id === 'assistant-live' && isStreaming
+            const messageThinkingSeconds = isActiveStreaming
+              ? status === 'thinking'
+                ? thinkingSeconds
+                : savedThinkingSeconds
+              : undefined
 
-          {/* Thinking Indicator */}
-          {status === 'thinking' && reasoning.length > 0 && (
-            <div className="flex w-full flex-col gap-[10px]">
-              <button
-                onClick={() => setIsReasoningExpanded(!isReasoningExpanded)}
-                className="flex items-center gap-[5px] py-[1px] text-left"
-              >
-                <div className="flex h-[14px] w-[14px] items-center justify-center">
-                  <div className="flex gap-0.5">
-                    <div
-                      className="h-1 w-1 animate-bounce rounded-full bg-[#777777]"
-                      style={{ animationDelay: '0ms' }}
-                    />
-                    <div
-                      className="h-1 w-1 animate-bounce rounded-full bg-[#777777]"
-                      style={{ animationDelay: '150ms' }}
-                    />
-                    <div
-                      className="h-1 w-1 animate-bounce rounded-full bg-[#777777]"
-                      style={{ animationDelay: '300ms' }}
-                    />
-                  </div>
-                </div>
-                <span className="text-[14px] leading-[22px] text-[#777777]">
-                  Thought for {reasoning.length} seconds
-                </span>
-                {isReasoningExpanded ? (
-                  <ChevronUp className="h-[18px] w-[18px] text-[#777777]" />
-                ) : (
-                  <ChevronDown className="h-[18px] w-[18px] text-[#777777]" />
-                )}
-              </button>
-
-              {isReasoningExpanded && (
-                <div className="text-[14px] leading-[22px] text-[#777777]">
-                  {reasoning.join('\n')}
-                </div>
-              )}
-            </div>
-          )}
+            return (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isStreaming={isActiveStreaming}
+                isThinking={status === 'thinking'}
+                thinkingSeconds={messageThinkingSeconds}
+                savedThinkingSeconds={savedThinkingSeconds}
+              />
+            )
+          })}
 
           {status === 'error' && streamError && (
             <div className="rounded-[15px] bg-red-500/10 px-4 py-3 text-sm text-red-200">

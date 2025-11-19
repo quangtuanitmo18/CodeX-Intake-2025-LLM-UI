@@ -24,7 +24,7 @@ export const MarkdownContent = memo(function MarkdownContent({
       components={{
         // Paragraphs
         p: ({ node, ...props }) => (
-          <p className="mb-4 text-[14px] font-normal leading-[22px] text-white" {...props} />
+          <p className="text-[14px] font-normal leading-[22px] text-white" {...props} />
         ),
 
         // Headings
