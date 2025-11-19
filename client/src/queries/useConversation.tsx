@@ -3,7 +3,12 @@
 import conversationApiRequest from '@/apiRequests/conversation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-export const useConversations = (params?: { limit?: number; offset?: number; search?: string }) => {
+export const useConversations = (params?: {
+  limit?: number
+  offset?: number
+  search?: string
+  projectId?: string
+}) => {
   return useQuery({
     queryKey: ['conversations', params],
     queryFn: () => conversationApiRequest.list(params),
@@ -21,7 +26,8 @@ export const useConversation = (id: string | null) => {
 export const useCreateConversation = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: { title?: string; model?: string }) => conversationApiRequest.create(body),
+    mutationFn: (body: { title?: string; model?: string; projectId?: string }) =>
+      conversationApiRequest.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     },
@@ -46,6 +52,19 @@ export const useDeleteConversation = () => {
     mutationFn: (id: string) => conversationApiRequest.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    },
+  })
+}
+
+export const useMoveConversationProject = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, projectId }: { id: string; projectId: string | null }) =>
+      conversationApiRequest.moveToProject(id, { projectId }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({ queryKey: ['conversation', variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
 }

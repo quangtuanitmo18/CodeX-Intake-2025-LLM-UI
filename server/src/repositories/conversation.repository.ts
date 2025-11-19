@@ -4,12 +4,24 @@ export const conversationRepository = {
   /**
    * Find conversations by account ID with pagination and search
    */
-  async findByAccountId(accountId: number, options: { limit?: number; offset?: number; search?: string } = {}) {
-    const { limit = 20, offset = 0, search = '' } = options
+  async findByAccountId(
+    accountId: number,
+    options: { limit?: number; offset?: number; search?: string; projectId?: string } = {}
+  ) {
+    const { limit = 20, offset = 0, search = '', projectId } = options
 
     const where: any = {
       accountId,
       deletedAt: null
+    }
+
+    if (projectId !== undefined) {
+      // If projectId is "null" or "standalone" (string), filter for standalone conversations (projectId is null)
+      if (projectId === 'null' || projectId === 'standalone') {
+        where.projectId = null
+      } else {
+        where.projectId = projectId
+      }
     }
 
     // Add search filter if provided
@@ -59,12 +71,13 @@ export const conversationRepository = {
   /**
    * Create new conversation
    */
-  async create(data: { accountId: number; title?: string; model?: string }) {
+  async create(data: { accountId: number; title?: string; model?: string; projectId?: string }) {
     return prisma.conversation.create({
       data: {
         accountId: data.accountId,
         title: data.title || null,
-        model: data.model || 'atlas-2.1'
+        model: data.model || 'atlas-2.1',
+        projectId: data.projectId || null
       }
     })
   },
@@ -86,6 +99,20 @@ export const conversationRepository = {
     return prisma.conversation.updateMany({
       where: { id, accountId, deletedAt: null },
       data: { deletedAt: new Date() }
+    })
+  },
+
+  async moveToProject(accountId: number, fromProjectId: string, toProjectId: string) {
+    return prisma.conversation.updateMany({
+      where: { accountId, projectId: fromProjectId, deletedAt: null },
+      data: { projectId: toProjectId }
+    })
+  },
+
+  async moveConversation(accountId: number, conversationId: string, projectId: string | null) {
+    return prisma.conversation.updateMany({
+      where: { id: conversationId, accountId, deletedAt: null },
+      data: { projectId }
     })
   }
 }

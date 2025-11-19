@@ -6,6 +6,7 @@ export const CreateConversationBody = z
   .object({
     title: z.string().trim().min(1).max(200).optional(),
     model: z.string().trim().min(1).max(100).optional(),
+    projectId: z.string().optional(),
   })
   .strict()
 
@@ -51,6 +52,7 @@ export type CreateMessageBodyType = z.TypeOf<typeof CreateMessageBody>
 export const ConversationSchema = z.object({
   id: z.string(),
   accountId: z.number(),
+  projectId: z.string().nullable().optional(),
   title: z.string().nullable(),
   model: z.string(),
   createdAt: z.string(),

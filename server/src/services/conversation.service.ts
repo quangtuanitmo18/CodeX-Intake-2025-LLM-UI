@@ -1,12 +1,16 @@
 import { conversationRepository } from '../repositories/conversation.repository'
 import { messageRepository } from '../repositories/message.repository'
+import { projectRepository } from '../repositories/project.repository'
 import { mediaService } from './media.service'
 
 export const conversationService = {
   /**
    * List conversations for a user with pagination and search
    */
-  async list(accountId: number, filters: { limit?: number; offset?: number; search?: string } = {}) {
+  async list(
+    accountId: number,
+    filters: { limit?: number; offset?: number; search?: string; projectId?: string } = {}
+  ) {
     return conversationRepository.findByAccountId(accountId, filters)
   },
 
@@ -24,7 +28,13 @@ export const conversationService = {
   /**
    * Create new conversation
    */
-  async create(accountId: number, data: { title?: string; model?: string } = {}) {
+  async create(accountId: number, data: { title?: string; model?: string; projectId?: string } = {}) {
+    if (data.projectId) {
+      const project = await projectRepository.findById(data.projectId, accountId)
+      if (!project) {
+        throw new Error('Project not found')
+      }
+    }
     return conversationRepository.create({ accountId, ...data })
   },
 
@@ -46,6 +56,18 @@ export const conversationService = {
 
     // Delete all attachment files from disk
     await mediaService.deleteConversationAttachments(id)
+  },
+
+  async moveToProject(accountId: number, conversationId: string, projectId: string | null) {
+    const conversation = await this.get(conversationId, accountId)
+    if (projectId) {
+      const project = await projectRepository.findById(projectId, accountId)
+      if (!project) {
+        throw new Error('Project not found')
+      }
+    }
+    await conversationRepository.moveConversation(accountId, conversationId, projectId ?? null)
+    return { ...conversation, projectId: projectId ?? null }
   },
 
   /**

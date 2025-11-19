@@ -1,11 +1,13 @@
 import http from '@/lib/http'
+import { ConversationResType } from '@/schemaValidations/conversation.schema'
 
 const conversationApiRequest = {
-  list: (params?: { limit?: number; offset?: number; search?: string }) =>
+  list: (params?: { limit?: number; offset?: number; search?: string; projectId?: string }) =>
     http.get<{
       data: {
         id: string
         accountId: number
+        projectId?: string | null
         title: string | null
         model: string
         createdAt: string
@@ -20,6 +22,7 @@ const conversationApiRequest = {
       data: {
         id: string
         accountId: number
+        projectId?: string | null
         title: string | null
         model: string
         createdAt: string
@@ -29,11 +32,12 @@ const conversationApiRequest = {
       message: string
     }>(`/api/conversations/${id}`),
 
-  create: (body: { title?: string; model?: string }) =>
+  create: (body: { title?: string; model?: string; projectId?: string }) =>
     http.post<{
       data: {
         id: string
         accountId: number
+        projectId?: string | null
         title: string | null
         model: string
         createdAt: string
@@ -48,6 +52,7 @@ const conversationApiRequest = {
       data: {
         id: string
         accountId: number
+        projectId?: string | null
         title: string | null
         model: string
         createdAt: string
@@ -56,6 +61,9 @@ const conversationApiRequest = {
       }
       message: string
     }>(`/api/conversations/${id}`, body),
+
+  moveToProject: (id: string, body: { projectId: string | null }) =>
+    http.patch<ConversationResType>(`/api/conversations/${id}/project`, body),
 
   delete: (id: string) => http.delete<{ message: string }>(`/api/conversations/${id}`),
 

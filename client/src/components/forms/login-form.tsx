@@ -1,18 +1,18 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { toast } from '@/components/ui/use-toast'
+import { handleErrorApi } from '@/lib/utils'
 import { useLoginMutation } from '@/queries/useAuth'
 import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
-import { handleErrorApi } from '@/lib/utils'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { LoaderCircle } from 'lucide-react'
-import { toast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
 
 export function LoginForm() {
   const router = useRouter()
@@ -33,7 +33,7 @@ export function LoginForm() {
         title: 'Signed in successfully',
         description: res.payload.message,
       })
-      router.push('/dashboard')
+      router.push('/llm')
     } catch (error) {
       handleErrorApi({
         error,
@@ -83,5 +83,3 @@ export function LoginForm() {
     </Card>
   )
 }
-
-

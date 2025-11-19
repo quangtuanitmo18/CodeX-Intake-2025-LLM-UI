@@ -46,44 +46,21 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    console.log('🔍 Auto-scroll effect triggered', {
-      hasRef: !!transcriptRef.current,
-      messagesLength: historicalMessages.length,
-      activeMessageContent: activeAssistantMessage?.content?.substring(0, 50),
-      conversationId,
-    })
-
     if (!transcriptRef.current) {
-      console.warn('⚠️ transcriptRef.current is null')
       return
     }
 
     const el = transcriptRef.current
 
-    console.log('📏 Scroll dimensions BEFORE scroll:', {
-      scrollTop: el.scrollTop,
-      scrollHeight: el.scrollHeight,
-      clientHeight: el.clientHeight,
-      shouldScroll: el.scrollHeight > el.clientHeight,
-    })
-
     const rafId = requestAnimationFrame(() => {
       const newScrollTop = el.scrollHeight
-      console.log('🎯 Setting scrollTop to:', newScrollTop)
       el.scrollTop = newScrollTop
 
       // Verify after scroll
-      setTimeout(() => {
-        console.log('✅ Scroll dimensions AFTER scroll:', {
-          scrollTop: el.scrollTop,
-          scrollHeight: el.scrollHeight,
-          atBottom: Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) < 5,
-        })
-      }, 100)
+      setTimeout(() => {}, 100)
     })
 
     return () => {
-      console.log('🧹 Cleaning up scroll effect')
       cancelAnimationFrame(rafId)
     }
   }, [historicalMessages.length, activeAssistantMessage?.content, conversationId])

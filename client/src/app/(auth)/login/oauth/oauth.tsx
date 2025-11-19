@@ -19,7 +19,7 @@ export default function Oauth() {
       if (count.current === 0) {
         mutateAsync({ accessToken, refreshToken })
           .then(() => {
-            router.push('/dashboard')
+            router.push('/llm')
           })
           .catch((e) => {
             toast({

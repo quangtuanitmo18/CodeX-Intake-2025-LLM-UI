@@ -4,7 +4,8 @@ import {
   exportConversationController,
   getConversationController,
   listConversationsController,
-  updateConversationController
+  updateConversationController,
+  updateConversationProjectController
 } from '@/controllers/conversation.controller'
 import { requireLoginedHook } from '@/hooks/auth.hooks'
 import { MessageRes, MessageResType } from '@/schemaValidations/common.schema'
@@ -22,13 +23,16 @@ import {
   ListConversationsQuery,
   ListConversationsQueryType,
   UpdateConversationBody,
-  UpdateConversationBodyType
+  UpdateConversationBodyType,
+  UpdateConversationProjectBody,
+  UpdateConversationProjectBodyType
 } from '@/schemaValidations/conversation.schema'
 import { FastifyInstance, FastifyPluginOptions } from 'fastify'
 
 const serializeConversation = (conversation: {
   id: string
   accountId: number
+  projectId: string | null
   title: string | null
   model: string
   createdAt: Date
@@ -37,6 +41,7 @@ const serializeConversation = (conversation: {
 }) => ({
   id: conversation.id,
   accountId: conversation.accountId,
+  projectId: conversation.projectId,
   title: conversation.title,
   model: conversation.model,
   createdAt: conversation.createdAt,
@@ -128,6 +133,32 @@ export default async function conversationRoutes(fastify: FastifyInstance, optio
       reply.send({
         data: serializeConversation(conversation) as ConversationResType['data'],
         message: 'Update conversation successfully'
+      })
+    }
+  )
+
+  // PATCH /api/conversations/:id/project - Move conversation between projects
+  fastify.patch<{
+    Reply: ConversationResType
+    Params: ConversationIdParamType
+    Body: UpdateConversationProjectBodyType
+  }>(
+    '/:id/project',
+    {
+      schema: {
+        params: ConversationIdParam,
+        body: UpdateConversationProjectBody,
+        response: {
+          200: ConversationRes
+        }
+      }
+    },
+    async (request, reply) => {
+      const accountId = request.account!.userId
+      const conversation = await updateConversationProjectController(request.params.id, accountId, request.body)
+      reply.send({
+        data: serializeConversation(conversation) as ConversationResType['data'],
+        message: 'Move conversation successfully'
       })
     }
   )

@@ -1,14 +1,22 @@
 'use client'
 
 import { toast } from '@/components/ui/use-toast'
+import { Role } from '@/constants/type'
 import { cn, handleErrorApi } from '@/lib/utils'
 import { useAccountMe } from '@/queries/useAccount'
 import { useLogoutMutation } from '@/queries/useAuth'
-import { LoaderCircle, LogOut, User } from 'lucide-react'
+import { ChevronDown, LoaderCircle, LogOut, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-export function UserProfileMenu() {
+type DropdownPlacement = 'top' | 'bottom'
+
+interface UserProfileMenuProps {
+  className?: string
+  dropdownPlacement?: DropdownPlacement
+}
+
+export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: UserProfileMenuProps) {
   const router = useRouter()
   const { data: accountData, isLoading } = useAccountMe()
   const logoutMutation = useLogoutMutation()
@@ -38,7 +46,7 @@ export function UserProfileMenu() {
     try {
       const result = await logoutMutation.mutateAsync()
       toast({
-        description:  'Logged out successfully',
+        description: 'Logged out successfully',
       })
       router.push('/login')
     } catch (error: any) {
@@ -67,24 +75,54 @@ export function UserProfileMenu() {
       .slice(0, 2)
   }
 
+  const planLabel = account?.role === Role.Admin ? 'Workspace' : 'Plus'
+
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Avatar Button */}
+      {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/20"
-      >
-        {account?.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={account.avatar} alt={account.name || 'User'} className="h-full w-full object-cover" />
-        ) : (
-          <span>{getInitials(account?.name)}</span>
+        className={cn(
+          'group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left text-white transition hover:border-white/20 hover:bg-white/10',
+          className
         )}
+      >
+        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-orange-500 to-amber-400 text-sm font-semibold uppercase text-white">
+          {account?.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={account.avatar}
+              alt={account.name || 'User'}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span>{getInitials(account?.name)}</span>
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col leading-tight">
+          <span className="truncate text-sm font-medium text-white">{account?.name || 'User'}</span>
+          <span className="text-xs text-emerald-300">{planLabel}</span>
+        </div>
+
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 text-white/60 transition duration-200',
+            isOpen && 'rotate-180 text-white'
+          )}
+        />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-56 animate-in fade-in zoom-in-95 overflow-hidden rounded-md border border-white/10 bg-gray-900 shadow-lg">
+        <div
+          className={cn(
+            'absolute right-0 z-50 w-56 overflow-hidden rounded-md border border-white/10 shadow-lg animate-in fade-in zoom-in-95',
+            dropdownPlacement === 'top'
+              ? 'bottom-full mb-2 origin-bottom-right'
+              : 'top-full mt-2 origin-top-right'
+          )}
+        >
           {/* User Info */}
           <div className="px-3 py-2">
             <p className="text-sm font-medium text-white">{account?.name || 'User'}</p>
@@ -106,7 +144,7 @@ export function UserProfileMenu() {
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </button>
-{/* 
+            {/* 
             <button
               onClick={() => {
                 router.push('/settings')

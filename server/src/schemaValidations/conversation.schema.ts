@@ -3,13 +3,14 @@ import z from 'zod'
 // ==================== Request Schemas ====================
 
 // Query params for list conversations
-export const ListConversationsQuery = z
-  .object({
-    limit: z.coerce.number().int().positive().max(100).default(20),
-    offset: z.coerce.number().int().min(0).default(0),
-    search: z.string().optional()
-  })
-  .strict()
+// Note: projectId accepts any string value including 'standalone' or 'null' for filtering
+// CUID validation is handled in the repository layer
+export const ListConversationsQuery = z.object({
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+  search: z.string().optional(),
+  projectId: z.string().optional()
+})
 
 export type ListConversationsQueryType = z.TypeOf<typeof ListConversationsQuery>
 
@@ -26,11 +27,20 @@ export type ConversationIdParamType = z.TypeOf<typeof ConversationIdParam>
 export const CreateConversationBody = z
   .object({
     title: z.string().min(1).max(200).optional(),
-    model: z.string().min(1).max(100).optional()
+    model: z.string().min(1).max(100).optional(),
+    projectId: z.string().cuid().optional()
   })
   .strict()
 
 export type CreateConversationBodyType = z.TypeOf<typeof CreateConversationBody>
+
+export const UpdateConversationProjectBody = z
+  .object({
+    projectId: z.string().cuid().nullable()
+  })
+  .strict()
+
+export type UpdateConversationProjectBodyType = z.TypeOf<typeof UpdateConversationProjectBody>
 
 // Body for updating conversation
 export const UpdateConversationBody = z
@@ -57,6 +67,7 @@ export const ConversationRes = z.object({
   data: z.object({
     id: z.string().cuid(),
     accountId: z.number().int().positive(),
+    projectId: z.string().cuid().nullable(),
     title: z.string().nullable(),
     model: z.string(),
     createdAt: z.date(),
@@ -74,6 +85,7 @@ export const ConversationListRes = z.object({
     z.object({
       id: z.string().cuid(),
       accountId: z.number().int().positive(),
+      projectId: z.string().cuid().nullable(),
       title: z.string().nullable(),
       model: z.string(),
       createdAt: z.date(),

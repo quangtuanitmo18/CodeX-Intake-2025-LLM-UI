@@ -2,7 +2,8 @@ import {
   CreateConversationBodyType,
   ExportConversationQueryType,
   ListConversationsQueryType,
-  UpdateConversationBodyType
+  UpdateConversationBodyType,
+  UpdateConversationProjectBodyType
 } from '@/schemaValidations/conversation.schema'
 import { conversationService } from '@/services/conversation.service'
 
@@ -16,6 +17,12 @@ export const createConversationController = async (accountId: number, body: Crea
 
 export const updateConversationController = async (id: string, accountId: number, body: UpdateConversationBodyType) =>
   conversationService.updateTitle(id, accountId, body.title)
+
+export const updateConversationProjectController = async (
+  id: string,
+  accountId: number,
+  body: UpdateConversationProjectBodyType
+) => conversationService.moveToProject(accountId, id, body.projectId ?? null)
 
 export const deleteConversationController = async (id: string, accountId: number) =>
   conversationService.delete(id, accountId)

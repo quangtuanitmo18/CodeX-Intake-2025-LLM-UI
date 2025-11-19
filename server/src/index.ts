@@ -9,6 +9,7 @@ import conversationRoutes from '@/routes/conversation.route'
 import llmRoutes from '@/routes/llm.route'
 import mediaRoutes from '@/routes/media.route'
 import messageRoutes from '@/routes/message.route'
+import projectRoutes from '@/routes/project.route'
 import staticRoutes from '@/routes/static.route'
 import { createFolder } from '@/utils/helpers'
 import fastifyAuth from '@fastify/auth'
@@ -68,6 +69,9 @@ const start = async () => {
     })
     fastify.register(conversationRoutes, {
       prefix: '/api/conversations'
+    })
+    fastify.register(projectRoutes, {
+      prefix: '/api/projects'
     })
     fastify.register(messageRoutes, {
       prefix: '/api/conversations'
