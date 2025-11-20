@@ -1,6 +1,15 @@
 'use client'
 
-import { Activity, ChevronDown, ChevronUp, Loader2, Paperclip, Send, Sparkles, X } from 'lucide-react'
+import {
+  Activity,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Paperclip,
+  Send,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import { parseMarkdownToBlocks, type InlineNode, type MarkdownBlock } from '@/lib/markdown'
@@ -104,7 +113,10 @@ export function LLMPreview() {
       id: 'assistant-live',
       role: 'assistant',
       author: 'Atlas · LLM',
-      timestamp: status === 'complete' ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live',
+      timestamp:
+        status === 'complete'
+          ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : 'Live',
       highlight: 'LLM response',
       status: status === 'complete' ? 'complete' : 'streaming',
       blocks: parsedBlocks,
@@ -220,7 +232,7 @@ export function LLMPreview() {
           <div className="flex flex-wrap items-center gap-3 text-sm text-white/60">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
               <Sparkles className="h-4 w-4 text-emerald-300" />
-              Atlas-2.1 · Streaming
+              openai/gpt-5-mini · Streaming
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
               <Activity className="h-4 w-4 text-sky-300" />
@@ -233,7 +245,7 @@ export function LLMPreview() {
           </div>
         </header>
 
-        <div className="flex flex-col gap-6 rounded-[28px] border border-white/10 bg-white/5/0 bg-gradient-to-br from-white/5 via-white/2 to-transparent backdrop-blur-xl">
+        <div className="bg-white/5/0 via-white/2 flex flex-col gap-6 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-xl">
           <div className="border-b border-white/5 px-6 py-5">
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-base font-medium text-white">Transcript</p>
@@ -309,7 +321,9 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           {message.author}
         </span>
         <span className={cn(isUser ? 'text-slate-900/40' : 'text-white/30')}>·</span>
-        <span className={cn(isUser ? 'text-slate-900/60' : 'text-white/50')}>{message.timestamp}</span>
+        <span className={cn(isUser ? 'text-slate-900/60' : 'text-white/50')}>
+          {message.timestamp}
+        </span>
         {message.highlight && (
           <span
             className={cn(
@@ -327,7 +341,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           </span>
         )}
       </div>
-      <div className={cn('mt-4 space-y-4 text-sm leading-relaxed', isUser ? 'text-slate-900/90' : 'text-white/80')}>
+      <div
+        className={cn(
+          'mt-4 space-y-4 text-sm leading-relaxed',
+          isUser ? 'text-slate-900/90' : 'text-white/80'
+        )}
+      >
         {message.blocks.map((block, index) => (
           <MarkdownBlockRenderer key={`${message.id}-${index}`} block={block} isUser={isUser} />
         ))}
@@ -370,7 +389,9 @@ function MarkdownBlockRenderer({ block, isUser }: { block: MarkdownBlock; isUser
         <pre
           className={cn(
             'overflow-x-auto rounded-2xl border px-4 py-3 text-xs leading-relaxed',
-            isUser ? 'border-slate-900/10 bg-slate-900/5 text-slate-900/90' : 'border-white/10 bg-black/40'
+            isUser
+              ? 'border-slate-900/10 bg-slate-900/5 text-slate-900/90'
+              : 'border-white/10 bg-black/40'
           )}
         >
           <code className="whitespace-pre">{block.content}</code>
@@ -380,7 +401,7 @@ function MarkdownBlockRenderer({ block, isUser }: { block: MarkdownBlock; isUser
       return (
         <blockquote
           className={cn(
-            'border-l-4 border-white/20 bg-white/5/30 px-4 py-2 italic',
+            'bg-white/5/30 border-l-4 border-white/20 px-4 py-2 italic',
             isUser ? 'text-slate-900/70' : 'text-white/70'
           )}
         >
@@ -392,10 +413,14 @@ function MarkdownBlockRenderer({ block, isUser }: { block: MarkdownBlock; isUser
         <div
           className={cn(
             'rounded-2xl border px-4 py-3 text-sm',
-            isUser ? 'border-slate-900/10 bg-slate-50 text-slate-900/80' : 'border-white/10 bg-white/5 text-white/80'
+            isUser
+              ? 'border-slate-900/10 bg-slate-50 text-slate-900/80'
+              : 'border-white/10 bg-white/5 text-white/80'
           )}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] opacity-80">{block.title}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] opacity-80">
+            {block.title}
+          </p>
           <p className={cn('mt-2 text-sm leading-relaxed')}>{block.body}</p>
         </div>
       )
@@ -431,7 +456,7 @@ function renderInline(nodes: InlineNode[]): ReactNode {
         return (
           <code
             key={index}
-            className="mx-1 rounded-md bg-white/10 px-1 py-0.5 text-xs font-mono text-white/80"
+            className="mx-1 rounded-md bg-white/10 px-1 py-0.5 font-mono text-xs text-white/80"
           >
             {node.text}
           </code>
@@ -591,7 +616,11 @@ function ReplyComposer({
           disabled={!prompt.trim() || isStreaming}
           className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-300 text-slate-900 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {isStreaming ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
         </button>
       </div>
       <input
@@ -607,7 +636,9 @@ function ReplyComposer({
           event.target.value = ''
         }}
       />
-      <p className="mt-3 text-xs text-white/50">Attachments upload coming soon—preview your selections above.</p>
+      <p className="mt-3 text-xs text-white/50">
+        Attachments upload coming soon—preview your selections above.
+      </p>
     </form>
   )
 }
@@ -615,4 +646,3 @@ function ReplyComposer({
 const cryptoRandom = () => Math.random().toString(36).slice(2, 10)
 
 export default LLMPreview
-

@@ -59,7 +59,7 @@ export function ExportMenu({ conversationId, conversationTitle, className }: Exp
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-white/10 bg-[#040714] p-1 shadow-xl">
+          <div className="absolute right-0 top-10 z-20 w-56 rounded-lg border border-white/10 bg-[#040714] p-1 shadow-xl">
             <button
               onClick={() => handleExport('json')}
               disabled={exportMutation.isPending}

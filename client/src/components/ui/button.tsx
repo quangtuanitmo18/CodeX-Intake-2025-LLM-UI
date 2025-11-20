@@ -14,9 +14,9 @@ const variantClasses: Record<ButtonVariant, string> = {
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
-  default: 'min-h-[44px] py-2 px-4 md:min-h-0',
-  sm: 'min-h-[44px] py-1 px-3 text-sm md:min-h-0',
-  lg: 'min-h-[44px] py-2 px-6 text-base md:min-h-0',
+  default: 'min-h-[32px] py-2 px-4 md:min-h-0',
+  sm: 'min-h-[32px] py-1 px-3 text-sm md:min-h-0',
+  lg: 'min-h-[32px] py-2 px-6 text-base md:min-h-0',
 }
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

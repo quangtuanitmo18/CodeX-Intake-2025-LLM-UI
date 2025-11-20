@@ -9,6 +9,7 @@ import { useViewport } from '@/hooks/useViewport'
 import { cn } from '@/lib/utils'
 import { useConversation } from '@/queries/useConversation'
 
+import Image from 'next/image'
 import { LLMChatArea } from './llm-chat-area'
 import { LLMSidebar } from './llm-sidebar'
 
@@ -69,9 +70,9 @@ export default function LLMConversationPage({
     if (conversationProjectId === undefined) return
 
     if (conversationProjectId && conversationProjectId !== activeProjectId) {
-      router.replace(`/llm/projects/${conversationProjectId}/conversation/${activeConversationId}`)
+      router.replace(`/llm/project/${conversationProjectId}/conversation/${activeConversationId}`)
     } else if (!conversationProjectId && activeProjectId) {
-      router.replace(`/llm/${activeConversationId}`)
+      router.replace(`/llm/conversation/${activeConversationId}`)
     }
   }, [activeConversationId, activeProjectId, conversationProjectId, router])
 
@@ -92,7 +93,12 @@ export default function LLMConversationPage({
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           )}
-          <h1 className="text-base font-semibold text-white md:text-lg">LLM Chat</h1>
+          <button className="flex items-center gap-2" onClick={() => router.push('/')}>
+            <Image src="/codex-logo.svg" alt="CodeX logo" width={30} height={30} />
+            <h1 className="text-base font-semibold text-white md:text-lg">
+              LLM UI - CodeX Intake 2025
+            </h1>
+          </button>
         </div>
       </header>
 
@@ -125,7 +131,7 @@ export default function LLMConversationPage({
             <LLMChatArea conversationId={activeConversationId} />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center text-white/60 md:px-6">
-              <h2 className="text-lg font-semibold text-white md:text-xl">Select a conversation</h2>
+              <h2 className="text-lg font-semibold text-white md:text-xl">Select a chat</h2>
               <p className="max-w-md text-sm text-white/60">
                 Choose a chat from the list or start a new one to begin messaging inside{' '}
                 {activeProjectId ? 'this project' : 'your workspace'}.

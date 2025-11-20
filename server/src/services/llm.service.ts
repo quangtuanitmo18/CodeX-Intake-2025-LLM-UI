@@ -42,8 +42,8 @@ class LLMService {
       },
       body: JSON.stringify({
         prompt,
-        sessionId,
-        model: envConfig.LLM_API_MODEL
+        sessionId
+        // model: envConfig.LLM_API_MODEL
       }),
       signal
     })
@@ -91,7 +91,7 @@ class LLMService {
           fullContent,
           fullReasoning || undefined,
           {
-            model: envConfig.LLM_API_MODEL,
+            // model: envConfig.LLM_API_MODEL,
             duration
           }
         )

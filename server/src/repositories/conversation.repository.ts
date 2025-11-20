@@ -76,7 +76,7 @@ export const conversationRepository = {
       data: {
         accountId: data.accountId,
         title: data.title || null,
-        model: data.model || 'atlas-2.1',
+        model: data.model || 'openai/gpt-5-mini',
         projectId: data.projectId || null
       }
     })

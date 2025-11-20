@@ -129,7 +129,7 @@ export default function ProfilePage() {
         <div className="mx-auto max-w-4xl px-4 py-3 md:py-4">
           <button
             onClick={() => router.back()}
-            className="inline-flex min-h-[44px] items-center gap-2 text-sm text-gray-400 transition hover:text-white active:text-white/80 md:min-h-0"
+            className="inline-flex min-h-[32px] items-center gap-2 text-sm text-gray-400 transition hover:text-white active:text-white/80 md:min-h-0"
             aria-label="Go back"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -147,7 +147,7 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab('profile')}
             className={cn(
-              'min-h-[44px] border-b-2 px-3 py-2 text-xs font-medium transition md:min-h-0 md:px-4 md:text-sm',
+              'min-h-[32px] border-b-2 px-3 py-2 text-xs font-medium transition md:min-h-0 md:px-4 md:text-sm',
               activeTab === 'profile'
                 ? 'border-blue-500 text-white'
                 : 'border-transparent text-gray-400 hover:text-white active:text-white/80'
@@ -158,7 +158,7 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab('password')}
             className={cn(
-              'min-h-[44px] border-b-2 px-3 py-2 text-xs font-medium transition md:min-h-0 md:px-4 md:text-sm',
+              'min-h-[32px] border-b-2 px-3 py-2 text-xs font-medium transition md:min-h-0 md:px-4 md:text-sm',
               activeTab === 'password'
                 ? 'border-blue-500 text-white'
                 : 'border-transparent text-gray-400 hover:text-white active:text-white/80'
@@ -193,7 +193,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={handleAvatarClick}
-                    className="absolute bottom-0 right-0 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-gray-900 bg-blue-600 p-2 transition hover:bg-blue-700 active:bg-blue-800 md:min-h-0 md:min-w-0"
+                    className="absolute bottom-0 right-0 flex min-h-[32px] min-w-[44px] items-center justify-center rounded-full border-2 border-gray-900 bg-blue-600 p-2 transition hover:bg-blue-700 active:bg-blue-800 md:min-h-0 md:min-w-0"
                     aria-label="Change avatar"
                   >
                     <Camera className="h-4 w-4" />
@@ -222,7 +222,7 @@ export default function ProfilePage() {
                   id="name"
                   type="text"
                   {...profileForm.register('name')}
-                  className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
+                  className="min-h-[32px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
                 />
                 {profileForm.formState.errors.name && (
                   <p className="mt-1 text-xs text-red-500 md:text-sm">
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                   type="email"
                   value={account?.email || ''}
                   disabled
-                  className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-500 outline-none md:px-4"
+                  className="min-h-[32px] w-full rounded-lg border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-500 outline-none md:px-4"
                 />
                 <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
               </div>
@@ -252,7 +252,7 @@ export default function ProfilePage() {
                   type="submit"
                   disabled={updateMeMutation.isPending}
                   className={cn(
-                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium transition hover:bg-blue-700 active:bg-blue-800 md:min-h-0 md:px-6 md:text-base',
+                    'inline-flex min-h-[32px] items-center justify-center gap-2 rounded-lg bg-blue-600 px-2 py-1 text-sm font-medium transition hover:bg-blue-700 active:bg-blue-800 md:min-h-0 md:px-4 md:py-2 md:text-base',
                     updateMeMutation.isPending && 'cursor-not-allowed opacity-60'
                   )}
                 >
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                   id="oldPassword"
                   type="password"
                   {...passwordForm.register('oldPassword')}
-                  className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
+                  className="min-h-[32px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
                 />
                 {passwordForm.formState.errors.oldPassword && (
                   <p className="mt-1 text-xs text-red-500 md:text-sm">
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                   id="password"
                   type="password"
                   {...passwordForm.register('password')}
-                  className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
+                  className="min-h-[32px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
                 />
                 {passwordForm.formState.errors.password && (
                   <p className="mt-1 text-xs text-red-500 md:text-sm">
@@ -323,7 +323,7 @@ export default function ProfilePage() {
                   id="confirmPassword"
                   type="password"
                   {...passwordForm.register('confirmPassword')}
-                  className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
+                  className="min-h-[32px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 md:px-4"
                 />
                 {passwordForm.formState.errors.confirmPassword && (
                   <p className="mt-1 text-xs text-red-500 md:text-sm">
@@ -338,7 +338,7 @@ export default function ProfilePage() {
                   type="submit"
                   disabled={changePasswordMutation.isPending}
                   className={cn(
-                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium transition hover:bg-blue-700 active:bg-blue-800 md:min-h-0 md:px-6 md:text-base',
+                    'inline-flex min-h-[32px] items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium transition hover:bg-blue-700 active:bg-blue-800 md:min-h-0 md:px-6 md:text-base',
                     changePasswordMutation.isPending && 'cursor-not-allowed opacity-60'
                   )}
                 >

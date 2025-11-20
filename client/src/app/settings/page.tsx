@@ -1,4 +1,4 @@
-import SettingsPage from '@/components/settings/settings-page'
+import SettingsPage from '@/pageSections/settings/settings-page'
 
 export const metadata = {
   title: 'Settings · LLM UI',

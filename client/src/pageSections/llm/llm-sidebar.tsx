@@ -8,7 +8,6 @@ import {
   MessageSquarePlus,
   MoreVertical,
   Pencil,
-  Search,
   Trash2,
   X,
 } from 'lucide-react'
@@ -74,8 +73,8 @@ function ProjectItem({
 
   const resolveConversationPath = (conversation: { id: string; projectId?: string | null }) =>
     conversation.projectId
-      ? `/llm/projects/${conversation.projectId}/conversation/${conversation.id}`
-      : `/llm/${conversation.id}`
+      ? `/llm/project/${conversation.projectId}/conversation/${conversation.id}`
+      : `/llm/conversation/${conversation.id}`
 
   const handleSaveName = async () => {
     const trimmed = editName.trim()
@@ -334,7 +333,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
       setProjectName('')
       setIsCreatingProject(false)
       setExpandedProjects((prev) => new Set(prev).add(newProjectId))
-      router.push(`/llm/projects/${newProjectId}`)
+      router.push(`/llm/project/${newProjectId}`)
     } catch (error) {
       console.error('Failed to create project', error)
     }
@@ -354,8 +353,8 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
 
   const resolveConversationPath = (conversation: { id: string; projectId?: string | null }) =>
     conversation.projectId
-      ? `/llm/projects/${conversation.projectId}/conversation/${conversation.id}`
-      : `/llm/${conversation.id}`
+      ? `/llm/project/${conversation.projectId}/conversation/${conversation.id}`
+      : `/llm/conversation/${conversation.id}`
 
   const handleNewChat = async () => {
     try {
@@ -489,7 +488,6 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
           {chatsOpen && (
             <div className="mt-3 space-y-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                 <Input
                   type="text"
                   placeholder="Search chats..."

@@ -52,9 +52,9 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
 
   const navigateToConversation = (projectId: string | null) => {
     if (projectId) {
-      router.push(`/llm/projects/${projectId}/conversation/${conversation.id}`)
+      router.push(`/llm/project/${projectId}/conversation/${conversation.id}`)
     } else {
-      router.push(`/llm/${conversation.id}`)
+      router.push(`/llm/conversation/${conversation.id}`)
     }
   }
 
@@ -97,7 +97,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
       })
       if (isActive) {
         if (conversation.projectId) {
-          router.push(`/llm/projects/${conversation.projectId}`)
+          router.push(`/llm/project/${conversation.projectId}`)
         } else {
           router.push('/llm')
         }
@@ -152,7 +152,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
     >
       <div className="flex items-center gap-2">
         <div
-          className="flex min-h-[44px] min-w-0 flex-1 cursor-pointer items-center md:min-h-0"
+          className="flex min-h-[32px] min-w-0 flex-1 cursor-pointer items-center md:min-h-0"
           onClick={onClick}
         >
           {isEditing ? (
@@ -191,7 +191,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
             size="sm"
             onClick={() => setShowMenu((prev) => !prev)}
             className={cn(
-              'h-8 min-h-[44px] w-8 min-w-[44px] p-0 opacity-100 transition-opacity md:h-6 md:min-h-0 md:w-6 md:min-w-0 md:opacity-0 md:group-hover:opacity-100',
+              'h-8 min-h-[32px] w-8 min-w-[32px] p-0 opacity-100 transition-opacity md:h-6 md:min-h-0 md:w-6 md:min-w-0 md:opacity-0 md:group-hover:opacity-100',
               showMenu && 'opacity-100'
             )}
             aria-label="Conversation options"
@@ -208,7 +208,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                     setIsEditing(true)
                     closeMenu()
                   }}
-                  className="flex min-h-[44px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0"
+                  className="flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0"
                 >
                   <Pencil className="h-4 w-4 shrink-0" />
                   Edit Title
@@ -216,7 +216,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 <button
                   onClick={() => setIsSelectingProject((prev) => !prev)}
                   className={cn(
-                    'flex min-h-[44px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0',
+                    'flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0',
                     isSelectingProject && 'bg-white/10'
                   )}
                 >
@@ -231,7 +231,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 <button
                   onClick={() => setIsConfirmingDelete((prev) => !prev)}
                   className={cn(
-                    'flex min-h-[44px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10 active:bg-red-500/5 md:min-h-0',
+                    'flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10 active:bg-red-500/5 md:min-h-0',
                     isConfirmingDelete && 'bg-red-500/10'
                   )}
                 >

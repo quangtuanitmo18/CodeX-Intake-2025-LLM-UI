@@ -113,7 +113,7 @@ description: Technical implementation notes, patterns, and code guidelines
 - **Key Classes**:
   - `w-full md:max-w-[600px] md:mx-auto`
   - `p-3 md:p-4`
-  - `min-h-[44px]` for touch targets
+  - `min-h-[32px]` for touch targets
 
 #### 6. Message Bubbles Responsive
 

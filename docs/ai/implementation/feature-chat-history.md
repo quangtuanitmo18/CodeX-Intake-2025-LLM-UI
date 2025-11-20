@@ -7,20 +7,25 @@ description: Technical implementation notes, patterns, and code guidelines
 # Implementation Guide
 
 ## Development Setup
+
 **How do we get started?**
 
 ### Prerequisites
+
 - Node.js 18+ and npm installed
 - Existing project dependencies installed (`npm install` in both `client/` and `server/`)
 - SQLite database configured via `DATABASE_URL` in `.env`
 - Uploads folder exists and is writable (configured via `UPLOAD_FOLDER` env var)
 
 ### Environment Setup
+
 No new environment variables required for MVP. Reuse existing:
+
 - `DATABASE_URL` - SQLite connection string
 - `UPLOAD_FOLDER` - Local file storage path (default: `uploads`)
 
 ### Database Migration
+
 ```bash
 cd server
 npx prisma migrate dev --name add_chat_history
@@ -28,6 +33,7 @@ npx prisma generate
 ```
 
 ### Verify Setup
+
 ```bash
 # Check schema is updated
 npx prisma db pull
@@ -38,9 +44,11 @@ cd client && npm run dev  # Frontend on :3000
 ```
 
 ## Code Structure
+
 **How is the code organized?**
 
 ### Backend Structure
+
 ```
 server/src/
 ├── controllers/
@@ -66,6 +74,7 @@ prisma/
 ```
 
 ### Frontend Structure
+
 ```
 client/src/
 ├── app/
@@ -94,17 +103,19 @@ client/src/
 ```
 
 ## Implementation Notes
+
 **Key technical details to remember:**
 
 ### Core Features
 
 #### 1. Prisma Schema (server/prisma/schema.prisma)
+
 ```prisma
 model Conversation {
   id        String    @id @default(cuid())
   accountId Int
   title     String?
-  model     String    @default("atlas-2.1")
+  model     String    @default("openai/gpt-5-mini")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -148,6 +159,7 @@ model MessageAttachment {
 ```
 
 #### 2. Conversation Repository (server/src/repositories/conversation.repository.ts)
+
 ```typescript
 import { prisma } from '../database'
 
@@ -159,9 +171,9 @@ export const conversationRepository = {
       ...(search && {
         OR: [
           { title: { contains: search, mode: 'insensitive' } },
-          { messages: { some: { content: { contains: search, mode: 'insensitive' } } } }
-        ]
-      })
+          { messages: { some: { content: { contains: search, mode: 'insensitive' } } } },
+        ],
+      }),
     }
 
     const [conversations, total] = await Promise.all([
@@ -175,11 +187,11 @@ export const conversationRepository = {
           messages: {
             take: 1,
             orderBy: { createdAt: 'desc' },
-            select: { content: true, createdAt: true }
-          }
-        }
+            select: { content: true, createdAt: true },
+          },
+        },
       }),
-      prisma.conversation.count({ where })
+      prisma.conversation.count({ where }),
     ])
 
     return { conversations, total }
@@ -187,7 +199,7 @@ export const conversationRepository = {
 
   async findById(id: string, accountId: number) {
     return prisma.conversation.findFirst({
-      where: { id, accountId, deletedAt: null }
+      where: { id, accountId, deletedAt: null },
     })
   },
 
@@ -196,28 +208,29 @@ export const conversationRepository = {
       data: {
         accountId: data.accountId,
         title: data.title || null,
-        model: data.model || 'atlas-2.1'
-      }
+        model: data.model || 'openai/gpt-5-mini',
+      },
     })
   },
 
   async update(id: string, accountId: number, data: { title?: string }) {
     return prisma.conversation.updateMany({
       where: { id, accountId, deletedAt: null },
-      data
+      data,
     })
   },
 
   async softDelete(id: string, accountId: number) {
     return prisma.conversation.updateMany({
       where: { id, accountId, deletedAt: null },
-      data: { deletedAt: new Date() }
+      data: { deletedAt: new Date() },
     })
-  }
+  },
 }
 ```
 
 #### 3. Conversation Service (server/src/services/conversation.service.ts)
+
 ```typescript
 import { conversationRepository } from '../repositories/conversation.repository'
 import { messageRepository } from '../repositories/message.repository'
@@ -249,7 +262,8 @@ export const conversationService = {
 
   async autoGenerateTitle(conversationId: string, accountId: number, firstMessage: string) {
     // Extract first 50 chars, trim, fallback to timestamp
-    const title = firstMessage.trim().slice(0, 50) || `New Conversation - ${new Date().toISOString()}`
+    const title =
+      firstMessage.trim().slice(0, 50) || `New Conversation - ${new Date().toISOString()}`
     await conversationRepository.update(conversationId, accountId, { title })
   },
 
@@ -264,15 +278,15 @@ export const conversationService = {
       title: conversation.title,
       model: conversation.model,
       createdAt: conversation.createdAt,
-      messages: messages.map(m => ({
+      messages: messages.map((m) => ({
         id: m.id,
         role: m.role,
         content: m.content,
         reasoning: m.reasoning,
         metadata: m.metadata ? JSON.parse(m.metadata) : null,
         createdAt: m.createdAt,
-        attachments: m.attachments
-      }))
+        attachments: m.attachments,
+      })),
     }
   },
 
@@ -287,7 +301,7 @@ export const conversationService = {
       }
       if (msg.attachments.length > 0) {
         md += `**Attachments:**\n`
-        msg.attachments.forEach(att => {
+        msg.attachments.forEach((att) => {
           md += `- [${att.fileName}](${att.fileUrl})\n`
         })
         md += `\n`
@@ -296,23 +310,33 @@ export const conversationService = {
     })
 
     return md
-  }
+  },
 }
 ```
 
 #### 4. Message Service (server/src/services/message.service.ts)
+
 ```typescript
 import { messageRepository } from '../repositories/message.repository'
 import { conversationService } from './conversation.service'
 
 export const messageService = {
-  async list(conversationId: string, accountId: number, filters: { limit?: number; offset?: number }) {
+  async list(
+    conversationId: string,
+    accountId: number,
+    filters: { limit?: number; offset?: number }
+  ) {
     // Verify user owns conversation
     await conversationService.get(conversationId, accountId)
     return messageRepository.findByConversationId(conversationId, filters)
   },
 
-  async createUserMessage(conversationId: string, accountId: number, content: string, attachments: string[] = []) {
+  async createUserMessage(
+    conversationId: string,
+    accountId: number,
+    content: string,
+    attachments: string[] = []
+  ) {
     // Verify ownership
     await conversationService.get(conversationId, accountId)
 
@@ -321,7 +345,7 @@ export const messageService = {
       role: 'user',
       content,
       reasoning: null,
-      metadata: null
+      metadata: null,
     })
 
     // Link attachments if provided
@@ -352,13 +376,14 @@ export const messageService = {
       role: 'assistant',
       content,
       reasoning: reasoning || null,
-      metadata: metadata ? JSON.stringify(metadata) : null
+      metadata: metadata ? JSON.stringify(metadata) : null,
     })
-  }
+  },
 }
 ```
 
 #### 5. LLM Service Integration (server/src/services/llm.service.ts)
+
 Extend existing streaming service to save messages:
 
 ```typescript
@@ -396,12 +421,16 @@ export async function streamLLMResponse(
 ```
 
 #### 6. Conversation Controller (server/src/controllers/conversation.controller.ts)
+
 ```typescript
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { conversationService } from '../services/conversation.service'
 
 export const conversationController = {
-  async list(req: FastifyRequest<{ Querystring: { limit?: number; offset?: number; search?: string } }>, reply: FastifyReply) {
+  async list(
+    req: FastifyRequest<{ Querystring: { limit?: number; offset?: number; search?: string } }>,
+    reply: FastifyReply
+  ) {
     const accountId = req.user.id // From auth hook
     const { limit, offset, search } = req.query
 
@@ -417,7 +446,10 @@ export const conversationController = {
     return reply.send(conversation)
   },
 
-  async create(req: FastifyRequest<{ Body: { title?: string; model?: string } }>, reply: FastifyReply) {
+  async create(
+    req: FastifyRequest<{ Body: { title?: string; model?: string } }>,
+    reply: FastifyReply
+  ) {
     const accountId = req.user.id
     const { title, model } = req.body
 
@@ -425,7 +457,10 @@ export const conversationController = {
     return reply.status(201).send(conversation)
   },
 
-  async update(req: FastifyRequest<{ Params: { id: string }; Body: { title: string } }>, reply: FastifyReply) {
+  async update(
+    req: FastifyRequest<{ Params: { id: string }; Body: { title: string } }>,
+    reply: FastifyReply
+  ) {
     const accountId = req.user.id
     const { id } = req.params
     const { title } = req.body
@@ -442,7 +477,10 @@ export const conversationController = {
     return reply.send({ success: true })
   },
 
-  async export(req: FastifyRequest<{ Params: { id: string }; Querystring: { format: 'json' | 'markdown' } }>, reply: FastifyReply) {
+  async export(
+    req: FastifyRequest<{ Params: { id: string }; Querystring: { format: 'json' | 'markdown' } }>,
+    reply: FastifyReply
+  ) {
     const accountId = req.user.id
     const { id } = req.params
     const { format } = req.query
@@ -457,23 +495,26 @@ export const conversationController = {
       reply.type('text/markdown')
       return reply.send(markdown)
     }
-  }
+  },
 }
 ```
 
 ### Patterns & Best Practices
 
 #### Repository Pattern
+
 - All Prisma queries encapsulated in repositories
 - Makes testing easier (mock repositories instead of Prisma)
 - Single source of truth for database operations
 
 #### Service Layer
+
 - Business logic separated from controllers
 - Reusable across different endpoints
 - Handles authorization checks (user ownership)
 
 #### Error Handling
+
 ```typescript
 // Use custom error classes
 class NotFoundError extends Error {
@@ -494,6 +535,7 @@ fastify.setErrorHandler((error, req, reply) => {
 ```
 
 #### Optimistic Updates (Frontend)
+
 ```typescript
 const { mutate: deleteConversation } = useDeleteConversation()
 
@@ -505,22 +547,24 @@ const handleDelete = (id: string) => {
       const previous = queryClient.getQueryData(['conversations'])
       queryClient.setQueryData(['conversations'], (old: any) => ({
         ...old,
-        conversations: old.conversations.filter((c: any) => c.id !== deletedId)
+        conversations: old.conversations.filter((c: any) => c.id !== deletedId),
       }))
       return { previous }
     },
     onError: (err, deletedId, context) => {
       // Rollback on error
       queryClient.setQueryData(['conversations'], context.previous)
-    }
+    },
   })
 }
 ```
 
 ## Integration Points
+
 **How do pieces connect?**
 
 ### Backend Routes Registration
+
 ```typescript
 // server/src/index.ts
 import { conversationRoutes } from './routes/conversation.route'
@@ -531,6 +575,7 @@ fastify.register(messageRoutes, { prefix: '/api' })
 ```
 
 ### Frontend API Client
+
 ```typescript
 // client/src/apiRequests/conversation.ts
 import http from '@/lib/http'
@@ -538,22 +583,19 @@ import http from '@/lib/http'
 export const conversationApiRequest = {
   list: (params: { limit?: number; offset?: number; search?: string }) =>
     http.get('/conversations', { params }),
-  
-  get: (id: string) =>
-    http.get(`/conversations/${id}`),
-  
-  create: (data: { title?: string; model?: string }) =>
-    http.post('/conversations', data),
-  
-  update: (id: string, data: { title: string }) =>
-    http.patch(`/conversations/${id}`, data),
-  
-  delete: (id: string) =>
-    http.delete(`/conversations/${id}`)
+
+  get: (id: string) => http.get(`/conversations/${id}`),
+
+  create: (data: { title?: string; model?: string }) => http.post('/conversations', data),
+
+  update: (id: string, data: { title: string }) => http.patch(`/conversations/${id}`, data),
+
+  delete: (id: string) => http.delete(`/conversations/${id}`),
 }
 ```
 
 ### React Query Hooks
+
 ```typescript
 // client/src/queries/useConversations.tsx
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -562,7 +604,7 @@ import { conversationApiRequest } from '@/apiRequests/conversation'
 export const useConversationList = (params: { search?: string }) => {
   return useQuery({
     queryKey: ['conversations', params],
-    queryFn: () => conversationApiRequest.list(params)
+    queryFn: () => conversationApiRequest.list(params),
   })
 }
 
@@ -572,65 +614,77 @@ export const useDeleteConversation = () => {
     mutationFn: conversationApiRequest.delete,
     onSuccess: () => {
       queryClient.invalidateQueries(['conversations'])
-    }
+    },
   })
 }
 ```
 
 ## Error Handling
+
 **How do we handle failures?**
 
 ### Backend
+
 - Use try-catch in controllers, pass errors to Fastify error handler
 - Return consistent error format: `{ error: string, code?: string }`
 - Log errors with context (user ID, conversation ID, stack trace)
 
 ### Frontend
+
 - Display toast notifications for errors (use existing toast system)
 - Show inline error states in forms (validation errors)
 - Retry failed requests automatically (React Query retry logic)
 - Graceful degradation: If conversation list fails, show empty state with retry button
 
 ## Performance Considerations
+
 **How do we keep it fast?**
 
 ### Database
+
 - Indexes on `(accountId, updatedAt)` for conversation list queries
 - Indexes on `(conversationId, createdAt)` for message chronological order
 - Pagination to limit result sets (default 20 conversations, 50 messages)
 - Use `select` in Prisma to fetch only needed fields
 
 ### File Storage
+
 - Store files in organized folders to avoid too many files in one directory
 - Use CUID as filename to avoid collisions and sanitize user input
 - Serve files via Fastify static plugin (or CDN in production)
 
 ### Frontend
+
 - React Query caching reduces API calls
 - Optimistic updates for instant UI feedback
 - Lazy load conversation messages (don't fetch until conversation is opened)
 - Virtualize long conversation lists (if needed for 100+ conversations)
 
 ## Security Notes
+
 **What security measures are in place?**
 
 ### Authentication & Authorization
+
 - All endpoints protected by `authHook` (require valid JWT/session)
 - User ownership enforced in service layer (check `accountId` on all queries)
 - Return 403 Forbidden if user tries to access another user's conversation
 
 ### File Upload Security
+
 - Validate MIME type and file extension (whitelist: images, PDFs, text files)
 - Reject files >10MB to prevent DoS
 - Sanitize filenames (remove path traversal chars: `../`, `..\\`)
 - Store files outside web root, serve via controlled endpoint
 
 ### Input Validation
+
 - Use Zod schemas to validate all request bodies and query params
 - Sanitize user input (conversation titles, message content) to prevent XSS
 - Rate limit API endpoints to prevent abuse (use Fastify rate-limit plugin)
 
 ### Data Privacy
+
 - Soft delete allows recovery but respects GDPR "right to be forgotten" (add hard delete endpoint for compliance)
 - Don't log sensitive user data (message content, file contents)
 - Ensure file URLs are not guessable (use CUID, not sequential IDs)

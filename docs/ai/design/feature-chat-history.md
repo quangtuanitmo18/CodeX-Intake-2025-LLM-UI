@@ -7,6 +7,7 @@ description: Define the technical architecture, components, and data models
 # System Design & Architecture
 
 ## Architecture Overview
+
 **What is the high-level system structure?**
 
 ```mermaid
@@ -62,6 +63,7 @@ graph TD
 - **Integration**: Extends existing `/llm/stream` to accept `conversationId` and persist messages post-streaming.
 
 ## Data Models
+
 **What data do we need to manage?**
 
 ### Prisma Schema Changes
@@ -85,7 +87,7 @@ model Conversation {
   id        String    @id @default(cuid())  // CUID for URL-safe IDs
   accountId Int
   title     String?                         // Auto-generated or user-edited
-  model     String    @default("atlas-2.1") // LLM model used
+  model     String    @default("openai/gpt-5-mini") // LLM model used
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?                       // Soft delete
@@ -138,11 +140,13 @@ model MessageAttachment {
 6. **Export**: User clicks export → GET `/conversations/:id/export?format=json|md` → Returns formatted file.
 
 ## API Design
+
 **How do components communicate?**
 
 ### REST Endpoints
 
 #### Conversations
+
 - `GET /api/conversations` - List user's conversations (paginated, sorted by updatedAt desc)
   - Query params: `?limit=20&offset=0&search=keyword`
   - Response 200: `{ conversations: [...], total: number }`
@@ -180,6 +184,7 @@ model MessageAttachment {
   - Response 404: Not Found
 
 #### Messages
+
 - `GET /api/conversations/:id/messages` - Get all messages in a conversation
   - Query params: `?limit=50&offset=0`
   - Response 200: `{ messages: [...], total: number }`
@@ -196,6 +201,7 @@ model MessageAttachment {
   - Side effect: Creates user message, streams assistant message, saves both
 
 #### Attachments (use existing media controller)
+
 - `POST /api/media/upload` - Upload file for message attachment
   - Body: FormData with file
   - Response 200: `{ fileId: string, fileName: string, fileUrl: string, fileSize: number, fileType: string }`
@@ -205,6 +211,7 @@ model MessageAttachment {
 - After upload, file IDs are passed to `POST /conversations/:id/messages` to link attachments
 
 ### Error Response Format
+
 **Standard error structure for all endpoints:**
 
 ```json
@@ -216,6 +223,7 @@ model MessageAttachment {
 ```
 
 **Error Codes:**
+
 - `UNAUTHORIZED` - 401: Missing or invalid auth token
 - `FORBIDDEN` - 403: User doesn't own the resource
 - `NOT_FOUND` - 404: Resource doesn't exist or is soft-deleted
@@ -225,31 +233,38 @@ model MessageAttachment {
 - `INTERNAL_ERROR` - 500: Unexpected server error
 
 ### Pagination Strategy
+
 **Backend API:**
+
 - Use `limit/offset` query parameters for pagination
 - Default: `limit=20`, `offset=0`
 - Response includes `total` count for calculating page numbers
 - Example: `GET /conversations?limit=20&offset=40` returns items 41-60
 
 **Frontend UI:**
+
 - Implement infinite scroll for conversation sidebar (loads next page on scroll)
 - Or traditional pagination with "Load More" button
 - React Query handles caching and deduplication automatically
 
 ### Auth
+
 - All endpoints require authentication (JWT/session cookie).
 - Authorization: Users can only access their own conversations (enforce `accountId` filtering).
 
 ### Streaming Integration
+
 - Extend `/api/llm/stream` to accept `conversationId` in request body.
 - After streaming completes, save assistant message to database with metadata (tokens, duration).
 
 ## Component Breakdown
+
 **What are the major building blocks?**
 
 ### Backend (Server)
 
 #### Controllers
+
 - `conversation.controller.ts`
   - `listConversations()` - GET /conversations
   - `getConversation()` - GET /conversations/:id
@@ -268,6 +283,7 @@ model MessageAttachment {
   - Returns file metadata for linking to messages
 
 #### Services
+
 - `conversation.service.ts`
   - `findByAccountId(accountId, filters)` - Query conversations with pagination/search
   - `create(accountId, data)` - Create conversation with auto-title generation
@@ -281,6 +297,7 @@ model MessageAttachment {
   - `createWithAttachments(conversationId, content, fileIds)` - Save user message + link attachments
 
 #### Repositories
+
 - `conversation.repository.ts`
   - Prisma queries for CRUD operations on `Conversation` model
   - Includes message counts, pagination, soft delete filtering
@@ -290,6 +307,7 @@ model MessageAttachment {
   - Joins to fetch attachments with messages
 
 #### Routes
+
 - `conversation.route.ts` - Register all conversation endpoints
 - `message.route.ts` - Register message endpoints
 - Both use existing `authHook` to protect routes
@@ -297,11 +315,13 @@ model MessageAttachment {
 ### Frontend (Client)
 
 #### Pages
+
 - `app/llm/page.tsx` - Main chat interface (existing, extend to support conversationId)
 - `app/llm/conversations/page.tsx` - Conversation list page (new)
 - `app/llm/conversations/[id]/page.tsx` - Load specific conversation (new)
 
 #### Components
+
 - `components/llm/conversation-sidebar.tsx` - Sidebar with conversation list, search, new chat button
 - `components/llm/conversation-item.tsx` - Single conversation card (title, preview, timestamp)
 - `components/llm/message-attachment.tsx` - Display attachment (thumbnail or file icon)
@@ -309,6 +329,7 @@ model MessageAttachment {
 - `components/llm/export-menu.tsx` - Dropdown for export options (JSON/MD)
 
 #### Hooks
+
 - `queries/useConversations.tsx` - React Query hooks for conversation CRUD
   - `useConversationList()` - GET /conversations with pagination
   - `useConversation(id)` - GET /conversations/:id
@@ -324,17 +345,21 @@ model MessageAttachment {
   - `useUploadFile()` - POST /media/upload
 
 #### API Requests
+
 - `apiRequests/conversation.ts` - HTTP client functions for conversation endpoints
 - `apiRequests/message.ts` - HTTP client functions for message endpoints
 
 #### Schema Validations
+
 - `schemaValidations/conversation.schema.ts` - Zod schemas for conversation create/update
 - `schemaValidations/message.schema.ts` - Zod schemas for message create (with attachments)
 
 ### Database Migrations
+
 - `prisma/migrations/xxx_add_conversation_models.sql` - Add Conversation, Message, MessageAttachment tables
 
 ## Design Decisions
+
 **Why did we choose this approach?**
 
 - **CUID for IDs**: URL-safe, globally unique, better than autoincrement for distributed systems or public-facing IDs.
@@ -348,17 +373,20 @@ model MessageAttachment {
 - **Local file storage**: Simpler for MVP; cloud storage (S3) can be swapped in later without changing API contract.
 
 ### Trade-offs
+
 - **SQLite vs PostgreSQL**: SQLite is fine for MVP (<1000 conversations/user), but may need migration for multi-user scale.
 - **In-memory vs persistent streaming**: Keeping streaming ephemeral (current design) is simpler; adding persistence requires careful transaction handling.
 - **Export formats**: JSON (machine-readable) and Markdown (human-readable) cover most use cases; PDF/HTML export is future enhancement.
 
 ### Patterns
+
 - Repository pattern for database abstraction (easier to test, swap ORMs).
 - Service layer for business logic (title generation, export formatting).
 - React Query for client-side caching and optimistic updates.
 - Zod schemas shared between client/server for type safety.
 
 ## Non-Functional Requirements
+
 **How should the system perform?**
 
 - **Performance**
@@ -392,6 +420,7 @@ model MessageAttachment {
   - Export should preserve markdown formatting and attachment references.
 
 ## Database Indexes
+
 **Optimize common queries:**
 
 - `Conversation`:
@@ -404,6 +433,7 @@ model MessageAttachment {
   - `@@index([messageId])` - Fetch attachments for a message
 
 ## File Storage Strategy
+
 **Local uploads folder structure:**
 
 ```
@@ -421,11 +451,12 @@ uploads/
 ## Export Format Examples
 
 ### JSON Export
+
 ```json
 {
   "id": "clx123abc",
   "title": "Discuss React performance optimization",
-  "model": "atlas-2.1",
+  "model": "openai/gpt-5-mini",
   "createdAt": "2025-11-18T10:00:00Z",
   "messages": [
     {
@@ -449,23 +480,26 @@ uploads/
 ```
 
 ### Markdown Export
+
 ```markdown
 # Discuss React performance optimization
 
-**Model:** atlas-2.1  
+**Model:** openai/gpt-5-mini  
 **Created:** 2025-11-18 10:00 AM
 
 ---
 
 ## Message 1 (User)
-*2025-11-18 10:00 AM*
+
+_2025-11-18 10:00 AM_
 
 How can I optimize React re-renders?
 
 ---
 
 ## Message 2 (Assistant)
-*2025-11-18 10:00 AM*
+
+_2025-11-18 10:00 AM_
 
 Here are some strategies...
 

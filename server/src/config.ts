@@ -34,8 +34,8 @@ const configSchema = z.object({
   PRODUCTION_URL: z.string().optional().default(''),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LLM_API_URL: z.string().optional().default(''),
-  LLM_API_TOKEN: z.string().optional().default(''),
-  LLM_API_MODEL: z.string().optional().default('atlas-2.1')
+  LLM_API_TOKEN: z.string().optional().default('')
+  // LLM_API_MODEL: z.string().optional().default('openai/gpt-5-mini')
 })
 
 const configServer = configSchema.safeParse(process.env)
@@ -45,9 +45,10 @@ if (!configServer.success) {
   throw new Error('Invalid environment variables')
 }
 const envConfig = configServer.data
-export const API_URL = envConfig.PRODUCTION && envConfig.PRODUCTION_URL
-  ? envConfig.PRODUCTION_URL
-  : `${envConfig.PROTOCOL}://${envConfig.DOMAIN}:${envConfig.PORT}`
+export const API_URL =
+  envConfig.PRODUCTION && envConfig.PRODUCTION_URL
+    ? envConfig.PRODUCTION_URL
+    : `${envConfig.PROTOCOL}://${envConfig.DOMAIN}:${envConfig.PORT}`
 export default envConfig
 
 declare global {

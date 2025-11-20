@@ -1,4 +1,4 @@
-import LLMConversationPage from '@/components/llm/llm-conversation-page'
+import LLMConversationPage from '@/pageSections/llm/llm-conversation-page'
 
 export const metadata = {
   title: 'LLM UI · Chat History',

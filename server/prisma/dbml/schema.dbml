@@ -30,7 +30,7 @@ Table Conversation {
   accountId Int [not null]
   projectId String
   title String
-  model String [not null, default: 'atlas-2.1']
+  model String [not null, default: 'openai/gpt-5-mini']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   deletedAt DateTime

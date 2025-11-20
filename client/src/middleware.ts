@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refreshToken')?.value
   const accessToken = request.cookies.get('accessToken')?.value
 
-  const protectedPaths = ['/dashboard', '/settings', '/llm']
+  const protectedPaths = ['/settings', '/llm']
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path))
 
   if (isProtected && !refreshToken) {
@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname === '/login' && refreshToken && accessToken) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/llm', request.url))
   }
 
   return NextResponse.next()
@@ -24,5 +24,5 @@ export function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/dashboard/:path*', '/settings/:path*', '/llm', '/login'],
+  matcher: ['/settings/:path*', '/llm/:path*', '/login'],
 }

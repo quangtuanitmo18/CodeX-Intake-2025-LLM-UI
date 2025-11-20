@@ -1,4 +1,4 @@
-import ProfilePage from '@/components/profile/profile-page'
+import ProfilePage from '@/pageSections/profile/profile-page'
 
 export const metadata = {
   title: 'Profile · LLM UI',

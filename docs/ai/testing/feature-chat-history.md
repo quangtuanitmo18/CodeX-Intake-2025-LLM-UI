@@ -7,6 +7,7 @@ description: Define testing approach, test cases, and quality assurance
 # Testing Strategy
 
 ## Test Coverage Goals
+
 **What level of testing do we aim for?**
 
 - **Unit test coverage target**: 100% of new services, repositories, and utility functions
@@ -16,9 +17,11 @@ description: Define testing approach, test cases, and quality assurance
 - **Alignment with requirements**: All success criteria from requirements doc must have corresponding tests
 
 ## Unit Tests
+
 **What individual components need testing?**
 
 ### Conversation Repository (server/src/repositories/conversation.repository.ts)
+
 - [ ] `findByAccountId()` returns conversations for correct user only
 - [ ] `findByAccountId()` respects pagination (limit/offset)
 - [ ] `findByAccountId()` filters by search query (title and message content)
@@ -34,6 +37,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] `softDelete()` does not delete if user doesn't own conversation
 
 ### Message Repository (server/src/repositories/message.repository.ts)
+
 - [ ] `findByConversationId()` returns messages in chronological order (createdAt asc)
 - [ ] `findByConversationId()` includes attachments for each message
 - [ ] `findByConversationId()` respects pagination (limit/offset)
@@ -45,6 +49,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] Cascade delete: deleting message deletes all attachments
 
 ### Conversation Service (server/src/services/conversation.service.ts)
+
 - [ ] `list()` calls repository with correct filters
 - [ ] `get()` throws error if conversation not found
 - [ ] `get()` throws error if user doesn't own conversation (403)
@@ -61,6 +66,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] `exportToMarkdown()` lists attachments as links
 
 ### Message Service (server/src/services/message.service.ts)
+
 - [ ] `list()` verifies user owns conversation before fetching messages
 - [ ] `list()` throws error if conversation not found
 - [ ] `createUserMessage()` creates message with role "user"
@@ -72,6 +78,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] `createAssistantMessage()` stringifies metadata JSON
 
 ### LLM Service Integration (server/src/services/llm.service.ts)
+
 - [ ] `streamLLMResponse()` saves assistant message after stream completes if conversationId provided
 - [ ] `streamLLMResponse()` does not save message if conversationId is null (backward compatibility)
 - [ ] `streamLLMResponse()` stores full content (concatenated deltas)
@@ -80,15 +87,18 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] Error handling: partial stream failure still saves partial message (or rolls back user message)
 
 ### File Cleanup Utility (server/src/utils/file-cleanup.util.ts)
+
 - [ ] `deleteAttachmentFile()` deletes file from disk
 - [ ] `deleteAttachmentFile()` handles missing files gracefully (no error if file doesn't exist)
 - [ ] `deleteConversationFiles()` deletes all files in conversation folder
 - [ ] `deleteConversationFiles()` handles empty folders
 
 ## Integration Tests
+
 **How do we test component interactions?**
 
 ### Conversation API Endpoints
+
 - [ ] `GET /api/conversations` returns 401 if not authenticated
 - [ ] `GET /api/conversations` returns user's conversations only (not other users')
 - [ ] `GET /api/conversations` paginates correctly (limit/offset)
@@ -108,6 +118,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] `GET /api/conversations/:id/export` sets Content-Disposition header for download
 
 ### Message API Endpoints
+
 - [ ] `GET /api/conversations/:id/messages` returns 401 if not authenticated
 - [ ] `GET /api/conversations/:id/messages` returns 403 if user doesn't own conversation
 - [ ] `GET /api/conversations/:id/messages` returns messages in chronological order
@@ -121,6 +132,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] `POST /api/conversations/:id/messages` returns 403 if user doesn't own conversation
 
 ### File Upload Integration
+
 - [ ] `POST /api/media/upload` accepts valid file types (images, PDFs, text)
 - [ ] `POST /api/media/upload` rejects files >10MB
 - [ ] `POST /api/media/upload` rejects unsupported file types
@@ -130,6 +142,7 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] Attachment linked to message can be retrieved via message API
 
 ### Database Transaction & Cascade Tests
+
 - [ ] Deleting conversation cascades to all messages
 - [ ] Deleting conversation cascades to all message attachments
 - [ ] Deleting message cascades to all attachments
@@ -137,9 +150,11 @@ description: Define testing approach, test cases, and quality assurance
 - [ ] Soft-deleted conversations cannot be accessed via GET /:id
 
 ## End-to-End Tests
+
 **What user flows need validation?**
 
 ### E2E Flow 1: Create Conversation and Send Message
+
 1. [ ] User logs in successfully
 2. [ ] User navigates to LLM chat page
 3. [ ] User clicks "New Chat" button
@@ -151,6 +166,7 @@ description: Define testing approach, test cases, and quality assurance
 9. [ ] Conversation persists after page reload
 
 ### E2E Flow 2: Upload File and Attach to Message
+
 1. [ ] User opens existing conversation
 2. [ ] User clicks file upload button
 3. [ ] User selects an image file (PNG, <10MB)
@@ -161,6 +177,7 @@ description: Define testing approach, test cases, and quality assurance
 8. [ ] Clicking attachment opens/downloads file
 
 ### E2E Flow 3: Edit Conversation Title
+
 1. [ ] User clicks on conversation title (or edit icon)
 2. [ ] Input field appears with current title
 3. [ ] User edits title and presses Enter (or clicks save)
@@ -168,12 +185,14 @@ description: Define testing approach, test cases, and quality assurance
 5. [ ] Title persists after page reload
 
 ### E2E Flow 4: Search Conversations
+
 1. [ ] User types search query in sidebar search bar
 2. [ ] Conversation list filters in real-time
 3. [ ] Only matching conversations (by title or message content) appear
 4. [ ] Clearing search query restores full list
 
 ### E2E Flow 5: Delete Conversation
+
 1. [ ] User clicks delete button on conversation item
 2. [ ] Confirmation modal appears
 3. [ ] User confirms deletion
@@ -182,6 +201,7 @@ description: Define testing approach, test cases, and quality assurance
 6. [ ] Database record has `deletedAt` timestamp set
 
 ### E2E Flow 6: Export Conversation
+
 1. [ ] User opens conversation
 2. [ ] User clicks export button
 3. [ ] Export menu appears with JSON and Markdown options
@@ -192,6 +212,7 @@ description: Define testing approach, test cases, and quality assurance
 8. [ ] Markdown file is formatted correctly with headers, timestamps, reasoning
 
 ### E2E Flow 7: Pagination (Long Conversation List)
+
 1. [ ] User has 50+ conversations (seed database for test)
 2. [ ] Only first 20 conversations load initially
 3. [ ] User scrolls to bottom of sidebar (or clicks "Load More")
@@ -199,6 +220,7 @@ description: Define testing approach, test cases, and quality assurance
 5. [ ] No duplicate conversations appear
 
 ### E2E Flow 8: Error Handling (File Upload Failure)
+
 1. [ ] User selects a file >10MB
 2. [ ] Error toast appears: "File size exceeds 10MB limit"
 3. [ ] File is not uploaded
@@ -206,22 +228,29 @@ description: Define testing approach, test cases, and quality assurance
 5. [ ] Error toast appears: "File type not supported"
 
 ## Test Data
+
 **What data do we use for testing?**
 
 ### Test Fixtures
+
 - **Users**: 2 test accounts (user1, user2) to test ownership isolation
 - **Conversations**: 5 conversations per user with varying message counts (0, 1, 10, 50 messages)
 - **Messages**: Mix of user/assistant messages, some with reasoning, some with attachments
 - **Attachments**: Sample files (image.png, document.pdf, text.txt) stored in test uploads folder
 
 ### Seed Data Script
+
 ```typescript
 // server/src/tests/seed.ts
 import { prisma } from '../database'
 
 export async function seedTestData() {
-  const user1 = await prisma.account.create({ data: { email: 'user1@test.com', name: 'User 1', password: 'hashed' } })
-  const user2 = await prisma.account.create({ data: { email: 'user2@test.com', name: 'User 2', password: 'hashed' } })
+  const user1 = await prisma.account.create({
+    data: { email: 'user1@test.com', name: 'User 1', password: 'hashed' },
+  })
+  const user2 = await prisma.account.create({
+    data: { email: 'user2@test.com', name: 'User 2', password: 'hashed' },
+  })
 
   const conv1 = await prisma.conversation.create({
     data: {
@@ -230,10 +259,10 @@ export async function seedTestData() {
       messages: {
         create: [
           { role: 'user', content: 'Hello' },
-          { role: 'assistant', content: 'Hi there!', reasoning: 'Friendly greeting' }
-        ]
-      }
-    }
+          { role: 'assistant', content: 'Hi there!', reasoning: 'Friendly greeting' },
+        ],
+      },
+    },
   })
 
   // ... more seed data
@@ -241,14 +270,17 @@ export async function seedTestData() {
 ```
 
 ### Test Database Setup
+
 - Use separate SQLite database for tests: `DATABASE_URL="file:./test.db"`
 - Reset database before each test suite
 - Clean up uploaded files in test uploads folder after tests
 
 ## Test Reporting & Coverage
+
 **How do we verify and communicate test results?**
 
 ### Coverage Commands
+
 ```bash
 # Backend unit tests
 cd server
@@ -266,24 +298,29 @@ npm run test:e2e
 ```
 
 ### Coverage Thresholds
+
 - Minimum 90% coverage for services and repositories
 - Minimum 80% coverage for controllers
 - Minimum 70% coverage for frontend components
 
 ### Coverage Gaps (Acceptable Exceptions)
+
 - File cleanup utility: Hard to test file system operations in unit tests (manual testing sufficient)
 - SSE streaming: Difficult to unit test (covered by integration tests)
 - Frontend animations: Visual testing only
 
 ### Test Reports
+
 - Jest/Vitest HTML coverage report generated in `coverage/` folder
 - Playwright test report with screenshots for failed E2E tests
 - CI/CD pipeline fails if coverage drops below threshold
 
 ## Manual Testing
+
 **What requires human validation?**
 
 ### UI/UX Testing Checklist
+
 - [ ] Conversation sidebar is visually aligned with design (spacing, fonts, colors)
 - [ ] Conversation items show correct preview text (first 50 chars of last message)
 - [ ] Active conversation is highlighted in sidebar
@@ -296,6 +333,7 @@ npm run test:e2e
 - [ ] Responsive design: Works on mobile, tablet, desktop
 
 ### Browser/Device Compatibility
+
 - [ ] Chrome (latest)
 - [ ] Firefox (latest)
 - [ ] Safari (latest)
@@ -304,12 +342,14 @@ npm run test:e2e
 - [ ] Mobile Chrome (Android)
 
 ### Accessibility
+
 - [ ] Keyboard navigation works (Tab, Enter, Escape)
 - [ ] Screen reader announces conversation titles and message content
 - [ ] Color contrast meets WCAG AA standards
 - [ ] Focus indicators are visible
 
 ### Smoke Tests After Deployment
+
 - [ ] Login and navigate to chat page
 - [ ] Create new conversation
 - [ ] Send message and verify response
@@ -318,20 +358,24 @@ npm run test:e2e
 - [ ] Delete conversation and verify removal
 
 ## Performance Testing
+
 **How do we validate performance?**
 
 ### Load Testing Scenarios
+
 - [ ] Create 100 conversations for a single user → verify list query <200ms
 - [ ] Send 50 messages in a conversation → verify message fetch <500ms
 - [ ] Upload 10 files (5MB each) concurrently → verify all complete within 10s
 - [ ] Stream LLM response (1000 tokens) → verify chunk latency <200ms
 
 ### Stress Testing
+
 - [ ] 10 concurrent users creating conversations simultaneously
 - [ ] Paginate through 1000 conversations (50 pages) → verify no memory leaks
 - [ ] Database query performance with 10,000 messages across 500 conversations
 
 ### Performance Benchmarks (Success Criteria)
+
 - Conversation list load: <200ms (20 items)
 - Message list load: <500ms (50 items)
 - File upload: <2s (5MB file, local network)
@@ -339,9 +383,11 @@ npm run test:e2e
 - Export Markdown: <1s (100 message conversation)
 
 ## Bug Tracking
+
 **How do we manage issues?**
 
 ### Issue Tracking Process
+
 1. Log bugs in GitHub Issues with label `bug` and `chat-history`
 2. Include reproduction steps, expected vs actual behavior, screenshots
 3. Prioritize by severity:
@@ -351,12 +397,15 @@ npm run test:e2e
    - **Low**: Enhancement or polish item
 
 ### Regression Testing Strategy
+
 - Run full integration test suite before each release
 - Add test case for every fixed bug to prevent regression
 - Monitor production errors via logging (Sentry, LogRocket, etc.)
 
 ### Test Exit Criteria
+
 **When can we ship?**
+
 - [ ] All unit tests pass with >90% coverage
 - [ ] All integration tests pass
 - [ ] All critical E2E flows pass
@@ -371,6 +420,7 @@ npm run test:e2e
 ## Test Implementation Examples
 
 ### Example Unit Test (Conversation Service)
+
 ```typescript
 // server/src/services/__tests__/conversation.service.test.ts
 import { conversationService } from '../conversation.service'
@@ -381,20 +431,19 @@ jest.mock('../../repositories/conversation.repository')
 describe('conversationService', () => {
   describe('autoGenerateTitle', () => {
     it('should extract first 50 chars from message', async () => {
-      const message = 'This is a test message that is longer than fifty characters and should be truncated'
+      const message =
+        'This is a test message that is longer than fifty characters and should be truncated'
       await conversationService.autoGenerateTitle('conv123', 1, message)
-      
-      expect(conversationRepository.update).toHaveBeenCalledWith(
-        'conv123',
-        1,
-        { title: 'This is a test message that is longer than fifty' }
-      )
+
+      expect(conversationRepository.update).toHaveBeenCalledWith('conv123', 1, {
+        title: 'This is a test message that is longer than fifty',
+      })
     })
 
     it('should fallback to timestamp if message is empty', async () => {
       const message = ''
       await conversationService.autoGenerateTitle('conv123', 1, message)
-      
+
       const call = (conversationRepository.update as jest.Mock).mock.calls[0]
       expect(call[2].title).toMatch(/^New Conversation - \d{4}-\d{2}-\d{2}/)
     })
@@ -403,6 +452,7 @@ describe('conversationService', () => {
 ```
 
 ### Example Integration Test (API Endpoint)
+
 ```typescript
 // server/src/controllers/__tests__/conversation.controller.integration.test.ts
 import { build } from '../../app'
@@ -428,13 +478,13 @@ describe('POST /api/conversations', () => {
       method: 'POST',
       url: '/api/conversations',
       headers: { Authorization: `Bearer ${authToken}` },
-      payload: { title: 'My Custom Title' }
+      payload: { title: 'My Custom Title' },
     })
 
     expect(response.statusCode).toBe(201)
     expect(response.json()).toMatchObject({
       title: 'My Custom Title',
-      model: 'atlas-2.1'
+      model: 'openai/gpt-5-mini',
     })
   })
 
@@ -442,7 +492,7 @@ describe('POST /api/conversations', () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/conversations',
-      payload: { title: 'Test' }
+      payload: { title: 'Test' },
     })
 
     expect(response.statusCode).toBe(401)
@@ -451,6 +501,7 @@ describe('POST /api/conversations', () => {
 ```
 
 ### Example E2E Test (Playwright)
+
 ```typescript
 // client/tests/e2e/conversation.spec.ts
 import { test, expect } from '@playwright/test'
@@ -468,7 +519,7 @@ test.describe('Conversation Management', () => {
   test('should create new conversation and send message', async ({ page }) => {
     // Click "New Chat"
     await page.click('button:has-text("New Chat")')
-    
+
     // Type message
     await page.fill('textarea[placeholder="Type your message..."]', 'Hello, AI!')
     await page.press('textarea', 'Enter')

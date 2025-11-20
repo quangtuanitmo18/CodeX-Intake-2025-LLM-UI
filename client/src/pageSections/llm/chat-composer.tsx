@@ -74,7 +74,7 @@ export const ChatComposer = memo(function ChatComposer({
   return (
     <form
       onSubmit={onSubmit}
-      className="mx-auto flex min-h-[100px] w-full flex-col gap-1 rounded-[16px] border border-[#191919] bg-[#0E0E0E] p-3 md:max-w-[600px] md:p-4"
+      className="mx-auto flex min-h-[100px] w-full flex-col gap-1 rounded-[16px] border border-[#191919] bg-[#0E0E0E] px-3 py-2 md:max-w-[600px] md:px-4 md:py-[14px] lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]"
     >
       {attachments.length > 0 && (
         <div className="mb-2 space-y-2">
@@ -107,13 +107,13 @@ export const ChatComposer = memo(function ChatComposer({
       </div>
 
       {/* Footer with buttons */}
-      <div className="flex min-h-[44px] items-center justify-between gap-2 md:h-[28px] md:gap-0">
+      <div className="mt-3 flex items-center justify-between gap-2 md:gap-0">
         {/* Attach Button */}
         <button
           type="button"
           onClick={handleFileUpload}
           disabled={isStreaming}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-[16px] border border-[#191919] px-3 py-2 text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:border-[#777777] active:bg-white/5 disabled:opacity-50 md:min-h-[28px] md:min-w-0 md:py-1"
+          className="flex items-center justify-center gap-1 rounded-[16px] border border-[#191919] px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:border-[#777777] active:bg-white/5 disabled:opacity-50"
           aria-label="Attach file"
         >
           <AttachIcon />
@@ -124,7 +124,7 @@ export const ChatComposer = memo(function ChatComposer({
         <button
           type="submit"
           disabled={!prompt.trim() || isStreaming}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-[16px] bg-white px-3 py-2 text-[14px] font-medium leading-[22px] text-black transition-colors hover:bg-white/90 active:bg-white/80 disabled:opacity-50 md:min-h-[28px] md:min-w-0 md:py-1"
+          className="flex items-center justify-center gap-1 rounded-[16px] bg-white px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-black transition-colors hover:bg-white/90 active:bg-white/80 disabled:opacity-50 md:min-w-0 md:py-1"
           aria-label="Send message"
         >
           {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendIcon />}

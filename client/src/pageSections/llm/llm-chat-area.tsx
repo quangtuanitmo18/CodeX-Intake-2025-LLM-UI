@@ -14,7 +14,6 @@ import { useLLMStream } from '@/queries/useLLMStream'
 import { CreateMessageBody } from '@/schemaValidations/conversation.schema'
 
 import { ChatComposer } from './chat-composer'
-import { ExportMenu } from './export-menu'
 import { MessageBubble, type ChatMessage } from './message-bubble'
 
 interface LLMChatAreaProps {
@@ -308,7 +307,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       <div className="flex h-full items-center justify-center px-4">
         <div className="text-center">
           <p className="text-sm text-white/60 md:text-lg">
-            Select a conversation or create a new chat to begin
+            Select a chat or create a new chat to begin
           </p>
         </div>
       </div>
@@ -324,20 +323,20 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
             {conversation?.title || 'New Chat'}
           </h1>
           <p className="mt-1 text-xs text-white/60 md:text-sm">
-            {conversation?.model || 'Atlas-2.1'}
+            {conversation?.model || 'openai/gpt-5-mini'}
           </p>
         </div>
-        {conversationId && (
+        {/* {conversationId && (
           <ExportMenu
             conversationId={conversationId}
             conversationTitle={conversation?.title || undefined}
           />
-        )}
+        )} */}
       </header>
 
       {/* Transcript */}
       <div ref={transcriptRef} className="custom-scrollbar flex-1 overflow-y-auto pb-4 md:pb-6">
-        <div className="pad mx-auto flex w-full max-w-[600px] flex-col gap-4 pl-1 md:gap-[30px] md:pl-2">
+        <div className="pad mx-auto flex w-full flex-col gap-4 pl-1 md:max-w-[600px] md:gap-[30px] md:py-[14px] md:pl-2 lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]">
           {allMessages.length === 0 && (
             <div className="flex h-full items-center justify-center text-[#777777]">
               <p className="text-sm">Start a conversation...</p>

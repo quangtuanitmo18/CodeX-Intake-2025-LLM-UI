@@ -52,7 +52,7 @@ export const MessageBubble = memo(function MessageBubble({
           <div className="mb-2 flex w-full flex-col gap-2 md:mb-[10px] md:gap-[10px]">
             <button
               onClick={() => setIsReasoningExpanded(!isReasoningExpanded)}
-              className="flex min-h-[44px] items-center gap-[5px] py-1 text-left md:min-h-0 md:py-[1px]"
+              className="flex min-h-[32px] items-center gap-[5px] py-1 text-left md:min-h-0 md:py-[1px]"
               aria-label={isReasoningExpanded ? 'Collapse reasoning' : 'Expand reasoning'}
             >
               <div className="flex h-[14px] w-[14px] shrink-0 items-center justify-center">
