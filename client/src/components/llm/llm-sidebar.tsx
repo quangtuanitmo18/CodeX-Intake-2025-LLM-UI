@@ -377,7 +377,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
   }
 
   return (
-    <aside className="flex h-full w-80 flex-col border-r border-white/10 bg-white/5 backdrop-blur-sm">
+    <aside className="flex h-full w-full flex-col border-r border-white/10 bg-white/5 backdrop-blur-sm md:w-80">
       <div className="border-b border-white/10 p-4">
         <Button
           onClick={handleNewChat}

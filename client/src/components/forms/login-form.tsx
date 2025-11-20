@@ -43,14 +43,18 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="mx-auto w-full max-w-md">
       <CardHeader>
         <CardTitle>Welcome back</CardTitle>
         <CardDescription>Use your admin credentials to access the dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="space-y-4" noValidate onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            className="space-y-3 md:space-y-4"
+            noValidate
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="email"

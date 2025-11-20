@@ -305,9 +305,9 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
 
   if (!conversationId) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-lg text-white/60">
+          <p className="text-sm text-white/60 md:text-lg">
             Select a conversation or create a new chat to begin
           </p>
         </div>
@@ -316,12 +316,16 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   }
 
   return (
-    <div className="flex h-full flex-col px-6 py-8">
+    <div className="flex h-full flex-col px-4 py-4 md:px-6 md:py-8">
       {/* Header */}
-      <header className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+      <header className="mb-4 flex flex-col gap-2 border-b border-white/10 pb-3 md:mb-6 md:flex-row md:items-center md:justify-between md:pb-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{conversation?.title || 'New Chat'}</h1>
-          <p className="mt-1 text-sm text-white/60">{conversation?.model || 'Atlas-2.1'}</p>
+          <h1 className="text-lg font-semibold text-white md:text-2xl">
+            {conversation?.title || 'New Chat'}
+          </h1>
+          <p className="mt-1 text-xs text-white/60 md:text-sm">
+            {conversation?.model || 'Atlas-2.1'}
+          </p>
         </div>
         {conversationId && (
           <ExportMenu
@@ -332,8 +336,8 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       </header>
 
       {/* Transcript */}
-      <div ref={transcriptRef} className="custom-scrollbar flex-1 overflow-y-auto pb-6">
-        <div className="pad mx-auto flex max-w-[600px] flex-col gap-[30px] pl-2">
+      <div ref={transcriptRef} className="custom-scrollbar flex-1 overflow-y-auto pb-4 md:pb-6">
+        <div className="pad mx-auto flex w-full max-w-[600px] flex-col gap-4 pl-1 md:gap-[30px] md:pl-2">
           {allMessages.length === 0 && (
             <div className="flex h-full items-center justify-center text-[#777777]">
               <p className="text-sm">Start a conversation...</p>

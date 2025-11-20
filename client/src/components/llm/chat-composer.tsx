@@ -74,7 +74,7 @@ export const ChatComposer = memo(function ChatComposer({
   return (
     <form
       onSubmit={onSubmit}
-      className="mx-auto flex min-h-[100px] w-full max-w-[600px] flex-col gap-1 rounded-[16px] border border-[#191919] bg-[#0E0E0E] p-4"
+      className="mx-auto flex min-h-[100px] w-full flex-col gap-1 rounded-[16px] border border-[#191919] bg-[#0E0E0E] p-3 md:max-w-[600px] md:p-4"
     >
       {attachments.length > 0 && (
         <div className="mb-2 space-y-2">
@@ -101,30 +101,34 @@ export const ChatComposer = memo(function ChatComposer({
           disabled={isStreaming}
           className="custom-scrollbar max-h-[300px] w-full resize-none overflow-y-auto border-0 bg-transparent text-[14px] leading-[22px] text-white placeholder:text-[#777777] focus:outline-none disabled:opacity-50"
           style={{ minHeight: '22px' }}
+          inputMode="text"
+          enterKeyHint="send"
         />
       </div>
 
       {/* Footer with buttons */}
-      <div className="flex h-[28px] items-center justify-between">
+      <div className="flex min-h-[44px] items-center justify-between gap-2 md:h-[28px] md:gap-0">
         {/* Attach Button */}
         <button
           type="button"
           onClick={handleFileUpload}
           disabled={isStreaming}
-          className="flex h-[28px] items-center gap-1 rounded-[16px] border border-[#191919] px-3 py-1 text-[14px] font-medium leading-[22px] text-[#777777] hover:border-[#777777] disabled:opacity-50"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-[16px] border border-[#191919] px-3 py-2 text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:border-[#777777] active:bg-white/5 disabled:opacity-50 md:min-h-[28px] md:min-w-0 md:py-1"
+          aria-label="Attach file"
         >
           <AttachIcon />
-          <span>Attach</span>
+          <span className="md:inline">Attach</span>
         </button>
 
         {/* Send Button */}
         <button
           type="submit"
           disabled={!prompt.trim() || isStreaming}
-          className="flex h-[28px] items-center gap-1 rounded-[16px] bg-white px-3 py-1 text-[14px] font-medium leading-[22px] text-black hover:bg-white/90 disabled:opacity-50"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-[16px] bg-white px-3 py-2 text-[14px] font-medium leading-[22px] text-black transition-colors hover:bg-white/90 active:bg-white/80 disabled:opacity-50 md:min-h-[28px] md:min-w-0 md:py-1"
+          aria-label="Send message"
         >
           {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendIcon />}
-          <span>Send</span>
+          <span className="md:inline">Send</span>
         </button>
       </div>
     </form>

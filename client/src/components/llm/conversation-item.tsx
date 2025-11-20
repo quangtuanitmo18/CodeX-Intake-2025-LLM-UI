@@ -146,12 +146,15 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
   return (
     <div
       className={cn(
-        'group relative rounded-xl border border-transparent px-2 py-1.5 transition-colors hover:border-white/10 hover:bg-white/5',
+        'group relative rounded-xl border border-transparent px-2 py-1.5 transition-colors hover:border-white/10 hover:bg-white/5 md:px-2 md:py-1.5',
         isActive && 'border-emerald-500/30 bg-emerald-500/10'
       )}
     >
       <div className="flex items-center gap-2">
-        <div className="flex min-w-0 flex-1 cursor-pointer" onClick={onClick}>
+        <div
+          className="flex min-h-[44px] min-w-0 flex-1 cursor-pointer items-center md:min-h-0"
+          onClick={onClick}
+        >
           {isEditing ? (
             <div className="w-full">
               <Input
@@ -178,7 +181,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
               {validationError && <p className="mt-1 text-xs text-red-400">{validationError}</p>}
             </div>
           ) : (
-            <p className="truncate text-sm font-medium text-white">{displayTitle}</p>
+            <p className="truncate text-xs font-medium text-white md:text-sm">{displayTitle}</p>
           )}
         </div>
 
@@ -188,11 +191,12 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
             size="sm"
             onClick={() => setShowMenu((prev) => !prev)}
             className={cn(
-              'h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100',
+              'h-8 min-h-[44px] w-8 min-w-[44px] p-0 opacity-100 transition-opacity md:h-6 md:min-h-0 md:w-6 md:min-w-0 md:opacity-0 md:group-hover:opacity-100',
               showMenu && 'opacity-100'
             )}
+            aria-label="Conversation options"
           >
-            <MoreVertical className="h-3.5 w-3.5 text-white/60" />
+            <MoreVertical className="h-4 w-4 text-white/60 md:h-3.5 md:w-3.5" />
           </Button>
 
           {showMenu && (
@@ -204,21 +208,21 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                     setIsEditing(true)
                     closeMenu()
                   }}
-                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0"
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-4 w-4 shrink-0" />
                   Edit Title
                 </button>
                 <button
                   onClick={() => setIsSelectingProject((prev) => !prev)}
                   className={cn(
-                    'flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 hover:bg-white/10',
+                    'flex min-h-[44px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0',
                     isSelectingProject && 'bg-white/10'
                   )}
                 >
                   <Loader2
                     className={cn(
-                      'h-4 w-4 text-white/60',
+                      'h-4 w-4 shrink-0 text-white/60',
                       moveProjectMutation.isPending && 'animate-spin'
                     )}
                   />
@@ -227,11 +231,11 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 <button
                   onClick={() => setIsConfirmingDelete((prev) => !prev)}
                   className={cn(
-                    'flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-red-400 hover:bg-red-500/10',
+                    'flex min-h-[44px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10 active:bg-red-500/5 md:min-h-0',
                     isConfirmingDelete && 'bg-red-500/10'
                   )}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 shrink-0" />
                   Delete
                 </button>
 
