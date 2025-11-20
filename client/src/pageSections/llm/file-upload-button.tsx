@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { X } from 'lucide-react'
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import AttachIcon from '@/assets/icons/attach'
 import { Button } from '@/components/ui/button'
@@ -80,14 +81,29 @@ interface AttachmentChipProps {
 export function AttachmentChip({ file, onRemove }: AttachmentChipProps) {
   const isImage = file.type.startsWith('image/')
   const sizeKB = (file.size / 1024).toFixed(1)
+  const previewUrl = useMemo(() => {
+    if (!isImage) return null
+    return URL.createObjectURL(file)
+  }, [file, isImage])
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
 
   return (
     <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-      {isImage && file.size < 500000 && (
-        <img
-          src={URL.createObjectURL(file)}
+      {previewUrl && file.size < 500000 && (
+        <Image
+          src={previewUrl}
           alt={file.name}
+          width={32}
+          height={32}
           className="h-8 w-8 rounded object-cover"
+          unoptimized
         />
       )}
       <div className="flex-1 overflow-hidden">

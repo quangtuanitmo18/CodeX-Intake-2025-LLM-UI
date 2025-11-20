@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "lint:seo": "npm run build && lhci autorun --config=../docs/ai/testing/lhci.config.json",
     "prettier": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "prettier:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
@@ -41,6 +43,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.14.0",
     "@tanstack/eslint-plugin-query": "^5.59.7",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/mdast": "^4.0.4",

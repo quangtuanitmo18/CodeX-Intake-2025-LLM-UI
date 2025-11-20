@@ -1,11 +1,9 @@
-import { Metadata } from 'next'
 import Image from 'next/image'
 import LoginForm from './login-form'
 
-export const metadata: Metadata = {
-  title: 'Login',
-  description: 'Sign in to your account',
-}
+import { buildPageMetadata } from '@/seo/next-metadata'
+
+export const metadata = buildPageMetadata('login')
 
 export default function Login() {
   return (

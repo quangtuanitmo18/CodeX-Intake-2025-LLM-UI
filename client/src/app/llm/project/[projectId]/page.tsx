@@ -1,8 +1,7 @@
 import LLMConversationPage from '@/pageSections/llm/llm-conversation-page'
+import { buildPageMetadata } from '@/seo/next-metadata'
 
-export const metadata = {
-  title: 'Project · LLM UI',
-}
+export const metadata = buildPageMetadata('llm-project')
 
 export default async function LLmProjectPage({
   params,

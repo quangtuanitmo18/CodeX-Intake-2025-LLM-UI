@@ -1,6 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { buildPageMetadata } from '@/seo/next-metadata'
+
+export const metadata = buildPageMetadata('home')
+
 export default function HomePage() {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 py-16">

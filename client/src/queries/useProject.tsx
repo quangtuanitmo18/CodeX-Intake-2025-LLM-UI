@@ -24,8 +24,14 @@ export const useCreateProject = () => {
 export const useUpdateProject = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, ...body }: UpdateProjectBodyType & { id: string }) =>
-      projectApiRequest.update(id, body),
+    mutationFn: ({ id, lastOpenedAt, ...rest }: UpdateProjectBodyType & { id: string }) => {
+      const payload: Parameters<typeof projectApiRequest.update>[1] = {
+        ...rest,
+        ...(lastOpenedAt ? { lastOpenedAt: new Date(lastOpenedAt) } : {}),
+      }
+
+      return projectApiRequest.update(id, payload)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     },

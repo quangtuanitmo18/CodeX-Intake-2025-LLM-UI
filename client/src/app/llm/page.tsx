@@ -1,8 +1,7 @@
 import LLMConversationPage from '@/pageSections/llm/llm-conversation-page'
+import { buildPageMetadata } from '@/seo/next-metadata'
 
-export const metadata = {
-  title: 'LLM UI · Chat History',
-}
+export const metadata = buildPageMetadata('llm')
 
 export default function LLMPage() {
   return (

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Download, FileText } from 'lucide-react'
 
 import envConfig from '@/config'
@@ -33,11 +34,14 @@ export function MessageAttachment({ attachment, className }: MessageAttachmentPr
           className
         )}
       >
-        <img
+        <Image
           src={fullUrl}
           alt={attachment.fileName}
+          width={800}
+          height={512}
           className="max-h-64 w-auto cursor-pointer object-contain transition-opacity group-hover:opacity-80"
           onClick={handleDownload}
+          unoptimized
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
           <button

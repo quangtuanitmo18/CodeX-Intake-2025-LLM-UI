@@ -42,7 +42,10 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   const isStreaming = status === 'thinking' || status === 'streaming'
 
   const conversation = conversationData?.payload?.data
-  const historicalMessages = messagesData?.payload?.data || []
+  const historicalMessages = useMemo(
+    () => messagesData?.payload?.data ?? [],
+    [messagesData?.payload?.data]
+  )
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
