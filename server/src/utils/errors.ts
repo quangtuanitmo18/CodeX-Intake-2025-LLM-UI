@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 export class EntityError extends Error {
   fields: { message: string; field: string }[]
@@ -30,6 +30,6 @@ export class StatusError extends Error {
   }
 }
 
-export function isPrismaClientKnownRequestError(error: unknown): error is Prisma.PrismaClientKnownRequestError {
-  return error instanceof Prisma.PrismaClientKnownRequestError
+export function isPrismaClientKnownRequestError(error: unknown): error is PrismaClientKnownRequestError {
+  return error instanceof PrismaClientKnownRequestError
 }

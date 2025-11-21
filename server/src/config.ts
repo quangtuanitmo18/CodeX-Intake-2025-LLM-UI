@@ -3,18 +3,36 @@ import fs from 'fs'
 import path from 'path'
 import z from 'zod'
 
+// Try .env.local first (for Docker dev), then fallback to .env
+// In Docker, env_file injects variables directly, so files may not exist
+config({
+  path: '.env.local'
+})
 config({
   path: '.env'
 })
 
 const checkEnv = async () => {
+  // Skip file check in Docker - env variables are injected via docker-compose env_file
+  // DOCKER will be parsed as boolean by schema, but at this point it's still string from process.env
+  if (process.env.DOCKER) {
+    return
+  }
+
   const chalk = (await import('chalk')).default
-  if (!fs.existsSync(path.resolve('.env'))) {
-    console.log(chalk.red(`don't have .env`))
+  // Check for .env.local first (Docker dev), then .env
+  const envLocalPath = path.resolve('.env.local')
+  const envPath = path.resolve('.env')
+  if (!fs.existsSync(envLocalPath) && !fs.existsSync(envPath)) {
+    console.log(chalk.red(`don't have .env or .env.local`))
     process.exit(1)
   }
 }
-checkEnv()
+// Run checkEnv after config is loaded, but we need to check before schema parse
+// So check DOCKER from process.env directly
+if (!process.env.DOCKER) {
+  checkEnv()
+}
 
 const configSchema = z.object({
   PORT: z.coerce.number().default(4000),

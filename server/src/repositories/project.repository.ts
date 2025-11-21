@@ -24,13 +24,13 @@ export const projectRepository = {
     })
 
     const countsMap = new Map<string, number>()
-    counts.forEach((entry) => {
+    counts.forEach((entry: { projectId: string | null; _count: { _all: number } }) => {
       if (entry.projectId) {
         countsMap.set(entry.projectId, entry._count._all)
       }
     })
 
-    return projects.map((project) => ({
+    return projects.map((project: { id: string; [key: string]: any }) => ({
       ...project,
       stats: {
         conversations: countsMap.get(project.id) ?? 0

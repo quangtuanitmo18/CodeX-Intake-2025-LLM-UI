@@ -59,7 +59,7 @@ export default async function projectRoutes(fastify: FastifyInstance, options: F
       const accountId = request.account!.userId
       const projects = await listProjectsController(accountId, request.query)
       reply.send({
-        data: projects.map((project) => serializeProject(project as ProjectResType['data'])),
+        data: projects.map((project: any) => serializeProject(project as ProjectResType['data'])),
         message: 'List projects successfully'
       })
     }

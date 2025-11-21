@@ -57,6 +57,7 @@ description: Clarify the problem space, gather requirements, and define success 
 - Developer experience expectations are documented—if hot reload or bind-mount workflows are supported (or explicitly out of scope), that’s called out in the docs.
 - CI can build both images successfully and optionally push them to a registry.
 - Secrets management approach (e.g., `.env`, Docker secrets, external vault) is defined and documented for both local and CI/CD usage.
+- Production environment variables are injected via CI/CD (e.g., GitHub Actions encrypted secrets) so no `.env` files are committed.
 - Logging guidance is provided (stdout, log rotation, aggregation) and monitoring hooks (healthchecks, metrics) are implemented/documented for each container.
 - Next.js client is reachable via Nginx on the configured port, Fastify API responds through its service, and both communicate correctly.
 - SQLite data remains intact across container restarts because of the configured volume.
@@ -80,6 +81,7 @@ description: Clarify the problem space, gather requirements, and define success 
   - Nginx will run in the same container as the built Next.js output (classic multi-stage approach).
   - Windows developers will rely on Docker Desktop/WSL2; any deviations must be documented if unsupported.
   - Log aggregation/monitoring stack (e.g., ELK, CloudWatch) is available downstream; containers will emit structured stdout logs and expose health endpoints.
+  - GitHub Actions (or equivalent CI) provides encrypted variables/secrets used for production Docker builds and deployments (no prod `.env` checked in).
 
 ## Questions & Open Items
 
@@ -94,3 +96,4 @@ description: Clarify the problem space, gather requirements, and define success 
 - Is logging/monitoring integration inside the containers required, or handled externally?
 - What logging strategy should containers use (stdout only, sidecar, or external aggregator), and is monitoring instrumentation needed now or later?
 - Do we need built-in metrics endpoints or integration with tools like Prometheus/Grafana for container health?
+- Are there additional CI/CD pipeline requirements for injecting secrets (e.g., GitHub Actions `vars` vs `secrets`, environment configs per branch)?

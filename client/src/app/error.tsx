@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Link from 'next/link'
 import { useEffect } from 'react'
 
 type GlobalErrorProps = {
@@ -33,9 +34,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <Button onClick={reset} className="flex-1">
                   Try again
                 </Button>
-                <Button variant="secondary" className="flex-1">
-                  <a href="/">Back home</a>
-                </Button>
+                <Link href="/" className="flex-1">
+                  <Button variant="secondary" className="w-full">
+                    Back home
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

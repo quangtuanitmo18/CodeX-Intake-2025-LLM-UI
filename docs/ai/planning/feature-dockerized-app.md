@@ -30,6 +30,7 @@ description: Break down work into actionable tasks and estimate timeline
 - [ ] Task 2.2: Add optional `docker-compose.override.yml` for dev (bind mounts/hot reload).
 - [ ] Task 2.3: Update environment samples (.env) and README instructions for Docker usage.
 - [ ] Task 2.4: Define container logging/monitoring strategy (stdout drivers, healthchecks, optional metrics) and document integration steps with external stacks.
+- [ ] Task 2.5: Document dev vs prod Docker workflows (Dockerfile.dev + compose overrides) and explain how GitHub Actions injects production env vars/secrets without committing `.env` files.
 
 ### Phase 3: Integration & Polish
 

@@ -9,7 +9,6 @@ This project is inspired by Sapo FNB's QR Order system, where customers can simp
 ## Technologies Used
 
 - **Frontend:**
-
   - Next.js 14 App Router
   - TypeScript
   - TailwindCSS
@@ -18,7 +17,6 @@ This project is inspired by Sapo FNB's QR Order system, where customers can simp
   - WebSockets (Socket.io)
 
 - **Backend (local hosting):**
-
   - Fastify
   - Prisma
   - TypeScript
@@ -65,3 +63,22 @@ This project is inspired by Sapo FNB's QR Order system, where customers can simp
 - **Node.js** (v14 or higher)
 - **SQLite** (or any compatible database supported by Prisma)
 - **Git**
+- **Docker & Docker Compose** (optional, for containerized deployment)
+
+### Docker Setup (Recommended)
+
+For quick setup using Docker, see [Docker Setup Guide](./docs/DOCKER_SETUP.md).
+
+**Quick start:**
+
+```bash
+# Production mode
+docker compose up --build -d
+
+# Development mode (with hot reload)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+### Manual Setup
+
+For local development without Docker:

@@ -90,8 +90,12 @@ const request = async <Response>(
     if (accessToken) headers.Authorization = `Bearer ${accessToken}`
   }
 
-  const baseUrl =
-    options?.baseUrl === undefined ? envConfig.NEXT_PUBLIC_API_ENDPOINT : (options.baseUrl ?? '')
+  // Use API_ENDPOINT for server-side (Docker service name), NEXT_PUBLIC_API_ENDPOINT for client-side
+  const defaultBaseUrl =
+    !isClient && envConfig.API_ENDPOINT
+      ? envConfig.API_ENDPOINT
+      : envConfig.NEXT_PUBLIC_API_ENDPOINT
+  const baseUrl = options?.baseUrl === undefined ? defaultBaseUrl : (options.baseUrl ?? '')
 
   let fullUrl = `${baseUrl}/${normalizePath(url)}`
   if (options?.params) {

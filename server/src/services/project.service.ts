@@ -5,7 +5,9 @@ const DEFAULT_PROJECT_NAME = 'General'
 
 async function ensureDefaultProject(accountId: number) {
   const existing = await projectRepository.listByAccount(accountId)
-  const defaultProject = existing.find((project) => project.name === DEFAULT_PROJECT_NAME && project.deletedAt === null)
+  const defaultProject = existing.find(
+    (project: any) => project.name === DEFAULT_PROJECT_NAME && project.deletedAt === null
+  )
 
   if (defaultProject) {
     return defaultProject

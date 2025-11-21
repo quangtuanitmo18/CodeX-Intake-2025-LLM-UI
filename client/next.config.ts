@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'standalone',
+  output: 'standalone', // Use standalone for Docker
   productionBrowserSourceMaps: false,
 
   experimental: {},

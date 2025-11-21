@@ -55,6 +55,8 @@ Key responsibilities:
 - Environment variables stored in `.env` or Compose override for:
   - Fastify: `PORT`, `NODE_ENV`, `DATABASE_URL=sqlite:///app/database/dev.db`.
   - Next.js build: `NEXT_PUBLIC_*` envs injected during `next build`.
+- TLS termination: assume upstream reverse proxy (e.g., cloud LB) handles HTTPS termination. If TLS inside the container is required, document how to mount certs and update Nginx config accordingly.
+- GitHub Actions injects production secrets via encrypted vars/secrets; runtimes rely on environment variables passed at container start rather than bundled `.env` files.
 
 ## API Design
 
@@ -86,9 +88,12 @@ Key responsibilities:
   - All containers log to stdout/stderr; Compose can be configured with `json-file` or external log drivers.
   - Fastify exposes `/healthz` (and optional `/metrics`) endpoints; Nginx can return `/healthz` or leverage `nginx -s` test command for Docker healthcheck.
   - Document how to forward logs to ELK/CloudWatch if needed.
+- **Optional builder service**
+  - An optional `client-builder` service can run inside Compose/CI to produce artifacts before copying into the Nginx image. Document whether this runs only in CI (default) or can be invoked locally.
 - **Environment handling**
   - `.env` file read by Compose for shared values.
   - `docker-compose.override.yml` (optional) for dev overrides (mount source, enable hot reload).
+  - Production deployments use CI-provided env vars (GitHub Actions secrets) when running `docker compose` or `docker run`—no prod `.env` in repo.
 
 ## Design Decisions
 
