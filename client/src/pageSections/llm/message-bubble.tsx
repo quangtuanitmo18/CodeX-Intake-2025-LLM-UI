@@ -2,7 +2,7 @@ import ThoughtIcon from '@/assets/icons/thought'
 import { type MarkdownBlock } from '@/lib/markdown'
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { MarkdownContent } from './markdown-content'
 import { MessageAttachment } from './message-attachment'
 
@@ -15,6 +15,7 @@ export type ChatMessage = {
   blocks: MarkdownBlock[]
   attachments?: any[]
   reasoning?: string
+  savedThinkingSeconds?: number
 }
 
 interface MessageBubbleProps {
@@ -34,8 +35,20 @@ export const MessageBubble = memo(function MessageBubble({
   savedThinkingSeconds,
 }: MessageBubbleProps) {
   const isUser = message.role === 'user'
-  const [isReasoningExpanded, setIsReasoningExpanded] = useState(true)
+  // When thinking is active, always expand. When thinking is done, default to collapsed
+  const [isReasoningExpanded, setIsReasoningExpanded] = useState(isThinking)
   const hasReasoning = message.reasoning && message.reasoning.trim().length > 0
+
+  // Auto-expand when thinking starts, auto-collapse when thinking ends
+  useEffect(() => {
+    if (isThinking) {
+      // Always expand when thinking
+      setIsReasoningExpanded(true)
+    } else if (hasReasoning) {
+      // When thinking is done, collapse by default (user can expand manually)
+      setIsReasoningExpanded(false)
+    }
+  }, [isThinking, hasReasoning])
 
   return (
     <article className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}>
@@ -48,44 +61,59 @@ export const MessageBubble = memo(function MessageBubble({
         )}
       >
         {/* Reasoning - Show ABOVE content for assistant messages */}
-        {!isUser && hasReasoning && (
+        {!isUser && (hasReasoning || isThinking) && (
           <div className="mb-2 flex w-full flex-col gap-2 md:mb-[10px] md:gap-[10px]">
             <button
-              onClick={() => setIsReasoningExpanded(!isReasoningExpanded)}
-              className="flex min-h-[32px] items-center gap-[5px] py-1 text-left md:min-h-0 md:py-[1px]"
+              onClick={() => {
+                // Don't allow collapse when thinking
+                if (!isThinking) {
+                  setIsReasoningExpanded(!isReasoningExpanded)
+                }
+              }}
+              disabled={isThinking}
+              className={cn(
+                'flex min-h-[32px] items-center gap-[5px] py-1 text-left transition-opacity md:min-h-0 md:py-[1px]',
+                isThinking ? 'cursor-default opacity-100' : 'cursor-pointer hover:opacity-80'
+              )}
               aria-label={isReasoningExpanded ? 'Collapse reasoning' : 'Expand reasoning'}
             >
               <div className="flex h-[14px] w-[14px] shrink-0 items-center justify-center">
                 <ThoughtIcon />
               </div>
               <span className="text-xs leading-[20px] text-[#777777] md:text-[14px] md:leading-[22px]">
-                {isThinking ? 'Thinking...' : 'Thought'}
-                {` for ${savedThinkingSeconds} seconds`}
+                {isThinking
+                  ? `Thinking...`
+                  : savedThinkingSeconds
+                    ? `Thought for ${savedThinkingSeconds} seconds`
+                    : 'Thought'}
               </span>
-              {isReasoningExpanded ? (
+              {isThinking ? null : isReasoningExpanded ? (
                 <ChevronUp className="h-4 w-4 shrink-0 text-[#777777] md:h-[18px] md:w-[18px]" />
               ) : (
                 <ChevronDown className="h-4 w-4 shrink-0 text-[#777777] md:h-[18px] md:w-[18px]" />
               )}
             </button>
 
-            {isReasoningExpanded && (
+            {/* Show reasoning only when expanded OR when thinking */}
+            {(isReasoningExpanded || isThinking) && (message.reasoning || isThinking) && (
               <div className="text-xs leading-[20px] text-[#777777] md:text-[14px] md:leading-[22px]">
-                {message.reasoning}
+                {message.reasoning || (isThinking ? 'Processing...' : '')}
               </div>
             )}
           </div>
         )}
 
-        {/* Content */}
-        <div
-          className={cn(
-            'text-sm leading-[20px] md:text-[15px] md:leading-[22px]',
-            isUser ? 'text-white' : 'text-white/90'
-          )}
-        >
-          <MarkdownContent content={message.content} isUser={isUser} />
-        </div>
+        {/* Content - Only show when not thinking or when thinking is done */}
+        {(!isThinking || message.content) && (
+          <div
+            className={cn(
+              'text-sm leading-[20px] md:text-[15px] md:leading-[22px]',
+              isUser ? 'text-white' : 'text-white/90'
+            )}
+          >
+            <MarkdownContent content={message.content} isUser={isUser} />
+          </div>
+        )}
 
         {/* Attachments */}
         {message.attachments && message.attachments.length > 0 && (

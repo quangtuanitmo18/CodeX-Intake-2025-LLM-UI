@@ -36,8 +36,16 @@ export type ProjectListResType = z.infer<typeof ProjectListRes>
 
 export const CreateProjectBody = z
   .object({
-    name: z.string().trim().min(2).max(100),
-    description: z.string().trim().max(500).optional(),
+    name: z
+      .string({ required_error: 'Project name is required' })
+      .trim()
+      .min(2, { message: 'Project name must be at least 2 characters' })
+      .max(100, { message: 'Project name must not exceed 100 characters' }),
+    description: z
+      .string()
+      .trim()
+      .max(500, { message: 'Description must not exceed 500 characters' })
+      .optional(),
   })
   .strict()
 
@@ -45,8 +53,18 @@ export type CreateProjectBodyType = z.infer<typeof CreateProjectBody>
 
 export const UpdateProjectBody = z
   .object({
-    name: z.string().trim().min(2).max(100).optional(),
-    description: z.string().trim().max(500).nullable().optional(),
+    name: z
+      .string()
+      .trim()
+      .min(2, { message: 'Project name must be at least 2 characters' })
+      .max(100, { message: 'Project name must not exceed 100 characters' })
+      .optional(),
+    description: z
+      .string()
+      .trim()
+      .max(500, { message: 'Description must not exceed 500 characters' })
+      .nullable()
+      .optional(),
     lastOpenedAt: z.string().optional(),
   })
   .strict()

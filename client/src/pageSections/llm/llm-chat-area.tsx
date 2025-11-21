@@ -27,6 +27,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   const [activeAssistantMessage, setActiveAssistantMessage] = useState<ChatMessage | null>(null)
   const [thinkingSeconds, setThinkingSeconds] = useState(0)
   const [savedThinkingSeconds, setSavedThinkingSeconds] = useState(0)
+  const [showComposerGradient, setShowComposerGradient] = useState(false)
 
   const transcriptRef = useRef<HTMLDivElement | null>(null)
   const isSubmittingRef = useRef(false)
@@ -59,14 +60,49 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       const newScrollTop = el.scrollHeight
       el.scrollTop = newScrollTop
 
-      // Verify after scroll
-      setTimeout(() => {}, 100)
+      // Update gradient visibility after scroll
+      setTimeout(() => {
+        const shouldShow = el.scrollTop + el.clientHeight < el.scrollHeight - 8
+        setShowComposerGradient(shouldShow)
+      }, 100)
     })
 
     return () => {
       cancelAnimationFrame(rafId)
     }
   }, [historicalMessages.length, activeAssistantMessage?.content, conversationId])
+
+  // Handle scroll to show/hide gradient above composer
+  useEffect(() => {
+    const el = transcriptRef.current
+    if (!el) return
+
+    const handleScroll = () => {
+      // Check if there's more content to scroll (with small threshold)
+      const threshold = 8
+      const scrollBottom = el.scrollTop + el.clientHeight
+      const scrollHeight = el.scrollHeight
+      const shouldShow = scrollBottom < scrollHeight - threshold
+      setShowComposerGradient(shouldShow)
+    }
+
+    // Check initial state
+    handleScroll()
+
+    // Listen to scroll events
+    el.addEventListener('scroll', handleScroll, { passive: true })
+
+    // Also listen to resize to handle content changes
+    const resizeObserver = new ResizeObserver(() => {
+      handleScroll()
+    })
+    resizeObserver.observe(el)
+
+    return () => {
+      el.removeEventListener('scroll', handleScroll)
+      resizeObserver.disconnect()
+    }
+  }, [historicalMessages.length, activeAssistantMessage?.content])
 
   // Track thinking time
   useEffect(() => {
@@ -167,19 +203,34 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   }, [status, conversationId, answer, reasoning, queryClient, reset])
 
   const allMessages = useMemo<ChatMessage[]>(() => {
-    const historical = historicalMessages.map((msg: any) => ({
-      id: msg.id,
-      role: msg.role,
-      author: msg.role === 'user' ? 'You' : 'Atlas · LLM',
-      timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      content: msg.content,
-      blocks: [],
-      attachments: msg.attachments || [],
-      reasoning: msg.reasoning,
-    }))
+    const historical = historicalMessages.map((msg: any) => {
+      // Parse metadata to get thinkingSeconds
+      let savedThinkingSeconds: number | undefined
+      if (msg.metadata) {
+        try {
+          const metadata =
+            typeof msg.metadata === 'string' ? JSON.parse(msg.metadata) : msg.metadata
+          savedThinkingSeconds = metadata.thinkingSeconds
+        } catch (error) {
+          console.error('Failed to parse message metadata:', error)
+        }
+      }
+
+      return {
+        id: msg.id,
+        role: msg.role,
+        author: msg.role === 'user' ? 'You' : 'Atlas · LLM',
+        timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        content: msg.content,
+        blocks: [],
+        attachments: msg.attachments || [],
+        reasoning: msg.reasoning,
+        savedThinkingSeconds,
+      }
+    })
 
     if (activeAssistantMessage) {
       return [...historical, activeAssistantMessage]
@@ -338,42 +389,57 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       </header>
 
       {/* Transcript */}
-      <div ref={transcriptRef} className="custom-scrollbar flex-1 overflow-y-auto pb-4 md:pb-6">
-        <div className="pad mx-auto flex w-full flex-col gap-4 pl-1 md:max-w-[600px] md:gap-[30px] md:py-[14px] md:pl-2 lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]">
-          {allMessages.length === 0 && (
-            <div className="flex h-full items-center justify-center text-[#777777]">
-              <p className="text-sm">Start a conversation...</p>
-            </div>
-          )}
+      <div
+        ref={transcriptRef}
+        className="custom-scrollbar relative flex-1 overflow-y-auto pb-4 md:pb-6"
+      >
+        <div className="relative">
+          <div className="pad mx-auto flex w-full flex-col gap-4 pl-2 md:max-w-[600px] md:gap-[30px] md:py-[14px] md:pl-4 lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]">
+            {allMessages.length === 0 && (
+              <div className="flex h-full items-center justify-center text-[#777777]">
+                <p className="text-sm">Start a conversation...</p>
+              </div>
+            )}
 
-          {allMessages.map((message) => {
-            // Check if this is the active streaming message
-            const isActiveStreaming = message.id === 'assistant-live' && isStreaming
-            const messageThinkingSeconds = isActiveStreaming
-              ? status === 'thinking'
-                ? thinkingSeconds
-                : savedThinkingSeconds
-              : undefined
+            {allMessages.map((message) => {
+              // Check if this is the active streaming message
+              const isActiveStreaming = message.id === 'assistant-live' && isStreaming
+              const messageThinkingSeconds = isActiveStreaming
+                ? status === 'thinking'
+                  ? thinkingSeconds
+                  : savedThinkingSeconds
+                : undefined
 
-            return (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isStreaming={isActiveStreaming}
-                isThinking={status === 'thinking'}
-                thinkingSeconds={messageThinkingSeconds}
-                savedThinkingSeconds={savedThinkingSeconds}
-              />
-            )
-          })}
+              return (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  isStreaming={isActiveStreaming}
+                  isThinking={status === 'thinking'}
+                  thinkingSeconds={messageThinkingSeconds}
+                  savedThinkingSeconds={message.savedThinkingSeconds ?? savedThinkingSeconds}
+                />
+              )
+            })}
 
-          {status === 'error' && streamError && (
-            <div className="rounded-[15px] bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {streamError}
-            </div>
+            {status === 'error' && streamError && (
+              <div className="rounded-[15px] bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {streamError}
+              </div>
+            )}
+          </div>
+
+          {/* Gradient overlay at bottom of transcript - sticky to show when scrolling */}
+          {showComposerGradient && (
+            <div
+              className="via-[#01030B]/98 pointer-events-none sticky -bottom-6 left-0 right-0 z-10 h-24 bg-gradient-to-t from-[#01030B] to-transparent md:h-28"
+              style={{ marginBottom: '-24px' }}
+            />
           )}
         </div>
       </div>
+
+      {/* Composer */}
 
       {/* Composer */}
       <ChatComposer

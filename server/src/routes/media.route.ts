@@ -31,7 +31,7 @@ export default async function mediaRoutes(fastify: FastifyInstance, options: Fas
       const url = await uploadMediaController(file)
       reply.send({
         data: url,
-        message: 'Upload successfully'
+        message: 'File uploaded successfully'
       })
     }
   )

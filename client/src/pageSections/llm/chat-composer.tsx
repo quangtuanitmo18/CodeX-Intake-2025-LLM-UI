@@ -112,7 +112,8 @@ export const ChatComposer = memo(function ChatComposer({
         <button
           type="button"
           onClick={handleFileUpload}
-          disabled={isStreaming}
+          disabled={true}
+          // disabled={isStreaming}
           className="flex items-center justify-center gap-1 rounded-[16px] border border-[#191919] px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:border-[#777777] active:bg-white/5 disabled:opacity-50"
           aria-label="Attach file"
         >

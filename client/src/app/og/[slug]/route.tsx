@@ -15,8 +15,8 @@ type OgPreset = {
 
 const OG_PRESETS: Record<string, OgPreset> = {
   home: {
-    title: 'CodeX LLM UI',
-    subtitle: 'Open-source playground for AI teams',
+    title: 'CodeX',
+    subtitle: 'LLM UI',
     accent: '#00F0FF',
   },
   login: {

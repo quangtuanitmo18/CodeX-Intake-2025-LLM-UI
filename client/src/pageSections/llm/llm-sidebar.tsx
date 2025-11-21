@@ -21,7 +21,6 @@ import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 import { useConversations, useCreateConversation } from '@/queries/useConversation'
 import {
-  useCreateProject,
   useCreateProjectConversation,
   useDeleteProject,
   useProjects,
@@ -30,6 +29,7 @@ import {
 import { CreateConversationBody } from '@/schemaValidations/conversation.schema'
 
 import { ConversationItem } from './conversation-item'
+import { ProjectFormModal } from './project-form-modal'
 import { UserProfileMenu } from './user-profile-menu'
 
 interface LLMSidebarProps {
@@ -290,8 +290,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
   const [projectsOpen, setProjectsOpen] = useState(true)
   const [chatsOpen, setChatsOpen] = useState(true)
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set())
-  const [isCreatingProject, setIsCreatingProject] = useState(false)
-  const [projectName, setProjectName] = useState('')
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [limit] = useState(20)
   const [offset, setOffset] = useState(0)
@@ -309,7 +308,6 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
 
   const projectQueryParams = useMemo(() => ({ includeCounts: true }), [])
   const { data: projectsData, isLoading: isLoadingProjects } = useProjects(projectQueryParams)
-  const createProjectMutation = useCreateProject()
 
   // Only fetch standalone conversations (projectId = null)
   const { data: conversationsData, isLoading: isLoadingConversations } = useConversations({
@@ -323,20 +321,9 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
   const projects = projectsData?.payload?.data || []
   const conversations = conversationsData?.payload?.data || []
 
-  const handleCreateProject = async (event: React.FormEvent) => {
-    event.preventDefault()
-    const trimmed = projectName.trim()
-    if (!trimmed) return
-    try {
-      const result = await createProjectMutation.mutateAsync({ name: trimmed })
-      const newProjectId = result.payload.data.id
-      setProjectName('')
-      setIsCreatingProject(false)
-      setExpandedProjects((prev) => new Set(prev).add(newProjectId))
-      router.push(`/llm/project/${newProjectId}`)
-    } catch (error) {
-      console.error('Failed to create project', error)
-    }
+  const handleProjectCreated = (projectId: string) => {
+    setExpandedProjects((prev) => new Set(prev).add(projectId))
+    router.push(`/llm/project/${projectId}`)
   }
 
   const toggleProjectExpand = (projectId: string) => {
@@ -400,7 +387,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  setIsCreatingProject((prev) => !prev)
+                  setIsProjectModalOpen(true)
                   setProjectsOpen(true)
                 }}
                 className="rounded-full border border-white/15 p-1 text-white/70 transition hover:bg-white/10"
@@ -418,31 +405,6 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
 
           {projectsOpen && (
             <div className="mt-3 space-y-1">
-              {isCreatingProject && (
-                <form
-                  onSubmit={handleCreateProject}
-                  className="mb-3 space-y-2 rounded-lg border border-white/10 p-2"
-                >
-                  <Input
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                    placeholder="Project name"
-                    className="h-9 border-white/10 bg-white/5 text-sm text-white placeholder:text-white/40"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={createProjectMutation.isPending}
-                    className="w-full bg-emerald-500/20 text-sm text-emerald-200 hover:bg-emerald-500/30"
-                  >
-                    {createProjectMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Create project'
-                    )}
-                  </Button>
-                </form>
-              )}
-
               {isLoadingProjects ? (
                 <div className="flex items-center justify-center py-4 text-xs text-white/60">
                   <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
@@ -545,6 +507,12 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
       <div className="border-t border-white/10 p-2">
         <UserProfileMenu dropdownPlacement="top" />
       </div>
+
+      <ProjectFormModal
+        open={isProjectModalOpen}
+        onOpenChange={setIsProjectModalOpen}
+        onSuccess={handleProjectCreated}
+      />
     </aside>
   )
 }

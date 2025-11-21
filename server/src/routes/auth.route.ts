@@ -47,7 +47,7 @@ export default async function authRoutes(fastify: FastifyInstance, options: Fast
       const { body } = request
       const { accessToken, refreshToken, account } = await loginController(body)
       reply.send({
-        message: 'Login successful!',
+        message: 'Login successful',
         data: {
           account: account as LoginResType['data']['account'],
           accessToken,
@@ -72,7 +72,7 @@ export default async function authRoutes(fastify: FastifyInstance, options: Fast
     async (request, reply) => {
       const result = await refreshTokenController(request.body.refreshToken)
       reply.send({
-        message: 'Get new token successfully',
+        message: 'Token refreshed successfully',
         data: result
       })
     }

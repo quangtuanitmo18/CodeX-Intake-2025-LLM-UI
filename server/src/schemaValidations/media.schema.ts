@@ -24,8 +24,8 @@ export type UploadAttachmentResType = z.TypeOf<typeof UploadAttachmentRes>
 // Query params for conversation ID
 export const UploadAttachmentQuery = z
   .object({
-    conversationId: z.string().cuid(),
-    messageId: z.string().cuid().optional()
+    conversationId: z.string().cuid({ message: 'Conversation ID must be a valid CUID' }),
+    messageId: z.string().cuid({ message: 'Message ID must be a valid CUID' }).optional()
   })
   .strict()
 

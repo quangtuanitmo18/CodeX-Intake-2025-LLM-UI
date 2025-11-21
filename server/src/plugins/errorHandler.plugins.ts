@@ -52,7 +52,7 @@ export const errorHandlerPlugin = fastifyPlugin(async (fastify) => {
     // Continue with your existing error handling logic
     if (isEntityError(error)) {
       return reply.status(error.status).send({
-        message: 'Error when authenticating...',
+        message: 'Validation error occurred',
         errors: error.fields,
         statusCode: error.status
       })
@@ -89,7 +89,7 @@ export const errorHandlerPlugin = fastifyPlugin(async (fastify) => {
       })
       const statusCode = 422
       return reply.status(statusCode).send({
-        message: `A validation error occurred when validating the ${validationContext}...`,
+        message: 'Validation error occurred',
         errors,
         code: error.code,
         statusCode

@@ -63,7 +63,7 @@ export const messageService = {
     accountId: number,
     content: string,
     reasoning?: string,
-    metadata?: { tokens?: any; duration?: number; model?: string }
+    metadata?: { tokens?: any; duration?: number; model?: string; thinkingSeconds?: number }
   ) {
     // Verify ownership
     await conversationService.get(conversationId, accountId)

@@ -26,9 +26,17 @@ export type ConversationIdParamType = z.TypeOf<typeof ConversationIdParam>
 // Body for creating conversation
 export const CreateConversationBody = z
   .object({
-    title: z.string().min(1).max(200).optional(),
-    model: z.string().min(1).max(100).optional(),
-    projectId: z.string().cuid().optional()
+    title: z
+      .string()
+      .min(1, { message: 'Title must be at least 1 character' })
+      .max(200, { message: 'Title must not exceed 200 characters' })
+      .optional(),
+    model: z
+      .string()
+      .min(1, { message: 'Model must be at least 1 character' })
+      .max(100, { message: 'Model must not exceed 100 characters' })
+      .optional(),
+    projectId: z.string().cuid({ message: 'Project ID must be a valid CUID' }).optional()
   })
   .strict()
 
@@ -36,7 +44,7 @@ export type CreateConversationBodyType = z.TypeOf<typeof CreateConversationBody>
 
 export const UpdateConversationProjectBody = z
   .object({
-    projectId: z.string().cuid().nullable()
+    projectId: z.string().cuid({ message: 'Project ID must be a valid CUID' }).nullable()
   })
   .strict()
 
@@ -45,7 +53,10 @@ export type UpdateConversationProjectBodyType = z.TypeOf<typeof UpdateConversati
 // Body for updating conversation
 export const UpdateConversationBody = z
   .object({
-    title: z.string().min(1).max(200)
+    title: z
+      .string({ required_error: 'Title is required' })
+      .min(1, { message: 'Title must be at least 1 character' })
+      .max(200, { message: 'Title must not exceed 200 characters' })
   })
   .strict()
 

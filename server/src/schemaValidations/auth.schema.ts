@@ -3,8 +3,14 @@ import z from 'zod'
 
 export const LoginBody = z
   .object({
-    email: z.string().email(),
-    password: z.string().min(6).max(100)
+    email: z
+      .string({ required_error: 'Email is required' })
+      .min(1, { message: 'Email is required' })
+      .email({ message: 'Please enter a valid email address' }),
+    password: z
+      .string({ required_error: 'Password is required' })
+      .min(6, { message: 'Password must be at least 6 characters' })
+      .max(100, { message: 'Password must not exceed 100 characters' })
   })
   .strict()
 

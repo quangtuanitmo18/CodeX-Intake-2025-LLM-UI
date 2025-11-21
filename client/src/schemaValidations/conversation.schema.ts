@@ -4,8 +4,18 @@ import z from 'zod'
 
 export const CreateConversationBody = z
   .object({
-    title: z.string().trim().min(1).max(200).optional(),
-    model: z.string().trim().min(1).max(100).optional(),
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: 'Title must be at least 1 character' })
+      .max(200, { message: 'Title must not exceed 200 characters' })
+      .optional(),
+    model: z
+      .string()
+      .trim()
+      .min(1, { message: 'Model must be at least 1 character' })
+      .max(100, { message: 'Model must not exceed 100 characters' })
+      .optional(),
     projectId: z.string().optional(),
   })
   .strict()
@@ -15,10 +25,10 @@ export type CreateConversationBodyType = z.TypeOf<typeof CreateConversationBody>
 export const UpdateConversationBody = z
   .object({
     title: z
-      .string()
+      .string({ required_error: 'Title is required' })
       .trim()
-      .min(1, 'Title is required')
-      .max(200, 'Title must be less than 200 characters'),
+      .min(1, { message: 'Title must be at least 1 character' })
+      .max(200, { message: 'Title must not exceed 200 characters' }),
   })
   .strict()
 
@@ -27,20 +37,30 @@ export type UpdateConversationBodyType = z.TypeOf<typeof UpdateConversationBody>
 export const CreateMessageBody = z
   .object({
     content: z
-      .string()
+      .string({ required_error: 'Message content is required' })
       .trim()
-      .min(1, 'Message content is required')
-      .max(10000, 'Message is too long'),
+      .min(1, { message: 'Message content must be at least 1 character' })
+      .max(10000, { message: 'Message content must not exceed 10000 characters' }),
     attachments: z
       .array(
         z.object({
-          fileUrl: z.string().url(),
-          fileName: z.string().min(1).max(255),
-          fileType: z.string().min(1).max(100),
-          fileSize: z.number().int().positive().max(10485760, 'File must be smaller than 10MB'),
+          fileUrl: z.string().url({ message: 'File URL must be a valid URL' }),
+          fileName: z
+            .string()
+            .min(1, { message: 'File name must be at least 1 character' })
+            .max(255, { message: 'File name must not exceed 255 characters' }),
+          fileType: z
+            .string()
+            .min(1, { message: 'File type must be at least 1 character' })
+            .max(100, { message: 'File type must not exceed 100 characters' }),
+          fileSize: z
+            .number()
+            .int({ message: 'File size must be an integer' })
+            .positive({ message: 'File size must be positive' })
+            .max(10485760, { message: 'File size must not exceed 10MB' }),
         })
       )
-      .max(10, 'Maximum 10 attachments allowed')
+      .max(10, { message: 'Maximum 10 attachments allowed' })
       .optional(),
   })
   .strict()

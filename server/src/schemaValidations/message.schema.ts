@@ -24,17 +24,30 @@ export type MessageConversationParamType = z.TypeOf<typeof MessageConversationPa
 // Body for creating user message
 export const CreateMessageBody = z
   .object({
-    content: z.string().min(1).max(10000),
+    content: z
+      .string({ required_error: 'Message content is required' })
+      .min(1, { message: 'Message content must be at least 1 character' })
+      .max(10000, { message: 'Message content must not exceed 10000 characters' }),
     attachments: z
       .array(
         z.object({
-          fileUrl: z.string().url(),
-          fileName: z.string().min(1).max(255),
-          fileType: z.string().min(1).max(100),
-          fileSize: z.number().int().positive().max(10485760) // 10MB
+          fileUrl: z.string().url({ message: 'File URL must be a valid URL' }),
+          fileName: z
+            .string()
+            .min(1, { message: 'File name must be at least 1 character' })
+            .max(255, { message: 'File name must not exceed 255 characters' }),
+          fileType: z
+            .string()
+            .min(1, { message: 'File type must be at least 1 character' })
+            .max(100, { message: 'File type must not exceed 100 characters' }),
+          fileSize: z
+            .number()
+            .int({ message: 'File size must be an integer' })
+            .positive({ message: 'File size must be positive' })
+            .max(10485760, { message: 'File size must not exceed 10MB' }) // 10MB
         })
       )
-      .max(10)
+      .max(10, { message: 'Maximum 10 attachments allowed' })
       .optional()
   })
   .strict()

@@ -11,9 +11,9 @@ const seoEntries: Record<SeoSlug, SeoEntry> = {
     slug: 'home',
     route: '/',
     title: {
-      en: 'CodeX LLM UI · Open-source playground for AI teams',
-      vi: 'CodeX LLM UI · Sân chơi AI mã nguồn mở',
-      ru: 'CodeX LLM UI · Открытый интерфейс для экспериментов с ИИ',
+      en: 'CodeX · LLM UI',
+      vi: 'CodeX · LLM UI',
+      ru: 'CodeX · LLM UI',
     },
     description: {
       en: 'Discover the CodeX LLM UI demo, collaborate with motivated builders, and explore cutting-edge open-source tooling for large language models.',

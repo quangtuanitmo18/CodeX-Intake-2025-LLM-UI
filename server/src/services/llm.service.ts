@@ -61,6 +61,8 @@ class LLMService {
     let fullContent = ''
     let fullReasoning = ''
     const startTime = Date.now()
+    let reasoningStartTime: number | null = null
+    let thinkingSeconds: number | null = null
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -73,9 +75,27 @@ class LLMService {
         const line = buffer.slice(0, newlineIndex).trim()
         buffer = buffer.slice(newlineIndex + 1)
         if (line) {
-          const accumulated = this.handleProxyEvent(line, onChunk)
-          if (accumulated.content) fullContent += accumulated.content
-          if (accumulated.reasoning) fullReasoning += accumulated.reasoning
+          const eventResult = this.handleProxyEvent(line, onChunk)
+          if (eventResult.content) fullContent += eventResult.content
+          if (eventResult.reasoning) fullReasoning += eventResult.reasoning
+
+          // Track thinking time based on events
+          try {
+            const event = JSON.parse(line) as AiProxyEvent
+            if (event.type === 'reasoning-start' || event.type === 'reasoning-delta') {
+              // Track reasoning start time
+              if (reasoningStartTime === null) {
+                reasoningStartTime = Date.now()
+              }
+            } else if (event.type === 'text-start' || event.type === 'reasoning-end') {
+              // Calculate thinking seconds when text starts or reasoning ends
+              if (reasoningStartTime !== null && thinkingSeconds === null) {
+                thinkingSeconds = Math.floor((Date.now() - reasoningStartTime) / 1000)
+              }
+            }
+          } catch (error) {
+            // Ignore parse errors, already handled in handleProxyEvent
+          }
         }
         newlineIndex = buffer.indexOf('\n')
       }
@@ -92,7 +112,8 @@ class LLMService {
           fullReasoning || undefined,
           {
             // model: envConfig.LLM_API_MODEL,
-            duration
+            duration,
+            thinkingSeconds: thinkingSeconds || undefined
           }
         )
       } catch (error) {
