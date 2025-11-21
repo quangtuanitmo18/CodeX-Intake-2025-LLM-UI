@@ -29,7 +29,11 @@ WORKDIR /app
 # NODE_ENV will be set by docker-compose.dev.yml (development)
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy built application
+# Install curl for healthcheck (minimal)
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy built application (standalone includes minimal node_modules)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public

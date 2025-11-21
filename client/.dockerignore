@@ -18,4 +18,11 @@ docker-compose*.yml
 coverage
 .vercel
 .cache
+.vscode
+.idea
+*.md
+docs
+README.md
+.eslintcache
+tsconfig.tsbuildinfo
 

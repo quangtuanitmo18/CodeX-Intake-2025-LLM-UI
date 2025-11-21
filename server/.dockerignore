@@ -21,4 +21,9 @@ tests
 coverage
 .npm
 .eslintcache
+.vscode
+.idea
+*.md
+docs
+README.md
 

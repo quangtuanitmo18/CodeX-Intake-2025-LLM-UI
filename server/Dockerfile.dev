@@ -3,7 +3,7 @@
 FROM node:20-bookworm AS base
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (with dev deps for building)
 FROM base AS deps
 COPY package*.json ./
 RUN npm ci
@@ -13,14 +13,19 @@ FROM deps AS builder
 COPY . .
 RUN npm run build
 
-# Generate Prisma Client
+# Install production dependencies only
+FROM base AS prod-deps
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Generate Prisma Client (needs dev deps for generation)
 FROM deps AS prisma-generate
 COPY prisma ./prisma
 COPY package*.json ./
 RUN npx prisma generate
 
-# Runtime image
-FROM node:20-bookworm AS runner
+# Runtime image - use slim to reduce size
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=development
 ENV PORT=4000
@@ -28,8 +33,8 @@ ENV PORT=4000
 # Install curl for healthcheck
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Copy dependencies and built files
-COPY --from=deps /app/node_modules ./node_modules
+# Copy only production dependencies and built files
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=prisma-generate /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/dist ./dist
 COPY package*.json ./
