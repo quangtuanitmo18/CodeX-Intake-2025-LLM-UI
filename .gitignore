@@ -20,7 +20,6 @@ npm-debug.log*
 .DS_Store
 
 node_modules/
-package-lock.json
 
 # Documentation - ignored on deploy branch only
 
