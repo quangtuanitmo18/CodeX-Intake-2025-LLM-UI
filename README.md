@@ -98,10 +98,6 @@ npm install
 
 # Edit .env.local with your configuration
 
-# Setup database
-npx prisma generate
-npx prisma db push
-
 # Start development server
 npm run dev
 ```
