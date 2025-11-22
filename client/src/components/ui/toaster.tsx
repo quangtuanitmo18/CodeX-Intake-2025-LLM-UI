@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { cn } from "@/lib/utils"
-import { ToastProvider, useToastQueue } from "./use-toast"
+import { cn } from '@/lib/utils'
+import { ToastProvider, useToastQueue } from './use-toast'
 
 export function Toaster() {
   return (
@@ -20,10 +20,10 @@ function ToastViewport() {
         <div
           key={toast.id}
           className={cn(
-            "pointer-events-auto w-full max-w-sm rounded-2xl border px-4 py-3 text-sm shadow-lg backdrop-blur",
-            toast.variant === "destructive"
-              ? "border-red-500/30 bg-red-500/20 text-red-50"
-              : "border-white/20 bg-[#040714]/90 text-white"
+            'pointer-events-auto w-full max-w-sm rounded-2xl border px-4 py-3 text-sm shadow-lg backdrop-blur',
+            toast.variant === 'destructive'
+              ? 'border-red-500/30 bg-red-500/20 text-red-50'
+              : 'border-white/20 bg-[#040714]/90 text-white'
           )}
           role="status"
         >
@@ -33,7 +33,7 @@ function ToastViewport() {
               {toast.description && <p className="text-sm text-white/80">{toast.description}</p>}
             </div>
             <button
-              className="text-xs uppercase tracking-wide text-white/60 transition hover:text-white"
+              className="mt-1 text-xs uppercase tracking-wide text-white/60 transition hover:text-white"
               onClick={() => dismiss(toast.id)}
             >
               Close
@@ -44,5 +44,3 @@ function ToastViewport() {
     </div>
   )
 }
-
-

@@ -1,0 +1,68 @@
+# syntax=docker/dockerfile:1.6
+
+# ---------------------
+# Base image
+# ---------------------
+FROM node:20-bookworm AS base
+WORKDIR /app
+
+# ---------------------
+# Install dependencies (with dev deps)
+# ---------------------
+FROM base AS deps
+COPY package*.json ./
+RUN npm ci
+
+# ---------------------
+# Build TypeScript
+# ---------------------
+FROM deps AS builder
+COPY . .
+RUN npm run build
+
+# ---------------------
+# Install production deps only
+# ---------------------
+FROM base AS prod-deps
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# ---------------------
+# Generate Prisma Client
+# ---------------------
+FROM prod-deps AS prisma-generate
+COPY prisma ./prisma
+COPY package*.json ./
+RUN npx prisma generate
+
+# ---------------------
+# Runtime image
+# ---------------------
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && \
+    groupadd -r appuser && useradd -r -g appuser -u 1001 appuser
+
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=prisma-generate /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+COPY prisma ./prisma
+
+# Copy any scripts/assets needed at runtime (optional)
+COPY scripts ./scripts
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+RUN chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 4000
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -fsS http://localhost:4000/healthz || exit 1
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["node", "dist/index.js"]
+

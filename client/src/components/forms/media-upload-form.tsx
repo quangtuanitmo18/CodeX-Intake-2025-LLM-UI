@@ -4,8 +4,8 @@ import { mediaApiRequest } from '@/apiRequests/media'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
 import { toast } from '@/components/ui/use-toast'
+import { useState } from 'react'
 
 export function MediaUploadForm() {
   const [preview, setPreview] = useState<string | null>(null)
@@ -36,13 +36,24 @@ export function MediaUploadForm() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="w-full max-w-2xl space-y-3">
       <Label htmlFor="media-input">Upload sample image</Label>
-      <Input id="media-input" type="file" accept="image/*" onChange={handleChange} disabled={isUploading} />
+      <Input
+        id="media-input"
+        type="file"
+        accept="image/*"
+        onChange={handleChange}
+        disabled={isUploading}
+      />
       {preview && (
-        <div className="rounded-lg border bg-muted p-4">
-          <p className="text-sm font-medium">Uploaded path</p>
-          <a href={preview} className="text-sm text-primary underline" target="_blank" rel="noreferrer">
+        <div className="rounded-lg border bg-muted p-3 md:p-4">
+          <p className="text-xs font-medium md:text-sm">Uploaded path</p>
+          <a
+            href={preview}
+            className="break-all text-xs text-primary underline md:text-sm"
+            target="_blank"
+            rel="noreferrer"
+          >
             {preview}
           </a>
         </div>
@@ -53,5 +64,3 @@ export function MediaUploadForm() {
     </div>
   )
 }
-
-

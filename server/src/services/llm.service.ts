@@ -1,4 +1,5 @@
 import envConfig from '@/config'
+import { messageService } from './message.service'
 
 export type LLMStreamChunk = {
   type: 'thinking' | 'answer' | 'complete' | 'error'
@@ -11,6 +12,8 @@ export type LLMStreamChunk = {
 type StreamParams = {
   prompt: string
   sessionId?: string
+  conversationId?: string
+  accountId?: number
   signal?: AbortSignal
   onChunk: (chunk: LLMStreamChunk) => void
 }
@@ -22,10 +25,13 @@ type AiProxyEvent =
   | { type: 'error'; error: string }
 
 class LLMService {
-  async stream({ prompt, sessionId, signal, onChunk }: StreamParams) {
+  async stream({ prompt, sessionId, conversationId, accountId, signal, onChunk }: StreamParams) {
     if (!envConfig.LLM_API_URL || !envConfig.LLM_API_TOKEN) {
       throw new Error('LLM provider is not configured')
     }
+
+    // Note: User message is created by the client before calling this stream endpoint
+    // We only need to save the assistant's response after streaming completes
 
     const response = await fetch(`${envConfig.LLM_API_URL}/stream`, {
       method: 'POST',
@@ -36,8 +42,8 @@ class LLMService {
       },
       body: JSON.stringify({
         prompt,
-        sessionId,
-        model: envConfig.LLM_API_MODEL
+        sessionId
+        // model: envConfig.LLM_API_MODEL
       }),
       signal
     })
@@ -51,6 +57,14 @@ class LLMService {
     const decoder = new TextDecoder()
     let buffer = ''
 
+    // Accumulate content and reasoning for saving after streaming
+    let fullContent = ''
+    let fullReasoning = ''
+    const startTime = Date.now()
+    let reasoningStartTime: number | null = null
+    let thinkingSeconds: number | null = null
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value, done } = await reader.read()
       if (done) break
@@ -61,31 +75,85 @@ class LLMService {
         const line = buffer.slice(0, newlineIndex).trim()
         buffer = buffer.slice(newlineIndex + 1)
         if (line) {
-          this.handleProxyEvent(line, onChunk)
+          const eventResult = this.handleProxyEvent(line, onChunk)
+          if (eventResult.content) fullContent += eventResult.content
+          if (eventResult.reasoning) fullReasoning += eventResult.reasoning
+
+          // Track thinking time based on events
+          try {
+            const event = JSON.parse(line) as AiProxyEvent
+            if (event.type === 'reasoning-start' || event.type === 'reasoning-delta') {
+              // Track reasoning start time
+              if (reasoningStartTime === null) {
+                reasoningStartTime = Date.now()
+              }
+            } else if (event.type === 'text-start' || event.type === 'reasoning-end') {
+              // Calculate thinking seconds when text starts or reasoning ends
+              if (reasoningStartTime !== null && thinkingSeconds === null) {
+                thinkingSeconds = Math.floor((Date.now() - reasoningStartTime) / 1000)
+              }
+            }
+          } catch (error) {
+            // Ignore parse errors, already handled in handleProxyEvent
+          }
         }
         newlineIndex = buffer.indexOf('\n')
       }
     }
+
+    // Save assistant message if conversationId and accountId provided
+    if (conversationId && accountId && fullContent) {
+      try {
+        const duration = Date.now() - startTime
+        await messageService.createAssistantMessage(
+          conversationId,
+          accountId,
+          fullContent,
+          fullReasoning || undefined,
+          {
+            // model: envConfig.LLM_API_MODEL,
+            duration,
+            thinkingSeconds: thinkingSeconds || undefined
+          }
+        )
+      } catch (error) {
+        console.error('Failed to save assistant message to database:', {
+          conversationId,
+          accountId,
+          contentLength: fullContent.length,
+          error: error instanceof Error ? error.message : error
+        })
+        // Don't throw - streaming already completed successfully for user
+        // Could implement retry logic or dead letter queue here
+      }
+    }
   }
 
-  private handleProxyEvent(rawLine: string, onChunk: (chunk: LLMStreamChunk) => void) {
+  private handleProxyEvent(
+    rawLine: string,
+    onChunk: (chunk: LLMStreamChunk) => void
+  ): { content?: string; reasoning?: string } {
     let event: AiProxyEvent | null = null
     try {
       event = JSON.parse(rawLine) as AiProxyEvent
     } catch (error) {
       console.error('Unable to parse NDJSON line from ai-proxy', { rawLine, error })
-      return
+      return {}
     }
+
+    const result: { content?: string; reasoning?: string } = {}
 
     switch (event.type) {
       case 'text-delta':
         if (event.delta) {
           onChunk({ type: 'answer', delta: event.delta })
+          result.content = event.delta
         }
         break
       case 'reasoning-delta':
         if (event.delta) {
           onChunk({ type: 'thinking', reasoning: event.delta })
+          result.reasoning = event.delta
         }
         break
       case 'text-start':
@@ -107,6 +175,8 @@ class LLMService {
         onChunk({ type: 'thinking', metadata: { event: (event as any).type } })
         break
     }
+
+    return result
   }
 }
 

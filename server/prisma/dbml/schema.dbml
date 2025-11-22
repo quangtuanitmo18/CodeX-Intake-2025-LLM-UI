@@ -12,6 +12,8 @@ Table Account {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   deletedAt DateTime
+  conversations Conversation [not null]
+  projects Project [not null]
   refreshToken RefreshToken [not null]
 }
 
@@ -23,4 +25,64 @@ Table RefreshToken {
   account Account [not null]
 }
 
+Table Conversation {
+  id String [pk]
+  accountId Int [not null]
+  projectId String
+  title String
+  model String [not null, default: 'openai/gpt-5-mini']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  account Account [not null]
+  project Project
+  messages Message [not null]
+}
+
+Table Message {
+  id String [pk]
+  conversationId String [not null]
+  role String [not null]
+  content String [not null]
+  reasoning String
+  metadata String
+  createdAt DateTime [default: `now()`, not null]
+  conversation Conversation [not null]
+  attachments MessageAttachment [not null]
+}
+
+Table MessageAttachment {
+  id String [pk]
+  messageId String [not null]
+  fileUrl String [not null]
+  fileName String [not null]
+  fileType String [not null]
+  fileSize Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  message Message [not null]
+}
+
+Table Project {
+  id String [pk]
+  accountId Int [not null]
+  name String [not null]
+  description String
+  lastOpenedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  account Account [not null]
+  conversations Conversation [not null]
+}
+
 Ref: RefreshToken.accountId > Account.id [delete: Cascade]
+
+Ref: Conversation.accountId > Account.id [delete: Cascade]
+
+Ref: Conversation.projectId > Project.id [delete: Set Null]
+
+Ref: Message.conversationId > Conversation.id [delete: Cascade]
+
+Ref: MessageAttachment.messageId > Message.id [delete: Cascade]
+
+Ref: Project.accountId > Account.id [delete: Cascade]

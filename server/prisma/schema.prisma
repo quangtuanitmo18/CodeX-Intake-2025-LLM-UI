@@ -12,16 +12,18 @@ datasource db {
 }
 
 model Account {
-  id           Int            @id @default(autoincrement())
-  name         String
-  email        String         @unique
-  password     String
-  avatar       String?
-  role         String         @default("user")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  deletedAt    DateTime?
-  refreshToken RefreshToken[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  avatar        String?
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+  conversations Conversation[]
+  projects      Project[]
+  refreshToken  RefreshToken[]
 }
 
 model RefreshToken {
@@ -29,6 +31,68 @@ model RefreshToken {
   accountId Int
   expiresAt DateTime
   createdAt DateTime @default(now())
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
 
-  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model Conversation {
+  id        String    @id @default(cuid())
+  accountId Int
+  projectId String?
+  title     String?
+  model     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  messages  Message[]
+
+  @@index([accountId])
+  @@index([accountId, updatedAt(sort: Desc)])
+  @@index([accountId, deletedAt])
+  @@index([projectId])
+}
+
+model Message {
+  id             String              @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  reasoning      String?
+  metadata       String?
+  createdAt      DateTime            @default(now())
+  conversation   Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments    MessageAttachment[]
+
+  @@index([conversationId])
+  @@index([conversationId, createdAt])
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  fileUrl   String
+  fileName  String
+  fileType  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  accountId    Int
+  name         String
+  description  String?
+  lastOpenedAt DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  account      Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@index([accountId])
+  @@index([accountId, updatedAt(sort: Desc)])
 }

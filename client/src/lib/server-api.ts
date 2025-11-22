@@ -10,7 +10,9 @@ export async function serverGet<T>(path: string, init?: RequestInit): Promise<T>
     redirect('/login')
   }
 
-  const res = await fetch(`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/${normalizePath(path)}`, {
+  // Use API_ENDPOINT for server-side (Docker service name), fallback to NEXT_PUBLIC_API_ENDPOINT
+  const apiEndpoint = envConfig.API_ENDPOINT || envConfig.NEXT_PUBLIC_API_ENDPOINT
+  const res = await fetch(`${apiEndpoint}/${normalizePath(path)}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -30,5 +32,3 @@ export async function serverGet<T>(path: string, init?: RequestInit): Promise<T>
 
   return (await res.json()) as T
 }
-
-

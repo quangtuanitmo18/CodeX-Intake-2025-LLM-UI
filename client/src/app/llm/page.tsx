@@ -1,17 +1,12 @@
-import LLMPreview from '@/components/llm/llm-preview'
+import LLMConversationPage from '@/pageSections/llm/llm-conversation-page'
+import { buildPageMetadata } from '@/seo/next-metadata'
 
-export const metadata = {
-  title: 'LLM UI · Reference Experience',
-}
+export const metadata = buildPageMetadata('llm')
 
 export default function LLMPage() {
   return (
-    <main className="relative min-h-screen bg-[#01030B] px-4 py-16 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-6xl space-y-8">
-        <LLMPreview />
-      </div>
+    <main className="relative min-h-screen bg-[#01030B] text-white">
+      <LLMConversationPage />
     </main>
   )
 }
-
-

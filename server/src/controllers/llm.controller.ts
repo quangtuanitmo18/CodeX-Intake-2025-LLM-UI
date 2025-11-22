@@ -6,6 +6,12 @@ class LLMController {
   async stream(request: FastifyRequest<{ Body: LLMStreamBodyType }>, reply: FastifyReply) {
     reply.hijack()
 
+    // CORS headers for SSE
+    reply.raw.setHeader('Access-Control-Allow-Origin', request.headers.origin || '*')
+    reply.raw.setHeader('Access-Control-Allow-Credentials', 'true')
+    reply.raw.setHeader('Access-Control-Expose-Headers', 'Content-Type')
+
+    // SSE headers
     reply.raw.setHeader('Content-Type', 'text/event-stream')
     reply.raw.setHeader('Cache-Control', 'no-cache')
     reply.raw.setHeader('Connection', 'keep-alive')
@@ -22,6 +28,8 @@ class LLMController {
       await llmService.stream({
         prompt: request.body.prompt,
         sessionId: request.body.sessionId,
+        conversationId: request.body.conversationId,
+        accountId: request.account?.userId,
         signal: abortController.signal,
         onChunk: sendChunk
       })
