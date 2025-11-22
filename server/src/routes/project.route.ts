@@ -153,7 +153,7 @@ export default async function projectRoutes(fastify: FastifyInstance, options: F
           accountId: conversation.accountId,
           projectId: conversation.projectId,
           title: conversation.title,
-          model: conversation.model,
+          model: conversation.model ?? '',
           createdAt: conversation.createdAt,
           updatedAt: conversation.updatedAt,
           deletedAt: conversation.deletedAt

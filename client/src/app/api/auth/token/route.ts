@@ -36,5 +36,3 @@ export async function POST(request: Request) {
     return Response.json({ message: 'Unable to set tokens' }, { status: 500 })
   }
 }
-
-

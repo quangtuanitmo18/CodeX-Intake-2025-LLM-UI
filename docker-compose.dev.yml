@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.dev
     image: codex-server:dev
     env_file:
-      - ./server/.env.local
+      - ./server/.env.dev # Load all server env vars from this file
     environment:
       NODE_ENV: development
       DOCKER: 'true'
@@ -40,7 +40,7 @@ services:
         NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL:-http://localhost:3000}
     image: codex-client:dev
     env_file:
-      - ./client/.env.local
+      - ./client/.env.dev
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:4000}
@@ -65,8 +65,6 @@ services:
         max-file: '3'
         labels: 'service'
 
-# Named volumes - cần khai báo để persist data
-# Anonymous volumes (/app/node_modules, /app/.next) không cần khai báo ở đây
 volumes:
   sqlite_data: # Persist SQLite database
   uploads_data: # Persist uploaded files

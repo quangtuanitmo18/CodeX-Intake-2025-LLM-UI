@@ -36,5 +36,3 @@ export async function POST(request: Request) {
     return Response.json({ message: 'Unexpected error' }, { status: 500 })
   }
 }
-
-
