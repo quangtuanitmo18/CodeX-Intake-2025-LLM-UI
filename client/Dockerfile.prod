@@ -30,14 +30,25 @@ ENV NEXT_PUBLIC_URL=${NEXT_PUBLIC_URL}
 RUN npm run build
 
 # ---------------------
-# Runtime layer (Nginx)
+# Runtime layer (Node.js - Next.js standalone)
 # ---------------------
-FROM nginx:1.27-alpine AS runner
-WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
-COPY --from=builder /app/out ./
-COPY --chown=nginx:nginx docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+# Copy built application
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://localhost:3000/healthz || exit 1
-CMD ["nginx", "-g", "daemon off;"]
+  CMD curl -fsS http://localhost:3000/api/healthz || exit 1
+
+CMD ["node", "server.js"]

@@ -34,7 +34,7 @@ const serializeConversation = (conversation: {
   accountId: number
   projectId: string | null
   title: string | null
-  model: string
+  model: string | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -43,7 +43,7 @@ const serializeConversation = (conversation: {
   accountId: conversation.accountId,
   projectId: conversation.projectId,
   title: conversation.title,
-  model: conversation.model,
+  model: conversation.model ?? '', // Provide default empty string if null
   createdAt: conversation.createdAt,
   updatedAt: conversation.updatedAt,
   deletedAt: conversation.deletedAt

@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   server:
@@ -6,54 +6,67 @@ services:
       context: ./server
       dockerfile: Dockerfile.prod
     image: codex-server:prod
+    # Load environment variables from server/.env.prod file
+    # Create this file on the server (DO NOT commit to git)
+    env_file:
+      - ./server/.env.prod
     environment:
       NODE_ENV: production
+      DOCKER: "true"
       PORT: ${SERVER_PORT:-4000}
-      DATABASE_URL: ${DATABASE_URL:-file:/app/prisma/dev.db}
+      DATABASE_URL: ${DATABASE_URL:-file:/app/prisma/prod.db}
     volumes:
       - sqlite_data:/app/prisma
       - uploads_data:/app/uploads
     ports:
-      - '${SERVER_PORT:-4000}:4000'
+      - "127.0.0.1:${SERVER_PORT:-4000}:4000" # Only bind to localhost (accessed via Nginx)
     healthcheck:
-      test: ['CMD', 'curl', '-fsS', 'http://localhost:4000/healthz']
+      test: ["CMD", "curl", "-fsS", "http://localhost:4000/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '10m'
-        max-file: '3'
-        labels: 'service'
+        max-size: "10m"
+        max-file: "3"
+        labels: "service"
     restart: unless-stopped
 
   web:
     build:
       context: ./client
       dockerfile: Dockerfile.prod
+      # Client build-time variables (NEXT_PUBLIC_*)
+      # These are read from root .env file
+      args:
+        NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-https://tuandev.ru/api-fastify}
+        NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL:-https://tuandev.ru}
     image: codex-client:prod
     environment:
-      NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:4000}
-      NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL:-http://localhost:3000}
+      # Runtime env vars
+      NODE_ENV: production
+      # Server-side Next.js route handlers call backend via Docker service name
+      # This avoids going through Nginx (faster, internal network)
+      API_ENDPOINT: http://server:4000
     depends_on:
       server:
         condition: service_healthy
     ports:
-      - '${CLIENT_PORT:-3000}:3000'
+      - "127.0.0.1:${CLIENT_PORT:-3000}:3000" # Only bind to localhost (accessed via Nginx)
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/healthz']
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '10m'
-        max-file: '3'
-        labels: 'service'
+        max-size: "10m"
+        max-file: "3"
+        labels: "service"
     restart: unless-stopped
 
 volumes:

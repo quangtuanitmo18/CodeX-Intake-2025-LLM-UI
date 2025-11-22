@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   server:
@@ -7,29 +7,29 @@ services:
       dockerfile: Dockerfile.dev
     image: codex-server:dev
     env_file:
-      - ./server/.env.local
+      - ./server/.env.dev # Load all server env vars from this file
     environment:
       NODE_ENV: development
-      DOCKER: 'true'
+      DOCKER: "true"
       PORT: ${SERVER_PORT:-4000}
       DATABASE_URL: ${DATABASE_URL:-file:/app/prisma/dev.db}
     volumes:
       - sqlite_data:/app/prisma
       - uploads_data:/app/uploads
     ports:
-      - '${SERVER_PORT:-4000}:4000'
+      - "${SERVER_PORT:-4000}:4000"
     healthcheck:
-      test: ['CMD', 'curl', '-fsS', 'http://localhost:4000/healthz']
+      test: ["CMD", "curl", "-fsS", "http://localhost:4000/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '10m'
-        max-file: '3'
-        labels: 'service'
+        max-size: "10m"
+        max-file: "3"
+        labels: "service"
 
   web:
     build:
@@ -40,7 +40,7 @@ services:
         NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL:-http://localhost:3000}
     image: codex-client:dev
     env_file:
-      - ./client/.env.local
+      - ./client/.env.dev
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:4000}
@@ -51,22 +51,20 @@ services:
       server:
         condition: service_healthy
     ports:
-      - '${CLIENT_PORT:-3000}:3000'
+      - "${CLIENT_PORT:-3000}:3000"
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/api/healthz']
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '10m'
-        max-file: '3'
-        labels: 'service'
+        max-size: "10m"
+        max-file: "3"
+        labels: "service"
 
-# Named volumes - cần khai báo để persist data
-# Anonymous volumes (/app/node_modules, /app/.next) không cần khai báo ở đây
 volumes:
   sqlite_data: # Persist SQLite database
   uploads_data: # Persist uploaded files

@@ -80,7 +80,7 @@ export const ConversationRes = z.object({
     accountId: z.number().int().positive(),
     projectId: z.string().cuid().nullable(),
     title: z.string().nullable(),
-    model: z.string(),
+    model: z.string().nullable(),
     createdAt: z.date(),
     updatedAt: z.date(),
     deletedAt: z.date().nullable()
@@ -98,7 +98,7 @@ export const ConversationListRes = z.object({
       accountId: z.number().int().positive(),
       projectId: z.string().cuid().nullable(),
       title: z.string().nullable(),
-      model: z.string(),
+      model: z.string().nullable(),
       createdAt: z.date(),
       updatedAt: z.date(),
       deletedAt: z.date().nullable()

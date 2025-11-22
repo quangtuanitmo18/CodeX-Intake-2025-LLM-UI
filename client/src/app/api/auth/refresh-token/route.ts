@@ -39,5 +39,3 @@ export async function POST() {
     return Response.json({ message: 'Unable to refresh token' }, { status: 500 })
   }
 }
-
-
