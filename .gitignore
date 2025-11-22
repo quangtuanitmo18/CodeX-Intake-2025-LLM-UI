@@ -28,3 +28,5 @@ package-lock.json
 
 docs/
 .cursor/
+
+.ai-devkit.json
