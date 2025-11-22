@@ -25,13 +25,14 @@ export const conversationRepository = {
     }
 
     // Add search filter if provided
+    // Note: SQLite doesn't support 'mode: insensitive', but contains is case-insensitive by default for text fields
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search } },
         {
           messages: {
             some: {
-              content: { contains: search, mode: 'insensitive' }
+              content: { contains: search }
             }
           }
         }

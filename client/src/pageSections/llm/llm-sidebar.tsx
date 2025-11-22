@@ -292,11 +292,18 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set())
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [limit] = useState(20)
   const [offset, setOffset] = useState(0)
 
+  // Debounce search input (500ms delay)
   useEffect(() => {
-    setOffset(0)
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+      setOffset(0) // Reset offset when search changes
+    }, 500)
+
+    return () => clearTimeout(timer)
   }, [search])
 
   // Auto-expand active project
@@ -310,10 +317,11 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
   const { data: projectsData, isLoading: isLoadingProjects } = useProjects(projectQueryParams)
 
   // Only fetch standalone conversations (projectId = null)
+  // Use debouncedSearch for API calls to avoid too many requests
   const { data: conversationsData, isLoading: isLoadingConversations } = useConversations({
     limit,
     offset,
-    search,
+    search: debouncedSearch,
     projectId: 'standalone', // Filter for standalone chats (projectId is null)
   })
   const createConversationMutation = useCreateConversation()
