@@ -1,6 +1,8 @@
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
+// DBML generator is only needed for development/documentation
+// Uncomment if you need to generate DBML files locally
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
 
 generator client {
   provider = "prisma-client-js"

@@ -30,9 +30,9 @@ RUN npm ci --omit=dev
 # ---------------------
 # Generate Prisma Client
 # ---------------------
-FROM prod-deps AS prisma-generate
+# Use deps stage which has prisma CLI
+FROM deps AS prisma-generate
 COPY prisma ./prisma
-COPY package*.json ./
 RUN npx prisma generate
 
 # ---------------------
@@ -50,6 +50,13 @@ COPY --from=builder /app/dist ./dist
 COPY package*.json ./
 COPY prisma ./prisma
 
+# Copy prisma CLI and its dependencies for runtime migrations
+# This avoids needing internet connection for npx to download prisma
+# Note: If these files don't exist, the build will fail, which is expected
+# as we need prisma CLI for migrations
+COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
+
 # Copy any scripts/assets needed at runtime (optional)
 COPY scripts ./scripts
 
@@ -58,8 +65,9 @@ COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh || true
 
+# Don't switch to appuser yet - entrypoint will handle migrations first
+# Then switch user before starting the server
 RUN chown -R appuser:appuser /app
-USER appuser
 
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
