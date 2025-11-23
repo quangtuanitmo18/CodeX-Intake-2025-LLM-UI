@@ -3,36 +3,73 @@ import fs from 'fs'
 import path from 'path'
 import z from 'zod'
 
-// Try .env.local first (for Docker dev), then fallback to .env
+// Environment variable loading strategy:
+// 1. Docker dev (DOCKER=true, NODE_ENV=development) → .env.dev
+// 2. Docker prod (DOCKER=true, NODE_ENV=production) → .env.prod
+// 3. Non-Docker → .env (priority) > .env.local (fallback)
+//
+// Priority order (highest to lowest):
+// 1. System/Process env vars (from shell, system, etc.)
+// 2. Docker environment (env_file + environment in docker-compose)
+// 3. dotenv files (based on environment)
+// 4. Default values in schema (lowest priority)
+//
+// Note: dotenv by default does NOT override existing process.env values
 // In Docker, env_file injects variables directly, so files may not exist
-config({
-  path: '.env.local'
-})
-config({
-  path: '.env'
-})
+
+// Check DOCKER from process.env (before schema transform)
+// process.env values are always strings or undefined
+const isDocker = String(process.env.DOCKER || '') === 'true'
+const isProduction = String(process.env.NODE_ENV || '') === 'production'
+
+if (isDocker) {
+  // Docker environment: load based on NODE_ENV
+  if (isProduction) {
+    // Docker production: load .env.prod
+    config({
+      path: '.env.prod',
+      override: false // Don't override Docker-injected env vars
+    })
+  } else {
+    // Docker development: load .env.dev
+    config({
+      path: '.env.dev',
+      override: false // Don't override Docker-injected env vars
+    })
+  }
+} else {
+  // Non-Docker: .env (priority) > .env.local (fallback)
+  // Load .env first (higher priority)
+  config({
+    path: '.env',
+    override: false // Don't override system env vars
+  })
+  // Load .env.local as fallback (won't override .env values)
+  config({
+    path: '.env.local',
+    override: false // Don't override .env or system env vars
+  })
+}
 
 const checkEnv = async () => {
   // Skip file check in Docker - env variables are injected via docker-compose env_file
-  // DOCKER will be parsed as boolean by schema, but at this point it's still string from process.env
-  if (process.env.DOCKER) {
+  if (isDocker) {
     return
   }
 
   const chalk = (await import('chalk')).default
-  // Check for .env.local first (Docker dev), then .env
-  const envLocalPath = path.resolve('.env.local')
+  // Check for .env or .env.local (non-Docker environments)
   const envPath = path.resolve('.env')
-  if (!fs.existsSync(envLocalPath) && !fs.existsSync(envPath)) {
-    console.log(chalk.red(`don't have .env or .env.local`))
+  const envLocalPath = path.resolve('.env.local')
+
+  if (!fs.existsSync(envPath) && !fs.existsSync(envLocalPath)) {
+    console.log(chalk.red(`Missing environment file: .env or .env.local is required`))
     process.exit(1)
   }
 }
-// Run checkEnv after config is loaded, but we need to check before schema parse
-// So check DOCKER from process.env directly
-if (!process.env.DOCKER) {
-  checkEnv()
-}
+
+// Run checkEnv after config is loaded
+checkEnv()
 
 const configSchema = z.object({
   PORT: z.coerce.number().default(4000),
