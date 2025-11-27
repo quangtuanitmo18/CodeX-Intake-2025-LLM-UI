@@ -72,3 +72,35 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
+
+/* Smooth streaming optimizations */
+.streaming-content {
+  /* Enable GPU acceleration for smoother rendering */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+
+  /* Optimize text rendering during streaming */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Smooth transitions for content updates */
+  transition: opacity 0.1s ease-out;
+}
+
+/* Optimize markdown rendering during streaming */
+.streaming-content * {
+  /* Prevent layout shifts during streaming */
+  contain: layout style paint;
+}
+
+/* Smooth scrolling for chat area */
+.custom-scrollbar {
+  /* Enable smooth scrolling */
+  scroll-behavior: smooth;
+
+  /* Optimize scrolling performance */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}

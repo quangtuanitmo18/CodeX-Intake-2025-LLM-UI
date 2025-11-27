@@ -2,7 +2,7 @@ import envConfig from '@/config'
 import { getAccessTokenFromLocalStorage } from '@/lib/utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-type StreamStatus = 'idle' | 'thinking' | 'streaming' | 'complete' | 'error'
+export type StreamStatus = 'idle' | 'thinking' | 'streaming' | 'complete' | 'error'
 
 type StreamState = {
   status: StreamStatus
@@ -30,58 +30,152 @@ export function useLLMStream() {
   const [state, setState] = useState<StreamState>(INITIAL_STATE)
   const abortControllerRef = useRef<AbortController | null>(null)
 
+  // Batching refs for smooth streaming
+  const pendingAnswerRef = useRef<string>('')
+  const pendingReasoningRef = useRef<string[]>([])
+  const rafIdRef = useRef<number | null>(null)
+  const lastUpdateTimeRef = useRef<number>(0)
+  const isProcessingRef = useRef(false)
+
   const reset = useCallback(() => {
     abortControllerRef.current?.abort()
     abortControllerRef.current = null
+    pendingAnswerRef.current = ''
+    pendingReasoningRef.current = []
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current)
+      rafIdRef.current = null
+    }
+    isProcessingRef.current = false
     setState(INITIAL_STATE)
   }, [])
 
-  const handleChunk = useCallback((payload: string) => {
-    let chunk: StreamChunk | null = null
-    try {
-      chunk = JSON.parse(payload) as StreamChunk
-    } catch (error) {
-      console.error('Unable to parse LLM chunk', { payload, error })
-      return
+  // Batched update function using requestAnimationFrame with slight delay for readability
+  const flushUpdates = useCallback(() => {
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current)
     }
 
-    if (!chunk) return
+    rafIdRef.current = requestAnimationFrame(() => {
+      // Add delay to make streaming more readable and slower
+      setTimeout(() => {
+        setState((prev) => {
+          const hasAnswerUpdate = pendingAnswerRef.current !== prev.answer
+          const hasReasoningUpdate =
+            pendingReasoningRef.current.length !== prev.reasoning.length ||
+            pendingReasoningRef.current.some((r, i) => r !== prev.reasoning[i])
 
-    setState((prev) => {
-      switch (chunk!.type) {
-        case 'thinking': {
-          if (!chunk?.reasoning) {
-            return prev.status === 'thinking'
-              ? prev
-              : { ...prev, status: prev.status === 'idle' ? 'thinking' : prev.status }
+          if (!hasAnswerUpdate && !hasReasoningUpdate) {
+            return prev
           }
+
           return {
             ...prev,
-            status: prev.status === 'idle' ? 'thinking' : prev.status,
-            reasoning: [...prev.reasoning, chunk.reasoning],
+            answer: pendingAnswerRef.current,
+            reasoning: pendingReasoningRef.current,
+            status: pendingAnswerRef.current ? 'streaming' : prev.status,
           }
-        }
-        case 'answer': {
-          if (!chunk?.delta) return prev
-          return {
+        })
+
+        rafIdRef.current = null
+        isProcessingRef.current = false
+        lastUpdateTimeRef.current = Date.now()
+      }, 100) // 100ms delay for slower, more readable streaming
+    })
+  }, [])
+
+  const handleChunk = useCallback(
+    (payload: string) => {
+      let chunk: StreamChunk | null = null
+      try {
+        chunk = JSON.parse(payload) as StreamChunk
+      } catch (error) {
+        console.error('Unable to parse LLM chunk', { payload, error })
+        return
+      }
+
+      if (!chunk) return
+
+      // Handle immediate updates (status changes, errors, complete)
+      if (chunk.type === 'complete' || chunk.type === 'error') {
+        // Flush any pending updates first
+        if (
+          isProcessingRef.current &&
+          (pendingAnswerRef.current || pendingReasoningRef.current.length > 0)
+        ) {
+          // Cancel any pending animation frame and flush immediately
+          if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current)
+            rafIdRef.current = null
+          }
+          // Flush updates synchronously
+          setState((prev) => ({
             ...prev,
-            status: 'streaming',
-            answer: prev.answer ? `${prev.answer}${chunk.delta}` : chunk.delta,
-          }
+            answer: pendingAnswerRef.current,
+            reasoning: pendingReasoningRef.current,
+          }))
+          isProcessingRef.current = false
+        } else if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current)
+          rafIdRef.current = null
         }
-        case 'complete':
-          return { ...prev, status: 'complete' }
-        case 'error':
+
+        setState((prev) => {
+          if (chunk!.type === 'complete') {
+            return { ...prev, status: 'complete' }
+          }
           return {
             ...prev,
             status: 'error',
             error: chunk?.message || 'LLM streaming failed',
           }
-        default:
-          return prev
+        })
+        return
       }
-    })
-  }, [])
+
+      // Handle batched updates (answer and reasoning deltas)
+      if (chunk.type === 'answer' && chunk.delta) {
+        pendingAnswerRef.current += chunk.delta
+        isProcessingRef.current = true
+
+        // Throttle updates to ~10fps (every ~100ms) for slower, more readable streaming
+        const now = Date.now()
+        const timeSinceLastUpdate = now - lastUpdateTimeRef.current
+
+        // Schedule update if enough time has passed or no update is scheduled
+        if (timeSinceLastUpdate >= 100 || rafIdRef.current === null) {
+          flushUpdates()
+        }
+        return
+      }
+
+      if (chunk.type === 'thinking') {
+        if (!chunk.reasoning) {
+          // Just status change
+          setState((prev) => {
+            return prev.status === 'thinking'
+              ? prev
+              : { ...prev, status: prev.status === 'idle' ? 'thinking' : prev.status }
+          })
+          return
+        }
+
+        // Batch reasoning updates
+        pendingReasoningRef.current = [...pendingReasoningRef.current, chunk.reasoning]
+        isProcessingRef.current = true
+
+        // Throttle updates to ~10fps (every ~100ms) for slower, more readable streaming
+        const now = Date.now()
+        const timeSinceLastUpdate = now - lastUpdateTimeRef.current
+
+        // Schedule update if enough time has passed or no update is scheduled
+        if (timeSinceLastUpdate >= 100 || rafIdRef.current === null) {
+          flushUpdates()
+        }
+      }
+    },
+    [flushUpdates]
+  )
 
   const start = useCallback(
     async (prompt: string, conversationId?: string) => {
@@ -93,6 +187,17 @@ export function useLLMStream() {
       abortControllerRef.current?.abort()
       const controller = new AbortController()
       abortControllerRef.current = controller
+
+      // Reset pending refs
+      pendingAnswerRef.current = ''
+      pendingReasoningRef.current = []
+      isProcessingRef.current = false
+      lastUpdateTimeRef.current = Date.now()
+
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+        rafIdRef.current = null
+      }
 
       setState({
         status: 'thinking',
@@ -128,7 +233,13 @@ export function useLLMStream() {
 
         while (true) {
           const { value, done } = await reader.read()
-          if (done) break
+          if (done) {
+            // Flush any pending updates before completing
+            if (isProcessingRef.current && pendingAnswerRef.current) {
+              flushUpdates()
+            }
+            break
+          }
           buffer += decoder.decode(value, { stream: true })
 
           let boundary = buffer.indexOf('\n\n')
@@ -153,7 +264,7 @@ export function useLLMStream() {
         }))
       }
     },
-    [handleChunk]
+    [handleChunk, flushUpdates]
   )
 
   const cancel = useCallback(() => {
@@ -165,6 +276,9 @@ export function useLLMStream() {
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort()
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+      }
     }
   }, [])
 

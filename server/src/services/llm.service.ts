@@ -64,10 +64,31 @@ class LLMService {
     let reasoningStartTime: number | null = null
     let thinkingSeconds: number | null = null
 
+    // Batching for slower streaming - accumulate text deltas
+    let textDeltaBuffer = ''
+    let batchTimer: NodeJS.Timeout | null = null
+    const BATCH_DELAY_MS = 55 // Delay between batches for smoother streaming
+    const MIN_BATCH_SIZE = 6 // Minimum characters before sending batch
+
+    const flushTextBatch = () => {
+      if (textDeltaBuffer.length > 0) {
+        onChunk({ type: 'answer', delta: textDeltaBuffer })
+        textDeltaBuffer = ''
+      }
+      if (batchTimer) {
+        clearTimeout(batchTimer)
+        batchTimer = null
+      }
+    }
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value, done } = await reader.read()
-      if (done) break
+      if (done) {
+        // Flush any remaining batched content
+        flushTextBatch()
+        break
+      }
       buffer += decoder.decode(value, { stream: true })
 
       let newlineIndex = buffer.indexOf('\n')
@@ -75,10 +96,6 @@ class LLMService {
         const line = buffer.slice(0, newlineIndex).trim()
         buffer = buffer.slice(newlineIndex + 1)
         if (line) {
-          const eventResult = this.handleProxyEvent(line, onChunk)
-          if (eventResult.content) fullContent += eventResult.content
-          if (eventResult.reasoning) fullReasoning += eventResult.reasoning
-
           // Track thinking time based on events
           try {
             const event = JSON.parse(line) as AiProxyEvent
@@ -93,8 +110,34 @@ class LLMService {
                 thinkingSeconds = Math.floor((Date.now() - reasoningStartTime) / 1000)
               }
             }
+
+            // Handle text-delta with batching
+            if (event.type === 'text-delta' && event.delta) {
+              textDeltaBuffer += event.delta
+              fullContent += event.delta
+
+              // Send batch if it reaches minimum size or schedule delayed send
+              if (textDeltaBuffer.length >= MIN_BATCH_SIZE) {
+                flushTextBatch()
+              } else if (!batchTimer) {
+                // Schedule batch send after delay
+                batchTimer = setTimeout(() => {
+                  flushTextBatch()
+                }, BATCH_DELAY_MS)
+              }
+            } else {
+              // For non-text-delta events, flush any pending text batch first
+              flushTextBatch()
+              const eventResult = this.handleProxyEvent(line, onChunk)
+              if (eventResult.content) fullContent += eventResult.content
+              if (eventResult.reasoning) fullReasoning += eventResult.reasoning
+            }
           } catch (error) {
-            // Ignore parse errors, already handled in handleProxyEvent
+            // Ignore parse errors, try to handle as proxy event
+            flushTextBatch()
+            const eventResult = this.handleProxyEvent(line, onChunk)
+            if (eventResult.content) fullContent += eventResult.content
+            if (eventResult.reasoning) fullReasoning += eventResult.reasoning
           }
         }
         newlineIndex = buffer.indexOf('\n')
@@ -146,14 +189,17 @@ class LLMService {
     switch (event.type) {
       case 'text-delta':
         if (event.delta) {
-          onChunk({ type: 'answer', delta: event.delta })
+          // Batch text deltas and send with slight delay for slower streaming
           result.content = event.delta
+          // Send chunk immediately but client will throttle it
+          onChunk({ type: 'answer', delta: event.delta })
         }
         break
       case 'reasoning-delta':
         if (event.delta) {
-          onChunk({ type: 'thinking', reasoning: event.delta })
           result.reasoning = event.delta
+          // Send chunk immediately but client will throttle it
+          onChunk({ type: 'thinking', reasoning: event.delta })
         }
         break
       case 'text-start':

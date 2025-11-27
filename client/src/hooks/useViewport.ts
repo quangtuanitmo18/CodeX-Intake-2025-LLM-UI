@@ -89,10 +89,8 @@ function getViewportState(): ViewportState {
  * ```
  */
 export function useViewport(): ViewportState {
-  const [viewportState, setViewportState] = useState<ViewportState>(() => {
-    // Initialize with current viewport state (or default for SSR)
-    return getViewportState()
-  })
+  // Always start with the SSR-safe defaults so the server and client markup match.
+  const [viewportState, setViewportState] = useState<ViewportState>(defaultViewportState)
 
   useEffect(() => {
     // Check if we're in the browser
@@ -100,7 +98,7 @@ export function useViewport(): ViewportState {
       return
     }
 
-    // Set initial state
+    // Set initial state after mount to avoid hydration mismatches
     setViewportState(getViewportState())
 
     // Debounced resize handler (150ms delay)
