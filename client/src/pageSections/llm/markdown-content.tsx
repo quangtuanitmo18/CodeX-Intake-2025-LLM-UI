@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
@@ -13,17 +13,13 @@ interface MarkdownContentProps {
 }
 
 // Memoize to prevent unnecessary re-renders
-export const MarkdownContent = memo(function MarkdownContent({
-  content,
-  isUser,
-}: MarkdownContentProps) {
-  return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeHighlight]}
-      components={{
+export const MarkdownContent = memo(
+  function MarkdownContent({ content, isUser }: MarkdownContentProps) {
+    // Memoize components to avoid recreating on every render
+    const components = useMemo(
+      () => ({
         // Paragraphs
-        p: ({ node, ...props }) => (
+        p: ({ node, ...props }: any) => (
           <p
             className="text-xs font-normal leading-[20px] text-white md:text-[14px] md:leading-[22px]"
             {...props}
@@ -31,25 +27,25 @@ export const MarkdownContent = memo(function MarkdownContent({
         ),
 
         // Headings
-        h1: ({ node, ...props }) => (
+        h1: ({ node, ...props }: any) => (
           <h1
             className="mb-2 mt-6 text-lg font-semibold leading-[24px] text-white md:mb-3 md:mt-8 md:text-[22px] md:leading-[28px]"
             {...props}
           />
         ),
-        h2: ({ node, ...props }) => (
+        h2: ({ node, ...props }: any) => (
           <h2
             className="mb-2 mt-4 text-base font-semibold leading-[22px] text-white md:mb-3 md:mt-6 md:text-[18px] md:leading-[24px]"
             {...props}
           />
         ),
-        h3: ({ node, ...props }) => (
+        h3: ({ node, ...props }: any) => (
           <h3
             className="mb-2 mt-3 text-sm font-semibold leading-[20px] text-white md:mb-3 md:mt-5 md:text-[16px] md:leading-[19px]"
             {...props}
           />
         ),
-        h4: ({ node, ...props }) => (
+        h4: ({ node, ...props }: any) => (
           <h4
             className="mb-1 mt-2 text-xs font-semibold leading-[18px] text-white md:mb-2 md:mt-4 md:text-[14px] md:leading-[20px]"
             {...props}
@@ -57,16 +53,16 @@ export const MarkdownContent = memo(function MarkdownContent({
         ),
 
         // Lists
-        ul: ({ node, ...props }) => (
+        ul: ({ node, ...props }: any) => (
           <ul className="mb-3 ml-4 list-disc space-y-1.5 md:mb-4 md:ml-6 md:space-y-2" {...props} />
         ),
-        ol: ({ node, ...props }) => (
+        ol: ({ node, ...props }: any) => (
           <ol
             className="mb-3 ml-4 list-decimal space-y-1.5 md:mb-4 md:ml-6 md:space-y-2"
             {...props}
           />
         ),
-        li: ({ node, ...props }) => (
+        li: ({ node, ...props }: any) => (
           <li
             className="pl-1 text-xs font-normal leading-[20px] text-white md:text-[14px] md:leading-[22px]"
             {...props}
@@ -94,7 +90,7 @@ export const MarkdownContent = memo(function MarkdownContent({
         },
 
         // Pre block - Code blocks
-        pre: ({ node, children, ...props }) => {
+        pre: ({ node, children, ...props }: any) => {
           const codeElement = node?.children?.[0]
           const className =
             codeElement?.type === 'element' ? codeElement.properties?.className : undefined
@@ -177,7 +173,7 @@ export const MarkdownContent = memo(function MarkdownContent({
         },
 
         // Links
-        a: ({ node, ...props }) => (
+        a: ({ node, ...props }: any) => (
           <a
             className="text-blue-400 underline decoration-blue-400/30 underline-offset-2 transition-colors hover:text-blue-300 hover:decoration-blue-300/50"
             target="_blank"
@@ -187,7 +183,7 @@ export const MarkdownContent = memo(function MarkdownContent({
         ),
 
         // Blockquotes
-        blockquote: ({ node, ...props }) => (
+        blockquote: ({ node, ...props }: any) => (
           <blockquote
             className="my-3 border-l-2 border-white/20 py-1 pl-3 pr-2 text-xs font-normal italic leading-[20px] text-white/70 md:my-5 md:pl-4 md:text-[14px] md:leading-[22px]"
             {...props}
@@ -195,34 +191,36 @@ export const MarkdownContent = memo(function MarkdownContent({
         ),
 
         // Strong (bold)
-        strong: ({ node, ...props }) => <strong className="font-semibold text-white" {...props} />,
+        strong: ({ node, ...props }: any) => (
+          <strong className="font-semibold text-white" {...props} />
+        ),
 
         // Emphasis (italic)
-        em: ({ node, ...props }) => <em className="italic text-white/90" {...props} />,
+        em: ({ node, ...props }: any) => <em className="italic text-white/90" {...props} />,
 
         // Delete (strikethrough)
-        del: ({ node, ...props }) => <del className="line-through opacity-60" {...props} />,
+        del: ({ node, ...props }: any) => <del className="line-through opacity-60" {...props} />,
 
         // Tables
-        table: ({ node, ...props }) => (
+        table: ({ node, ...props }: any) => (
           <div className="-mx-2 my-4 overflow-x-auto md:mx-0 md:my-6">
             <div className="inline-block min-w-full align-middle">
               <table className="min-w-full" {...props} />
             </div>
           </div>
         ),
-        thead: ({ node, ...props }) => <thead {...props} />,
-        tbody: ({ node, ...props }) => <tbody {...props} />,
-        tr: ({ node, ...props }) => (
+        thead: ({ node, ...props }: any) => <thead {...props} />,
+        tbody: ({ node, ...props }: any) => <tbody {...props} />,
+        tr: ({ node, ...props }: any) => (
           <tr className="border-b border-[#191919] last:border-0" {...props} />
         ),
-        th: ({ node, ...props }) => (
+        th: ({ node, ...props }: any) => (
           <th
             className="px-2 py-2 text-left text-xs font-bold leading-[20px] text-white first:pl-2 last:pr-2 md:px-4 md:py-3 md:text-[14px] md:leading-[22px] md:first:pl-0 md:last:pr-0"
             {...props}
           />
         ),
-        td: ({ node, ...props }) => (
+        td: ({ node, ...props }: any) => (
           <td
             className="px-2 py-2 text-xs font-normal leading-[20px] text-white first:pl-2 last:pr-2 md:px-4 md:py-3 md:text-[14px] md:leading-[22px] md:first:pl-0 md:last:pr-0"
             {...props}
@@ -231,9 +229,24 @@ export const MarkdownContent = memo(function MarkdownContent({
 
         // Horizontal Rule - Hide completely
         hr: () => null,
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  )
-})
+      }),
+      []
+    )
+
+    return (
+      <div className="streaming-content" style={{ willChange: 'contents' }}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight]}
+          components={components}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    )
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison: only re-render if content actually changed
+    return prevProps.content === nextProps.content && prevProps.isUser === nextProps.isUser
+  }
+)

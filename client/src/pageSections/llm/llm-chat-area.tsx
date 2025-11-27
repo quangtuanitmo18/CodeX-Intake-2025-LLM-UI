@@ -1,9 +1,10 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ZodError } from 'zod'
 
+import { useStreamingDisplay } from '@/hooks/useStreamingDisplay'
 import {
   useConversation,
   useConversationMessages,
@@ -32,6 +33,23 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   const transcriptRef = useRef<HTMLDivElement | null>(null)
   const isSubmittingRef = useRef(false)
   const thinkingStartTimeRef = useRef<number | null>(null)
+  const completionHandledRef = useRef(false)
+  const stickToBottomRef = useRef(true)
+  const isAutoScrollingRef = useRef(false)
+  const lastUserScrollTopRef = useRef(0)
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
+    const el = transcriptRef.current
+    if (!el) return
+    isAutoScrollingRef.current = true
+    stickToBottomRef.current = true
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior,
+    })
+    requestAnimationFrame(() => {
+      isAutoScrollingRef.current = false
+    })
+  }, [])
 
   const queryClient = useQueryClient()
   const { data: conversationData } = useConversation(conversationId || null)
@@ -47,54 +65,78 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     () => messagesData?.payload?.data ?? [],
     [messagesData?.payload?.data]
   )
+  const reasoningText = useMemo(() => reasoning.join('\n'), [reasoning])
 
-  // Auto-scroll to bottom when messages change
+  const [streamingAnswer, isAnswerAnimating] = useStreamingDisplay(answer, status, {
+    chunkSize: 7,
+    minChunkSize: 2,
+    intervalMs: 70,
+    accelerateOnComplete: false,
+  })
+
+  const [streamingReasoning] = useStreamingDisplay(reasoningText, status, {
+    chunkSize: 16,
+    minChunkSize: 4,
+    intervalMs: 110,
+  })
+
   useEffect(() => {
-    if (!transcriptRef.current) {
-      return
+    if (status === 'thinking' || status === 'streaming') {
+      completionHandledRef.current = false
     }
-
-    const el = transcriptRef.current
-
-    const rafId = requestAnimationFrame(() => {
-      const newScrollTop = el.scrollHeight
-      el.scrollTop = newScrollTop
-
-      // Update gradient visibility after scroll
-      setTimeout(() => {
-        const shouldShow = el.scrollTop + el.clientHeight < el.scrollHeight - 8
-        setShowComposerGradient(shouldShow)
-      }, 100)
-    })
-
-    return () => {
-      cancelAnimationFrame(rafId)
-    }
-  }, [historicalMessages.length, activeAssistantMessage?.content, conversationId])
+  }, [status])
 
   // Handle scroll to show/hide gradient above composer
   useEffect(() => {
     const el = transcriptRef.current
     if (!el) return
 
-    const handleScroll = () => {
-      // Check if there's more content to scroll (with small threshold)
+    const updateGradient = () => {
       const threshold = 8
       const scrollBottom = el.scrollTop + el.clientHeight
       const scrollHeight = el.scrollHeight
-      const shouldShow = scrollBottom < scrollHeight - threshold
+      const remaining = scrollHeight - scrollBottom
+      const shouldShow = remaining > threshold
       setShowComposerGradient(shouldShow)
     }
 
-    // Check initial state
-    handleScroll()
+    const handleScroll = () => {
+      const scrollTop = el.scrollTop
+      const scrollBottom = scrollTop + el.clientHeight
+      const scrollHeight = el.scrollHeight
+      const remaining = scrollHeight - scrollBottom
 
-    // Listen to scroll events
+      if (!isAutoScrollingRef.current) {
+        const prevTop = lastUserScrollTopRef.current
+        lastUserScrollTopRef.current = scrollTop
+
+        const isScrollingUp = scrollTop < prevTop - 1
+        if (isScrollingUp) {
+          // User intentionally scrolled up – stop auto-follow
+          stickToBottomRef.current = false
+        } else {
+          // If user scrolls down / wheel down and gets near bottom, re-enable follow
+          const BOTTOM_THRESHOLD = 40
+          if (remaining < BOTTOM_THRESHOLD) {
+            stickToBottomRef.current = true
+          }
+        }
+      }
+
+      const threshold = 8
+      const shouldShow = remaining > threshold
+      setShowComposerGradient(shouldShow)
+    }
+
+    // Initial gradient state
+    updateGradient()
+
+    // Listen to scroll events (user interactions)
     el.addEventListener('scroll', handleScroll, { passive: true })
 
-    // Also listen to resize to handle content changes
+    // Listen to resize for gradient only (do NOT touch stickToBottom here)
     const resizeObserver = new ResizeObserver(() => {
-      handleScroll()
+      updateGradient()
     })
     resizeObserver.observe(el)
 
@@ -102,7 +144,17 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       el.removeEventListener('scroll', handleScroll)
       resizeObserver.disconnect()
     }
-  }, [historicalMessages.length, activeAssistantMessage?.content])
+  }, [historicalMessages.length, streamingAnswer])
+
+  // Keep streaming message in view like ChatGPT
+  useEffect(() => {
+    if (!stickToBottomRef.current) {
+      return
+    }
+    if (status === 'streaming' || status === 'thinking') {
+      scrollToBottom('smooth')
+    }
+  }, [streamingAnswer, streamingReasoning, status, scrollToBottom])
 
   // Track thinking time
   useEffect(() => {
@@ -154,15 +206,22 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
         status === 'complete'
           ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           : 'Live',
-      content: answer || '',
+      content: streamingAnswer,
       blocks: [],
-      reasoning: reasoning.join('\n'),
+      reasoning: streamingReasoning || undefined,
     })
-  }, [status, answer, reasoning])
+  }, [status, streamingAnswer, streamingReasoning])
 
-  // When streaming completes, add assistant message to cache (optimistic update)
+  // When streaming completes, add assistant message to cache after animation finishes
   useEffect(() => {
-    if (status === 'complete' && conversationId && answer) {
+    if (
+      status === 'complete' &&
+      conversationId &&
+      answer &&
+      !isAnswerAnimating &&
+      !completionHandledRef.current
+    ) {
+      completionHandledRef.current = true
       console.log('✅ Stream complete, adding assistant message to cache')
 
       const assistantMessage = {
@@ -200,7 +259,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
 
       reset()
     }
-  }, [status, conversationId, answer, reasoning, queryClient, reset])
+  }, [status, conversationId, answer, reasoning, queryClient, reset, isAnswerAnimating])
 
   const allMessages = useMemo<ChatMessage[]>(() => {
     const historical = historicalMessages.map((msg: any) => {
@@ -316,6 +375,12 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       setPrompt('')
       setAttachments([])
 
+      // Scroll to user's message immediately after adding it
+      stickToBottomRef.current = true
+      requestAnimationFrame(() => {
+        scrollToBottom('smooth')
+      })
+
       // Send to server and replace temp message with real message
       const response = await createMessageMutation.mutateAsync({
         conversationId,
@@ -338,6 +403,11 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
               data: [...filteredMessages, response.payload.data],
             },
           }
+        })
+
+        // Ensure scroll to bottom after message is replaced with real one
+        requestAnimationFrame(() => {
+          scrollToBottom('auto')
         })
       }
 
