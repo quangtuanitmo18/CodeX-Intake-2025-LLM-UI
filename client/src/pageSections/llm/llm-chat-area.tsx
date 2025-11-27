@@ -102,6 +102,16 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     })
   }, [conversationId, scrollToBottom])
 
+  // Scroll to bottom when messages load or page reloads
+  useEffect(() => {
+    if (!transcriptRef.current) return
+    stickToBottomRef.current = true
+
+    requestAnimationFrame(() => {
+      scrollToBottom('auto')
+    })
+  }, [historicalMessages.length, scrollToBottom])
+
   // Handle scroll to show/hide gradient above composer
   useEffect(() => {
     const el = transcriptRef.current
