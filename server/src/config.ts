@@ -89,8 +89,9 @@ const configSchema = z.object({
   PRODUCTION_URL: z.string().optional().default(''),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LLM_API_URL: z.string().optional().default(''),
-  LLM_API_TOKEN: z.string().optional().default('')
+  LLM_API_TOKEN: z.string().optional().default(''),
   // LLM_API_MODEL: z.string().optional().default('openai/gpt-5-mini')
+  DEEPGRAM_API_KEY: z.string().optional().default('')
 })
 
 const configServer = configSchema.safeParse(process.env)

@@ -10,6 +10,7 @@ import llmRoutes from '@/routes/llm.route'
 import mediaRoutes from '@/routes/media.route'
 import messageRoutes from '@/routes/message.route'
 import projectRoutes from '@/routes/project.route'
+import speechRoutes from '@/routes/speech.route'
 import staticRoutes from '@/routes/static.route'
 import { createFolder } from '@/utils/helpers'
 import fastifyAuth from '@fastify/auth'
@@ -78,6 +79,9 @@ const start = async () => {
     })
     fastify.register(llmRoutes, {
       prefix: '/llm'
+    })
+    fastify.register(speechRoutes, {
+      prefix: '/speech'
     })
     fastify.register(staticRoutes)
 
