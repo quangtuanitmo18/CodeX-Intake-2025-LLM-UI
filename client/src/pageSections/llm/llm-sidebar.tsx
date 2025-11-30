@@ -58,11 +58,14 @@ function ProjectItem({
   const [editName, setEditName] = useState(project.name)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
-  const { data: projectConversationsData, isLoading: isLoadingProjectChats } = useConversations({
-    limit: 50,
-    offset: 0,
-    projectId: project.id,
-  })
+  const { data: projectConversationsData, isLoading: isLoadingProjectChats } = useConversations(
+    {
+      limit: 50,
+      offset: 0,
+      projectId: project.id,
+    },
+    { enabled: isExpanded }
+  )
 
   const updateProjectMutation = useUpdateProject()
   const deleteProjectMutation = useDeleteProject()

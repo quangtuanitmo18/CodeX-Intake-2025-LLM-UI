@@ -3,15 +3,21 @@
 import conversationApiRequest from '@/apiRequests/conversation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-export const useConversations = (params?: {
-  limit?: number
-  offset?: number
-  search?: string
-  projectId?: string
-}) => {
+export const useConversations = (
+  params?: {
+    limit?: number
+    offset?: number
+    search?: string
+    projectId?: string
+  },
+  options?: {
+    enabled?: boolean
+  }
+) => {
   return useQuery({
     queryKey: ['conversations', params],
     queryFn: () => conversationApiRequest.list(params),
+    enabled: options?.enabled ?? true,
   })
 }
 
