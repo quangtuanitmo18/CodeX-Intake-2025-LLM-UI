@@ -1,6 +1,9 @@
 import AttachIcon from '@/assets/icons/attach'
 import SendIcon from '@/assets/icons/send'
-import { MicrophoneButton } from '@/components/speech/microphone-button'
+import {
+  MicrophoneButton,
+  type MicrophoneButtonHandle,
+} from '@/components/speech/microphone-button'
 import type { Language } from '@/hooks/useSpeechToText'
 import { Loader2 } from 'lucide-react'
 import { memo, useEffect, useRef, useState } from 'react'
@@ -32,6 +35,7 @@ export const ChatComposer = memo(function ChatComposer({
   onSubmit,
 }: ChatComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const microphoneRef = useRef<MicrophoneButtonHandle>(null)
   const [speechLanguage, setSpeechLanguage] = useState<Language>('vi')
 
   // Auto-resize textarea
@@ -53,6 +57,10 @@ export const ChatComposer = memo(function ChatComposer({
   const handleKeydown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
+      // Stop mic recording before submit
+      if (microphoneRef.current) {
+        microphoneRef.current.stop()
+      }
       onSubmit()
     }
   }
@@ -74,9 +82,18 @@ export const ChatComposer = memo(function ChatComposer({
     input.click()
   }
 
+  const handleFormSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
+    event?.preventDefault()
+    // Stop mic recording before submit
+    if (microphoneRef.current) {
+      microphoneRef.current.stop()
+    }
+    onSubmit(event)
+  }
+
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={handleFormSubmit}
       className="mx-auto flex min-h-[100px] w-full flex-col gap-1 rounded-[16px] border border-[#191919] bg-[#0E0E0E] px-3 py-2 md:max-w-[600px] md:px-4 md:py-[14px] lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]"
     >
       {attachments.length > 0 && (
@@ -114,6 +131,7 @@ export const ChatComposer = memo(function ChatComposer({
         <div className="flex items-center gap-2">
           {/* Microphone Button with Language Selector */}
           <MicrophoneButton
+            ref={microphoneRef}
             language={speechLanguage}
             onLanguageChange={setSpeechLanguage}
             onTranscriptChange={setPrompt}

@@ -37,6 +37,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   const stickToBottomRef = useRef(true)
   const isAutoScrollingRef = useRef(false)
   const lastUserScrollTopRef = useRef(0)
+
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
     const el = transcriptRef.current
     if (!el) return
@@ -325,6 +326,8 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
 
   const handleSubmit = async (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault()
+
+    // Stop recording will be handled by ChatComposer via ref
 
     if (isSubmittingRef.current || isStreaming) {
       console.log('Prevented double submission', {
