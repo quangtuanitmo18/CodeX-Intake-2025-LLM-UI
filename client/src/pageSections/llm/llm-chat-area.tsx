@@ -113,51 +113,61 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
   }, [historicalMessages.length, scrollToBottom])
 
   // Handle scroll to show/hide gradient above composer
+  // Optimized with throttling and memoized handlers
   useEffect(() => {
     const el = transcriptRef.current
     if (!el) return
 
+    let rafId: number | null = null
+    const THRESHOLD = 8
+    const BOTTOM_THRESHOLD = 40
+
     const updateGradient = () => {
-      const threshold = 8
       const scrollBottom = el.scrollTop + el.clientHeight
       const scrollHeight = el.scrollHeight
       const remaining = scrollHeight - scrollBottom
-      const shouldShow = remaining > threshold
+      const shouldShow = remaining > THRESHOLD
       setShowComposerGradient(shouldShow)
     }
 
     const handleScroll = () => {
-      const scrollTop = el.scrollTop
-      const scrollBottom = scrollTop + el.clientHeight
-      const scrollHeight = el.scrollHeight
-      const remaining = scrollHeight - scrollBottom
-
-      if (!isAutoScrollingRef.current) {
-        const prevTop = lastUserScrollTopRef.current
-        lastUserScrollTopRef.current = scrollTop
-
-        const isScrollingUp = scrollTop < prevTop - 1
-        if (isScrollingUp) {
-          // User intentionally scrolled up – stop auto-follow
-          stickToBottomRef.current = false
-        } else {
-          // If user scrolls down / wheel down and gets near bottom, re-enable follow
-          const BOTTOM_THRESHOLD = 40
-          if (remaining < BOTTOM_THRESHOLD) {
-            stickToBottomRef.current = true
-          }
-        }
+      // Throttle scroll handler using requestAnimationFrame
+      if (rafId !== null) {
+        return
       }
 
-      const threshold = 8
-      const shouldShow = remaining > threshold
-      setShowComposerGradient(shouldShow)
+      rafId = requestAnimationFrame(() => {
+        const scrollTop = el.scrollTop
+        const scrollBottom = scrollTop + el.clientHeight
+        const scrollHeight = el.scrollHeight
+        const remaining = scrollHeight - scrollBottom
+
+        if (!isAutoScrollingRef.current) {
+          const prevTop = lastUserScrollTopRef.current
+          lastUserScrollTopRef.current = scrollTop
+
+          const isScrollingUp = scrollTop < prevTop - 1
+          if (isScrollingUp) {
+            // User intentionally scrolled up – stop auto-follow
+            stickToBottomRef.current = false
+          } else {
+            // If user scrolls down / wheel down and gets near bottom, re-enable follow
+            if (remaining < BOTTOM_THRESHOLD) {
+              stickToBottomRef.current = true
+            }
+          }
+        }
+
+        const shouldShow = remaining > THRESHOLD
+        setShowComposerGradient(shouldShow)
+        rafId = null
+      })
     }
 
     // Initial gradient state
     updateGradient()
 
-    // Listen to scroll events (user interactions)
+    // Listen to scroll events (user interactions) - passive for better performance
     el.addEventListener('scroll', handleScroll, { passive: true })
 
     // Listen to resize for gradient only (do NOT touch stickToBottom here)
@@ -169,6 +179,9 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     return () => {
       el.removeEventListener('scroll', handleScroll)
       resizeObserver.disconnect()
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [historicalMessages.length, streamingAnswer])
 
@@ -287,8 +300,9 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     }
   }, [status, conversationId, answer, reasoning, queryClient, reset, isAnswerAnimating])
 
-  const allMessages = useMemo<ChatMessage[]>(() => {
-    const historical = historicalMessages.map((msg: any) => {
+  // Memoize historical messages transformation to avoid re-computation
+  const transformedHistoricalMessages = useMemo<ChatMessage[]>(() => {
+    return historicalMessages.map((msg: any) => {
       // Parse metadata to get thinkingSeconds
       let savedThinkingSeconds: number | undefined
       if (msg.metadata) {
@@ -316,12 +330,14 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
         savedThinkingSeconds,
       }
     })
+  }, [historicalMessages])
 
+  const allMessages = useMemo<ChatMessage[]>(() => {
     if (activeAssistantMessage) {
-      return [...historical, activeAssistantMessage]
+      return [...transformedHistoricalMessages, activeAssistantMessage]
     }
-    return historical
-  }, [historicalMessages, activeAssistantMessage])
+    return transformedHistoricalMessages
+  }, [transformedHistoricalMessages, activeAssistantMessage])
 
   const handleSubmit = async (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault()
@@ -466,6 +482,14 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
 
   return (
     <div className="flex h-full flex-col px-4 py-4 md:px-6 md:py-8">
+      {/* Live region for streaming status announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {status === 'thinking' && 'AI is thinking'}
+        {status === 'streaming' && 'AI is responding'}
+        {status === 'complete' && 'AI response complete'}
+        {status === 'error' && `Error: ${streamError || 'Unknown error'}`}
+      </div>
+
       {/* Header */}
       <header className="mb-4 flex flex-col gap-2 border-b border-white/10 pb-3 md:mb-6 md:flex-row md:items-center md:justify-between md:pb-4">
         <div>
@@ -488,6 +512,10 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       <div
         ref={transcriptRef}
         className="custom-scrollbar relative flex-1 overflow-y-auto pb-4 md:pb-6"
+        role="log"
+        aria-label="Conversation messages"
+        aria-live="polite"
+        aria-atomic="false"
       >
         <div className="relative">
           <div className="pad mx-auto flex w-full flex-col gap-4 pl-2 md:max-w-[600px] md:gap-[30px] md:py-[14px] md:pl-4 lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]">
@@ -519,7 +547,11 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
             })}
 
             {status === 'error' && streamError && (
-              <div className="rounded-[15px] bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              <div
+                className="rounded-[15px] bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                role="alert"
+                aria-live="assertive"
+              >
                 {streamError}
               </div>
             )}

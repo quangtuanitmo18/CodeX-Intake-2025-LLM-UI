@@ -374,12 +374,16 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
   }
 
   return (
-    <aside className="flex h-full w-full flex-col border-r border-white/10 bg-white/5 backdrop-blur-sm md:w-80">
+    <aside
+      className="flex h-full w-full flex-col border-r border-white/10 bg-white/5 backdrop-blur-sm md:w-80"
+      aria-label="Navigation sidebar"
+    >
       <div className="border-b border-white/10 p-4">
         <Button
           onClick={handleNewChat}
           disabled={createConversationMutation.isPending}
           className="w-full gap-2 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30"
+          aria-label="Create new chat"
         >
           <MessageSquarePlus className="h-4 w-4" />
           New Chat

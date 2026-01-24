@@ -33,26 +33,6 @@ const defaultViewportState: ViewportState = {
 }
 
 /**
- * Debounce utility function
- */
-function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null
-      func(...args)
-    }
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    timeout = setTimeout(later, wait)
-  }
-}
-
-/**
  * Get viewport dimensions and device type
  */
 function getViewportState(): ViewportState {
@@ -76,6 +56,7 @@ function getViewportState(): ViewportState {
 
 /**
  * React hook to detect viewport size and device type
+ * Uses ResizeObserver for better performance than window resize events
  *
  * @returns ViewportState object with width, height, orientation, and device type flags
  *
@@ -101,17 +82,43 @@ export function useViewport(): ViewportState {
     // Set initial state after mount to avoid hydration mismatches
     setViewportState(getViewportState())
 
-    // Debounced resize handler (150ms delay)
-    const handleResize = debounce(() => {
-      setViewportState(getViewportState())
-    }, 150)
+    // Use ResizeObserver for better performance than window resize events
+    // ResizeObserver is more efficient and only fires when actual size changes
+    let rafId: number | null = null
+    const resizeObserver = new ResizeObserver(() => {
+      // Throttle updates using requestAnimationFrame
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(() => {
+        setViewportState(getViewportState())
+        rafId = null
+      })
+    })
 
-    // Add event listener
-    window.addEventListener('resize', handleResize)
+    // Observe the document body for size changes
+    resizeObserver.observe(document.body)
+
+    // Fallback to window resize for older browsers (though ResizeObserver is widely supported)
+    const handleResize = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(() => {
+        setViewportState(getViewportState())
+        rafId = null
+      })
+    }
+
+    window.addEventListener('resize', handleResize, { passive: true })
 
     // Cleanup
     return () => {
+      resizeObserver.disconnect()
       window.removeEventListener('resize', handleResize)
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [])
 

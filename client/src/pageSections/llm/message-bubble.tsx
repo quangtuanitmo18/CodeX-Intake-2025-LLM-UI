@@ -51,7 +51,10 @@ export const MessageBubble = memo(function MessageBubble({
   }, [isThinking, hasReasoning])
 
   return (
-    <article className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}>
+    <article
+      className={cn('flex w-full', isUser ? 'justify-end' : 'justify-start')}
+      aria-label={`Message from ${message.author} at ${message.timestamp}`}
+    >
       <div
         className={cn(
           'flex flex-col',

@@ -8,9 +8,15 @@ import {
 } from '@/lib/utils'
 import { RoleType } from '@/types/jwt.types'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import dynamic from 'next/dynamic'
 import { useEffect, useRef } from 'react'
 import { create } from 'zustand'
+
+// Dynamically import ReactQueryDevtools to reduce bundle size
+const ReactQueryDevtools = dynamic(
+  () => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools),
+  { ssr: false }
+)
 
 // Default
 // staleTime: 0
@@ -60,7 +66,7 @@ export default function AppProvider({ children }: { children: React.ReactNode })
     <QueryClientProvider client={queryClient}>
       {children}
       <RefreshToken />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   )
 }
