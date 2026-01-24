@@ -463,6 +463,7 @@ export function useSpeechToText(language: Language = 'vi') {
   return {
     isRecording,
     isConnecting,
+    setIsRecording,
     finalTranscript,
     interimTranscript,
     fullTranscript: finalTranscript + (interimTranscript ? ` ${interimTranscript}` : ''),
