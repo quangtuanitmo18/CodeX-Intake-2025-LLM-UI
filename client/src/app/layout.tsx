@@ -1,13 +1,15 @@
 import AppProvider from '@/components/app-provider'
-import { Toaster } from '@/components/ui/toaster'
+import ToasterWrapper from '@/components/toaster-wrapper'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  preload: true,
 })
 
 export const metadata: Metadata = {
@@ -21,7 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-background text-foreground antialiased">
         <AppProvider>
           {children}
-          <Toaster />
+          <Suspense fallback={null}>
+            <ToasterWrapper />
+          </Suspense>
         </AppProvider>
       </body>
     </html>

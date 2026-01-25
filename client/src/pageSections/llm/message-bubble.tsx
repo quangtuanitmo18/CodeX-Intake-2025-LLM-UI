@@ -59,7 +59,7 @@ export const MessageBubble = memo(function MessageBubble({
         className={cn(
           'flex flex-col',
           isUser
-            ? 'max-w-[85%] rounded-[20px] bg-[#2D2D2D] px-3 py-2 md:max-w-[70%] md:px-4 md:py-3'
+            ? 'max-w-[85%] rounded-[20px] bg-muted px-3 py-2 md:max-w-[70%] md:px-4 md:py-3'
             : 'w-full max-w-[85%] space-y-1 md:max-w-[70%]'
         )}
       >
@@ -83,7 +83,7 @@ export const MessageBubble = memo(function MessageBubble({
               <div className="flex h-[14px] w-[14px] shrink-0 items-center justify-center">
                 <ThoughtIcon />
               </div>
-              <span className="text-xs leading-[20px] text-[#777777] md:text-[14px] md:leading-[22px]">
+              <span className="text-xs leading-[20px] text-muted-foreground md:text-[14px] md:leading-[22px]">
                 {isThinking
                   ? `Thinking...`
                   : savedThinkingSeconds
@@ -91,15 +91,15 @@ export const MessageBubble = memo(function MessageBubble({
                     : 'Thought'}
               </span>
               {isThinking ? null : isReasoningExpanded ? (
-                <ChevronUp className="h-4 w-4 shrink-0 text-[#777777] md:h-[18px] md:w-[18px]" />
+                <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground md:h-[18px] md:w-[18px]" />
               ) : (
-                <ChevronDown className="h-4 w-4 shrink-0 text-[#777777] md:h-[18px] md:w-[18px]" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground md:h-[18px] md:w-[18px]" />
               )}
             </button>
 
             {/* Show reasoning only when expanded OR when thinking */}
             {(isReasoningExpanded || isThinking) && (message.reasoning || isThinking) && (
-              <div className="text-xs leading-[20px] text-[#777777] md:text-[14px] md:leading-[22px]">
+              <div className="text-xs leading-[20px] text-muted-foreground md:text-[14px] md:leading-[22px]">
                 {message.reasoning || (isThinking ? 'Processing...' : '')}
               </div>
             )}
@@ -111,7 +111,7 @@ export const MessageBubble = memo(function MessageBubble({
           <div
             className={cn(
               'text-sm leading-[20px] md:text-[15px] md:leading-[22px]',
-              isUser ? 'text-white' : 'text-white/90'
+              isUser ? 'text-foreground' : 'text-foreground/90'
             )}
           >
             <MarkdownContent content={message.content} isUser={isUser} />

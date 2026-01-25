@@ -95,7 +95,7 @@ export const ChatComposer = memo(function ChatComposer({
   return (
     <form
       onSubmit={handleFormSubmit}
-      className="mx-auto flex min-h-[100px] w-full flex-col gap-1 rounded-[16px] border border-[#191919] bg-[#0E0E0E] px-3 py-2 md:max-w-[600px] md:px-4 md:py-[14px] lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]"
+      className="mx-auto flex min-h-[100px] w-full flex-col gap-1 rounded-[16px] border border-border bg-card px-3 py-2 md:max-w-[600px] md:px-4 md:py-[14px] lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]"
       aria-label="Message composer"
     >
       {attachments.length > 0 && (
@@ -125,8 +125,8 @@ export const ChatComposer = memo(function ChatComposer({
           rows={1}
           disabled={isStreaming}
           className={cn(
-            'custom-scrollbar max-h-[300px] w-full resize-none overflow-y-auto border-0 bg-transparent text-[14px] leading-[22px] text-white placeholder:text-[#777777] disabled:opacity-50',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E]'
+            'custom-scrollbar max-h-[300px] w-full resize-none overflow-y-auto border-0 bg-transparent text-[14px] leading-[22px] text-foreground placeholder:text-muted-foreground disabled:opacity-50',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
           )}
           style={{ minHeight: '22px' }}
           inputMode="text"
@@ -162,8 +162,8 @@ export const ChatComposer = memo(function ChatComposer({
             disabled={true}
             // disabled={isStreaming}
             className={cn(
-              'flex items-center justify-center gap-1 rounded-[16px] border border-[#191919] px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:border-[#777777] active:bg-white/5 disabled:opacity-50',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E]'
+              'flex items-center justify-center gap-1 rounded-[16px] border border-border px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-muted-foreground transition-colors hover:border-foreground/20 active:bg-accent disabled:opacity-50',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
             )}
             aria-label="Attach file"
           >
@@ -177,8 +177,8 @@ export const ChatComposer = memo(function ChatComposer({
           type="submit"
           disabled={!prompt.trim() || isStreaming}
           className={cn(
-            'flex items-center justify-center gap-1 rounded-[16px] bg-white px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-black transition-colors hover:bg-white/90 active:bg-white/80 disabled:opacity-50 md:min-w-0 md:py-1',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E0E]'
+            'flex items-center justify-center gap-1 rounded-[16px] bg-primary px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-primary-foreground transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-50 md:min-w-0 md:py-1',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
           )}
           aria-label={isStreaming ? 'Sending message...' : 'Send message'}
           aria-busy={isStreaming}

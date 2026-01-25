@@ -6,7 +6,15 @@
   color-scheme: light dark;
   --radius: 0.5rem; /* 8px - default Tailwind rounded-lg value */
 
-  /* Colors - Dark theme defaults */
+  /* Font */
+  --font-inter: 'Inter', sans-serif;
+  --font-sans: var(--font-inter);
+}
+
+/* Dark theme (default) */
+:root,
+:root.dark {
+  /* Colors - Dark theme */
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
 
@@ -34,14 +42,44 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 142.1 76.2% 36.3%;
+}
 
-  /* Font */
-  --font-inter: 'Inter', sans-serif;
-  --font-sans: var(--font-inter);
+/* Light theme */
+:root.light {
+  /* Colors - Light theme */
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 47.4% 11.2%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 47.4% 11.2%;
+
+  --primary: 142.1 76.2% 36.3%;
+  --primary-foreground: 355.7 100% 97.3%;
+
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 142.1 76.2% 36.3%;
 }
 
 body {
   min-height: 100vh;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family:
     var(--font-sans),
     system-ui,
@@ -74,7 +112,7 @@ body {
   white-space: normal;
 }
 
-/* Custom Scrollbar - ChatGPT Style */
+/* Custom Scrollbar - Theme-aware */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
@@ -84,18 +122,18 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: hsl(var(--muted-foreground) / 0.3);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
 /* Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
 }
 
 /* Smooth streaming optimizations */

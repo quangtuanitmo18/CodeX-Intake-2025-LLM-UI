@@ -11,7 +11,7 @@ export default async function ConversationPage({
   const { conversationId } = await params
 
   return (
-    <main className="relative min-h-screen bg-[#01030B] text-white">
+    <main className="relative min-h-screen bg-background text-foreground">
       <LLMConversationPage conversationId={conversationId} />
     </main>
   )

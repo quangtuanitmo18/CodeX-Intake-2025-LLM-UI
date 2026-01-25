@@ -6,10 +6,10 @@ type ButtonSize = 'default' | 'sm' | 'lg'
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-primary-foreground shadow hover:bg-primary/90',
-  secondary: 'bg-white/10 text-white hover:bg-white/20',
-  ghost: 'bg-transparent text-white hover:bg-white/10',
-  outline: 'border border-white/20 text-white hover:bg-white/5',
-  destructive: 'bg-red-500 text-white hover:bg-red-500/90',
+  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+  ghost: 'bg-transparent text-foreground hover:bg-accent',
+  outline: 'border border-border text-foreground hover:bg-accent',
+  destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
   link: 'bg-transparent text-primary underline hover:text-primary/80',
 }
 

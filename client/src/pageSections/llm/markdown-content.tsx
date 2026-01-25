@@ -1,11 +1,16 @@
 import { memo, useMemo } from 'react'
-import ReactMarkdown from 'react-markdown'
+import dynamic from 'next/dynamic'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
 
 // Import highlight.js theme
 import '@/app/highlight-theme.css'
 import 'highlight.js/styles/github-dark.css'
+
+// Dynamically import ReactMarkdown to reduce initial bundle size
+const ReactMarkdown = dynamic(() => import('react-markdown'), {
+  ssr: true, // Keep SSR for markdown content
+})
 
 interface MarkdownContentProps {
   content: string
@@ -21,7 +26,7 @@ export const MarkdownContent = memo(
         // Paragraphs
         p: ({ node, ...props }: any) => (
           <p
-            className="text-xs font-normal leading-[20px] text-white md:text-[14px] md:leading-[22px]"
+            className="text-xs font-normal leading-[20px] text-foreground md:text-[14px] md:leading-[22px]"
             {...props}
           />
         ),
@@ -29,25 +34,25 @@ export const MarkdownContent = memo(
         // Headings
         h1: ({ node, ...props }: any) => (
           <h1
-            className="mb-2 mt-6 text-lg font-semibold leading-[24px] text-white md:mb-3 md:mt-8 md:text-[22px] md:leading-[28px]"
+            className="mb-2 mt-6 text-lg font-semibold leading-[24px] text-foreground md:mb-3 md:mt-8 md:text-[22px] md:leading-[28px]"
             {...props}
           />
         ),
         h2: ({ node, ...props }: any) => (
           <h2
-            className="mb-2 mt-4 text-base font-semibold leading-[22px] text-white md:mb-3 md:mt-6 md:text-[18px] md:leading-[24px]"
+            className="mb-2 mt-4 text-base font-semibold leading-[22px] text-foreground md:mb-3 md:mt-6 md:text-[18px] md:leading-[24px]"
             {...props}
           />
         ),
         h3: ({ node, ...props }: any) => (
           <h3
-            className="mb-2 mt-3 text-sm font-semibold leading-[20px] text-white md:mb-3 md:mt-5 md:text-[16px] md:leading-[19px]"
+            className="mb-2 mt-3 text-sm font-semibold leading-[20px] text-foreground md:mb-3 md:mt-5 md:text-[16px] md:leading-[19px]"
             {...props}
           />
         ),
         h4: ({ node, ...props }: any) => (
           <h4
-            className="mb-1 mt-2 text-xs font-semibold leading-[18px] text-white md:mb-2 md:mt-4 md:text-[14px] md:leading-[20px]"
+            className="mb-1 mt-2 text-xs font-semibold leading-[18px] text-foreground md:mb-2 md:mt-4 md:text-[14px] md:leading-[20px]"
             {...props}
           />
         ),
@@ -64,7 +69,7 @@ export const MarkdownContent = memo(
         ),
         li: ({ node, ...props }: any) => (
           <li
-            className="pl-1 text-xs font-normal leading-[20px] text-white md:text-[14px] md:leading-[22px]"
+            className="pl-1 text-xs font-normal leading-[20px] text-foreground md:text-[14px] md:leading-[22px]"
             {...props}
           />
         ),
@@ -74,7 +79,7 @@ export const MarkdownContent = memo(
           if (inline) {
             return (
               <code
-                className="rounded bg-[#2D2D2D] px-1 py-0.5 font-mono text-[11px] text-[#E5E5E5] md:px-1.5 md:text-[13px]"
+                className="rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground md:px-1.5 md:text-[13px]"
                 {...props}
               >
                 {children}
@@ -123,7 +128,7 @@ export const MarkdownContent = memo(
 
                     navigator.clipboard.writeText(code)
                   }}
-                  className="flex min-h-[36px] min-w-[44px] flex-row items-center justify-center gap-1 p-0 text-[10px] font-normal leading-[18px] text-[#777777] transition-colors hover:text-white active:bg-white/5 md:min-h-0 md:min-w-0 md:text-[12px] md:leading-[22px]"
+                  className="flex min-h-[36px] min-w-[44px] flex-row items-center justify-center gap-1 p-0 text-[10px] font-normal leading-[18px] text-muted-foreground transition-colors hover:text-foreground active:bg-accent md:min-h-0 md:min-w-0 md:text-[12px] md:leading-[22px]"
                   aria-label="Copy code"
                 >
                   <svg
@@ -160,7 +165,7 @@ export const MarkdownContent = memo(
               </div>
 
               {/* Code Content */}
-              <div className="w-full overflow-x-auto bg-[#0E0E0E] px-3 py-3 md:px-4 md:py-4">
+              <div className="w-full overflow-x-auto bg-muted px-3 py-3 md:px-4 md:py-4">
                 <pre
                   className="!m-0 min-w-0 max-w-full overflow-x-auto !bg-transparent font-mono text-[11px] leading-[150%] md:text-[12px]"
                   {...props}
@@ -185,18 +190,18 @@ export const MarkdownContent = memo(
         // Blockquotes
         blockquote: ({ node, ...props }: any) => (
           <blockquote
-            className="my-3 border-l-2 border-white/20 py-1 pl-3 pr-2 text-xs font-normal italic leading-[20px] text-white/70 md:my-5 md:pl-4 md:text-[14px] md:leading-[22px]"
+            className="my-3 border-l-2 border-border py-1 pl-3 pr-2 text-xs font-normal italic leading-[20px] text-muted-foreground md:my-5 md:pl-4 md:text-[14px] md:leading-[22px]"
             {...props}
           />
         ),
 
         // Strong (bold)
         strong: ({ node, ...props }: any) => (
-          <strong className="font-semibold text-white" {...props} />
+          <strong className="font-semibold text-foreground" {...props} />
         ),
 
         // Emphasis (italic)
-        em: ({ node, ...props }: any) => <em className="italic text-white/90" {...props} />,
+        em: ({ node, ...props }: any) => <em className="italic text-foreground/90" {...props} />,
 
         // Delete (strikethrough)
         del: ({ node, ...props }: any) => <del className="line-through opacity-60" {...props} />,
@@ -212,17 +217,17 @@ export const MarkdownContent = memo(
         thead: ({ node, ...props }: any) => <thead {...props} />,
         tbody: ({ node, ...props }: any) => <tbody {...props} />,
         tr: ({ node, ...props }: any) => (
-          <tr className="border-b border-[#191919] last:border-0" {...props} />
+          <tr className="border-b border-border last:border-0" {...props} />
         ),
         th: ({ node, ...props }: any) => (
           <th
-            className="px-2 py-2 text-left text-xs font-bold leading-[20px] text-white first:pl-2 last:pr-2 md:px-4 md:py-3 md:text-[14px] md:leading-[22px] md:first:pl-0 md:last:pr-0"
+            className="px-2 py-2 text-left text-xs font-bold leading-[20px] text-foreground first:pl-2 last:pr-2 md:px-4 md:py-3 md:text-[14px] md:leading-[22px] md:first:pl-0 md:last:pr-0"
             {...props}
           />
         ),
         td: ({ node, ...props }: any) => (
           <td
-            className="px-2 py-2 text-xs font-normal leading-[20px] text-white first:pl-2 last:pr-2 md:px-4 md:py-3 md:text-[14px] md:leading-[22px] md:first:pl-0 md:last:pr-0"
+            className="px-2 py-2 text-xs font-normal leading-[20px] text-foreground first:pl-2 last:pr-2 md:px-4 md:py-3 md:text-[14px] md:leading-[22px] md:first:pl-0 md:last:pr-0"
             {...props}
           />
         ),

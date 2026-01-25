@@ -494,12 +494,12 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       </div>
 
       {/* Header */}
-      <header className="mb-4 flex flex-col gap-2 border-b border-white/10 pb-3 md:mb-6 md:flex-row md:items-center md:justify-between md:pb-4">
+      <header className="mb-4 flex flex-col gap-2 border-b border-border pb-3 md:mb-6 md:flex-row md:items-center md:justify-between md:pb-4">
         <div>
-          <h1 className="text-lg font-semibold text-white md:text-2xl">
+          <h1 className="text-lg font-semibold text-foreground md:text-2xl">
             {conversation?.title || 'New Chat'}
           </h1>
-          <p className="mt-1 text-xs text-white/60 md:text-sm">
+          <p className="mt-1 text-xs text-muted-foreground md:text-sm">
             {conversation?.model || 'openai/gpt-5-mini'}
           </p>
         </div>
@@ -523,7 +523,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
         <div className="relative">
           <div className="pad mx-auto flex w-full flex-col gap-4 pl-2 md:max-w-[600px] md:gap-[30px] md:py-[14px] md:pl-4 lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]">
             {allMessages.length === 0 && (
-              <div className="flex h-full items-center justify-center text-[#777777]">
+              <div className="flex h-full items-center justify-center text-muted-foreground">
                 <p className="text-sm">Start a conversation...</p>
               </div>
             )}
@@ -551,7 +551,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
 
             {status === 'error' && streamError && (
               <div
-                className="rounded-[15px] bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                className="rounded-[15px] bg-destructive/10 px-4 py-3 text-sm text-destructive"
                 role="alert"
                 aria-live="assertive"
               >
@@ -563,7 +563,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
           {/* Gradient overlay at bottom of transcript - sticky to show when scrolling */}
           {showComposerGradient && (
             <div
-              className="via-[#01030B]/98 pointer-events-none sticky -bottom-6 left-0 right-0 z-10 h-24 bg-gradient-to-t from-[#01030B] to-transparent md:h-28"
+              className="via-background/98 pointer-events-none sticky -bottom-6 left-0 right-0 z-10 h-24 bg-gradient-to-t from-background to-transparent md:h-28"
               style={{ marginBottom: '-24px' }}
             />
           )}

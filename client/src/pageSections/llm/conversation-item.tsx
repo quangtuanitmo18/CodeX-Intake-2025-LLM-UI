@@ -146,8 +146,8 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
   return (
     <div
       className={cn(
-        'group relative rounded-xl border border-transparent px-2 py-1.5 transition-colors hover:border-white/10 hover:bg-white/5 md:px-2 md:py-1.5',
-        isActive && 'border-emerald-500/30 bg-emerald-500/10'
+        'group relative rounded-xl border border-transparent px-2 py-1.5 transition-colors hover:border-border hover:bg-accent md:px-2 md:py-1.5',
+        isActive && 'border-primary/30 bg-primary/10'
       )}
     >
       <div className="flex items-center gap-2">
@@ -173,15 +173,19 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 }}
                 onBlur={handleSaveTitle}
                 className={cn(
-                  'h-7 border-white/10 bg-white/5 text-sm text-white',
-                  validationError && 'border-red-500/50'
+                  'h-7 border-border bg-background text-sm text-foreground',
+                  validationError && 'border-destructive/50'
                 )}
                 autoFocus
               />
-              {validationError && <p className="mt-1 text-xs text-red-400">{validationError}</p>}
+              {validationError && (
+                <p className="mt-1 text-xs text-destructive">{validationError}</p>
+              )}
             </div>
           ) : (
-            <p className="truncate text-xs font-medium text-white md:text-sm">{displayTitle}</p>
+            <p className="truncate text-xs font-medium text-foreground md:text-sm">
+              {displayTitle}
+            </p>
           )}
         </div>
 
@@ -196,19 +200,19 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
             )}
             aria-label="Conversation options"
           >
-            <MoreVertical className="h-4 w-4 text-white/60 md:h-3.5 md:w-3.5" />
+            <MoreVertical className="h-4 w-4 text-muted-foreground md:h-3.5 md:w-3.5" />
           </Button>
 
           {showMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={closeMenu} />
-              <div className="absolute right-0 top-8 z-20 w-64 rounded-lg border border-white/10 bg-[#040714] p-2 shadow-xl">
+              <div className="absolute right-0 top-8 z-20 w-64 rounded-lg border border-border bg-popover p-2 shadow-xl">
                 <button
                   onClick={() => {
                     setIsEditing(true)
                     closeMenu()
                   }}
-                  className="flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0"
+                  className="flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent active:bg-accent/50 md:min-h-0"
                 >
                   <Pencil className="h-4 w-4 shrink-0" />
                   Edit Title
@@ -216,13 +220,13 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 <button
                   onClick={() => setIsSelectingProject((prev) => !prev)}
                   className={cn(
-                    'flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 active:bg-white/5 md:min-h-0',
-                    isSelectingProject && 'bg-white/10'
+                    'flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent active:bg-accent/50 md:min-h-0',
+                    isSelectingProject && 'bg-accent'
                   )}
                 >
                   <Loader2
                     className={cn(
-                      'h-4 w-4 shrink-0 text-white/60',
+                      'h-4 w-4 shrink-0 text-muted-foreground',
                       moveProjectMutation.isPending && 'animate-spin'
                     )}
                   />
@@ -231,8 +235,8 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 <button
                   onClick={() => setIsConfirmingDelete((prev) => !prev)}
                   className={cn(
-                    'flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10 active:bg-red-500/5 md:min-h-0',
-                    isConfirmingDelete && 'bg-red-500/10'
+                    'flex min-h-[32px] w-full items-center gap-2 rounded px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/5 md:min-h-0',
+                    isConfirmingDelete && 'bg-destructive/10'
                   )}
                 >
                   <Trash2 className="h-4 w-4 shrink-0" />
@@ -240,14 +244,14 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 </button>
 
                 {isSelectingProject && (
-                  <div className="mt-2 rounded-md border border-white/10 bg-[#01030b] p-2">
+                  <div className="mt-2 rounded-md border border-border bg-card p-2">
                     {isLoadingProjects ? (
-                      <div className="flex items-center gap-2 text-xs text-white/60">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         Loading projects...
                       </div>
                     ) : projects.length === 0 ? (
-                      <p className="text-xs text-white/60">
+                      <p className="text-xs text-muted-foreground">
                         No projects yet. Create one from the sidebar first.
                       </p>
                     ) : (
@@ -256,13 +260,13 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                           onClick={() => handleMoveConversation(null)}
                           disabled={moveProjectMutation.isPending}
                           className={cn(
-                            'flex w-full items-center justify-between rounded px-2 py-1 text-left text-white/80 hover:bg-white/10',
-                            !conversation.projectId && 'bg-white/10'
+                            'flex w-full items-center justify-between rounded px-2 py-1 text-left text-foreground/80 hover:bg-accent',
+                            !conversation.projectId && 'bg-accent'
                           )}
                         >
                           <span>All chats</span>
                           {!conversation.projectId && (
-                            <span className="text-xs text-emerald-300">Current</span>
+                            <span className="text-xs text-primary">Current</span>
                           )}
                         </button>
                         <div className="max-h-48 space-y-1 overflow-y-auto">
@@ -272,13 +276,13 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                               onClick={() => handleMoveConversation(project.id)}
                               disabled={moveProjectMutation.isPending}
                               className={cn(
-                                'flex w-full items-center justify-between rounded px-2 py-1 text-left text-white/80 hover:bg-white/10',
-                                conversation.projectId === project.id && 'bg-white/10'
+                                'flex w-full items-center justify-between rounded px-2 py-1 text-left text-foreground/80 hover:bg-accent',
+                                conversation.projectId === project.id && 'bg-accent'
                               )}
                             >
                               <span>{project.name}</span>
                               {conversation.projectId === project.id && (
-                                <span className="text-xs text-emerald-300">Current</span>
+                                <span className="text-xs text-primary">Current</span>
                               )}
                             </button>
                           ))}
@@ -289,14 +293,15 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                 )}
 
                 {isConfirmingDelete && (
-                  <div className="mt-2 space-y-2 rounded-md border border-red-500/20 bg-red-500/5 p-3 text-sm text-white/80">
-                    <p className="text-xs text-red-200">
+                  <div className="mt-2 space-y-2 rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-foreground/80">
+                    <p className="text-xs text-destructive">
                       This will permanently delete the conversation and its messages.
                     </p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        className="flex-1 bg-red-500/80 text-xs text-white hover:bg-red-500"
+                        variant="destructive"
+                        className="flex-1 text-xs"
                         disabled={deleteMutation.isPending}
                         onClick={handleDelete}
                       >
@@ -310,7 +315,7 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
                         type="button"
                         size="sm"
                         variant="ghost"
-                        className="flex-1 text-xs text-white/80"
+                        className="flex-1 text-xs"
                         onClick={() => setIsConfirmingDelete(false)}
                       >
                         Cancel

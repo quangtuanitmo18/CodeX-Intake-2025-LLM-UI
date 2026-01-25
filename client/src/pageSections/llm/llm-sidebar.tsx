@@ -145,18 +145,18 @@ function ProjectItem({
     <div className="space-y-1">
       <div
         className={cn(
-          'group relative flex w-full items-center gap-2 rounded-lg border border-transparent px-2 py-1.5 text-left text-sm text-white/80 transition hover:bg-white/5',
-          isActive && 'bg-white/10 text-white'
+          'group relative flex w-full items-center gap-2 rounded-lg border border-transparent px-2 py-1.5 text-left text-sm text-foreground/80 transition hover:bg-accent',
+          isActive && 'bg-accent text-foreground'
         )}
       >
         <button onClick={onToggleExpand} className="flex flex-1 items-center gap-2">
           <ChevronDown
             className={cn(
-              'h-3.5 w-3.5 text-white/60 transition-transform',
+              'h-3.5 w-3.5 text-muted-foreground transition-transform',
               isExpanded ? 'rotate-0' : '-rotate-90'
             )}
           />
-          <Folder className="h-4 w-4 text-white/70" />
+          <Folder className="h-4 w-4 text-muted-foreground" />
           {isEditing ? (
             <Input
               value={editName}
@@ -169,7 +169,7 @@ function ProjectItem({
                 }
               }}
               onBlur={handleSaveName}
-              className="h-6 border-white/10 bg-white/5 text-xs text-white"
+              className="h-6 border-border bg-background text-xs text-foreground"
               autoFocus
             />
           ) : (
@@ -187,19 +187,19 @@ function ProjectItem({
               showMenu && 'opacity-100'
             )}
           >
-            <MoreVertical className="h-3.5 w-3.5 text-white/60" />
+            <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
 
           {showMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-8 z-20 w-56 rounded-lg border border-white/10 bg-[#040714] p-2 shadow-xl">
+              <div className="absolute right-0 top-8 z-20 w-56 rounded-lg border border-border bg-popover p-2 shadow-xl">
                 <button
                   onClick={() => {
                     setIsEditing(true)
                     setShowMenu(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-foreground/80 hover:bg-accent"
                 >
                   <Pencil className="h-4 w-4" />
                   Edit
@@ -207,7 +207,7 @@ function ProjectItem({
                 <button
                   onClick={handleAddChat}
                   disabled={createProjectChatMutation.isPending}
-                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-foreground/80 hover:bg-accent"
                 >
                   {createProjectChatMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -219,8 +219,8 @@ function ProjectItem({
                 <button
                   onClick={() => setIsConfirmingDelete((prev) => !prev)}
                   className={cn(
-                    'flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-red-400 hover:bg-red-500/10',
-                    isConfirmingDelete && 'bg-red-500/10'
+                    'flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-destructive hover:bg-destructive/10',
+                    isConfirmingDelete && 'bg-destructive/10'
                   )}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -228,14 +228,15 @@ function ProjectItem({
                 </button>
 
                 {isConfirmingDelete && (
-                  <div className="mt-2 space-y-2 rounded-md border border-red-500/20 bg-red-500/5 p-3 text-sm text-white/80">
-                    <p className="text-xs text-red-200">
+                  <div className="mt-2 space-y-2 rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-foreground/80">
+                    <p className="text-xs text-destructive">
                       This will delete the project. All chats will be moved to General project.
                     </p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        className="flex-1 bg-red-500/80 text-xs text-white hover:bg-red-500"
+                        variant="destructive"
+                        className="flex-1 text-xs"
                         disabled={deleteProjectMutation.isPending}
                         onClick={handleDelete}
                       >
@@ -249,7 +250,7 @@ function ProjectItem({
                         type="button"
                         size="sm"
                         variant="ghost"
-                        className="flex-1 text-xs text-white/80"
+                        className="flex-1 text-xs"
                         onClick={() => setIsConfirmingDelete(false)}
                       >
                         Cancel
@@ -264,14 +265,14 @@ function ProjectItem({
       </div>
 
       {isExpanded && (
-        <div className="ml-6 space-y-2 border-l border-white/10 pl-2">
+        <div className="ml-6 space-y-2 border-l border-border pl-2">
           {isLoadingProjectChats ? (
-            <div className="flex items-center justify-center py-2 text-xs text-white/50">
+            <div className="flex items-center justify-center py-2 text-xs text-muted-foreground">
               <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
               Loading...
             </div>
           ) : projectConversations.length === 0 ? (
-            <div className="px-2 py-1.5 text-xs text-white/50">No chats yet</div>
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">No chats yet</div>
           ) : (
             projectConversations.map((conversation: any) => (
               <ConversationItem
@@ -375,14 +376,14 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
 
   return (
     <aside
-      className="flex h-full w-full flex-col border-r border-white/10 bg-white/5 backdrop-blur-sm md:w-80"
+      className="flex h-full w-full flex-col border-r border-border bg-card/50 backdrop-blur-sm md:w-80"
       aria-label="Navigation sidebar"
     >
-      <div className="border-b border-white/10 p-4">
+      <div className="border-b border-border p-4">
         <Button
           onClick={handleNewChat}
           disabled={createConversationMutation.isPending}
-          className="w-full gap-2 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30"
+          className="w-full gap-2 bg-primary/20 text-primary hover:bg-primary/30"
           aria-label="Create new chat"
         >
           <MessageSquarePlus className="h-4 w-4" />
@@ -392,9 +393,9 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
 
       <div className="flex-1 overflow-y-auto">
         {/* Projects Section */}
-        <section className="border-b border-white/5 p-4">
+        <section className="border-b border-border/50 p-4">
           <header
-            className="flex cursor-pointer items-center justify-between text-sm font-semibold text-white"
+            className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground"
             onClick={() => setProjectsOpen((prev) => !prev)}
           >
             <span>Projects</span>
@@ -405,13 +406,13 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
                   setIsProjectModalOpen(true)
                   setProjectsOpen(true)
                 }}
-                className="rounded-full border border-white/15 p-1 text-white/70 transition hover:bg-white/10"
+                className="rounded-full border border-border p-1 text-muted-foreground transition hover:bg-accent"
               >
                 <FolderPlus className="h-4 w-4" />
               </button>
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-white/70 transition-transform',
+                  'h-4 w-4 text-muted-foreground transition-transform',
                   projectsOpen ? 'rotate-0' : '-rotate-90'
                 )}
               />
@@ -421,12 +422,12 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
           {projectsOpen && (
             <div className="mt-3 space-y-1">
               {isLoadingProjects ? (
-                <div className="flex items-center justify-center py-4 text-xs text-white/60">
+                <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
                   <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                   Loading projects...
                 </div>
               ) : projects.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-white/15 p-4 text-center text-xs text-white/60">
+                <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
                   No projects yet. Use the + button to create one.
                 </div>
               ) : (
@@ -450,13 +451,13 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
         {/* Chats Section - Only standalone chats */}
         <section className="p-4">
           <header
-            className="flex cursor-pointer items-center justify-between text-sm font-semibold text-white"
+            className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground"
             onClick={() => setChatsOpen((prev) => !prev)}
           >
             <span>Chats</span>
             <ChevronDown
               className={cn(
-                'h-4 w-4 text-white/70 transition-transform',
+                'h-4 w-4 text-muted-foreground transition-transform',
                 chatsOpen ? 'rotate-0' : '-rotate-90'
               )}
             />
@@ -470,12 +471,12 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
                   placeholder="Search chats..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="border-white/10 bg-white/5 pl-10 pr-10 text-sm text-white placeholder:text-white/40"
+                  className="border-border bg-background pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground"
                 />
                 {search && (
                   <button
                     onClick={() => setSearch('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -483,12 +484,12 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
               </div>
 
               {isLoadingConversations ? (
-                <div className="flex items-center justify-center py-6 text-sm text-white/60">
+                <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Loading chats...
                 </div>
               ) : conversations.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-white/15 p-4 text-center text-xs text-white/60">
+                <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
                   {search ? 'No conversations found.' : 'No standalone chats yet.'}
                 </div>
               ) : (
@@ -507,7 +508,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
                       onClick={handleLoadMore}
                       variant="ghost"
                       size="sm"
-                      className="w-full text-white/60 hover:text-white"
+                      className="w-full text-muted-foreground hover:text-foreground"
                     >
                       Load more
                     </Button>
@@ -519,7 +520,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
         </section>
       </div>
 
-      <div className="border-t border-white/10 p-2">
+      <div className="border-t border-border p-2">
         <UserProfileMenu dropdownPlacement="top" />
       </div>
 

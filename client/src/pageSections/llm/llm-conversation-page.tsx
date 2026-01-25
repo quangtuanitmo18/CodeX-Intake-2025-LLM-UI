@@ -1,18 +1,36 @@
 'use client'
 
 import { Menu, X } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
+import { ThemeToggle } from '@/components/theme-toggle'
 import { useViewport } from '@/hooks/useViewport'
 import { cn } from '@/lib/utils'
 import { useConversation } from '@/queries/useConversation'
 
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { LLMChatArea } from './llm-chat-area'
-import { LLMSidebar } from './llm-sidebar'
+import { Suspense } from 'react'
+
+// Dynamically import heavy components to reduce initial bundle size
+const LLMChatArea = dynamic(() => import('./llm-chat-area').then((mod) => mod.LLMChatArea), {
+  loading: () => (
+    <div className="flex h-full items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    </div>
+  ),
+})
+
+const LLMSidebar = dynamic(() => import('./llm-sidebar').then((mod) => mod.LLMSidebar), {
+  loading: () => (
+    <div className="flex h-full items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    </div>
+  ),
+})
 
 interface LLMConversationPageProps {
   conversationId?: string
@@ -110,7 +128,7 @@ export default function LLMConversationPage({
       </a>
       <div className="flex h-screen flex-col">
         <header
-          className="flex h-14 items-center justify-between border-b border-gray-800 px-4 md:px-6"
+          className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:px-6"
           role="banner"
         >
           <div className="flex items-center gap-2 md:gap-4">
@@ -118,7 +136,7 @@ export default function LLMConversationPage({
             {isMobileOrTablet && (
               <button
                 onClick={toggleSidebar}
-                className="flex h-10 w-10 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/10 active:bg-white/20"
+                className="flex h-10 w-10 items-center justify-center rounded-md text-foreground/80 transition-colors hover:bg-foreground/10 active:bg-foreground/20"
                 aria-label="Toggle sidebar"
               >
                 {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -126,14 +144,15 @@ export default function LLMConversationPage({
             )}
             <Link
               href="/"
-              className="flex items-center gap-2 rounded-md transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800"
+              className="flex items-center gap-2 rounded-md transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Image src="/codex-logo.svg" alt="CodeX logo" width={30} height={30} />
-              <h1 className="text-base font-semibold text-white md:text-lg">
+              <h1 className="text-base font-semibold text-foreground md:text-lg">
                 LLM UI - CodeX Intake 2025
               </h1>
             </Link>
           </div>
+          <ThemeToggle />
         </header>
 
         <div className="relative flex flex-1 overflow-hidden">
@@ -146,10 +165,18 @@ export default function LLMConversationPage({
             aria-label="Navigation sidebar"
             aria-hidden={!showSidebar && isMobileOrTablet}
           >
-            <LLMSidebar
-              activeConversationId={activeConversationId}
-              activeProjectId={activeProjectId}
-            />
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                </div>
+              }
+            >
+              <LLMSidebar
+                activeConversationId={activeConversationId}
+                activeProjectId={activeProjectId}
+              />
+            </Suspense>
           </aside>
 
           {/* Overlay backdrop for mobile/tablet */}
@@ -162,13 +189,21 @@ export default function LLMConversationPage({
           )}
 
           {/* Chat area */}
-          <main id="chat-area" className="flex flex-1 flex-col border-l border-white/5" role="main">
+          <main id="chat-area" className="flex flex-1 flex-col border-l border-border" role="main">
             {activeConversationId ? (
-              <LLMChatArea conversationId={activeConversationId} />
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                  </div>
+                }
+              >
+                <LLMChatArea conversationId={activeConversationId} />
+              </Suspense>
             ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center text-white/60 md:px-6">
-                <h2 className="text-lg font-semibold text-white md:text-xl">Select a chat</h2>
-                <p className="max-w-md text-sm text-white/60">
+              <div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center text-muted-foreground md:px-6">
+                <h2 className="text-lg font-semibold text-foreground md:text-xl">Select a chat</h2>
+                <p className="max-w-md text-sm text-muted-foreground">
                   Choose a chat from the list or start a new one to begin messaging inside{' '}
                   {activeProjectId ? 'this project' : 'your workspace'}.
                 </p>

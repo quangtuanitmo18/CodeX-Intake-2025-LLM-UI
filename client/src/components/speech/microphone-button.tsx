@@ -144,7 +144,9 @@ export const MicrophoneButton = forwardRef<MicrophoneButtonHandle, MicrophoneBut
             onClick={handleMicClick}
             disabled={isDisabled}
             className={`flex items-center justify-center gap-1 px-[11px] py-[3px] text-[14px] font-medium leading-[22px] transition-colors disabled:opacity-50 ${
-              isRecording ? 'animate-pulse text-red-300' : 'text-[#777777] hover:bg-white/5'
+              isRecording
+                ? 'animate-pulse text-destructive'
+                : 'text-muted-foreground hover:bg-accent'
             }`}
             aria-label={isRecording ? 'Stop recording' : 'Start recording'}
             title={
@@ -168,7 +170,7 @@ export const MicrophoneButton = forwardRef<MicrophoneButtonHandle, MicrophoneBut
             type="button"
             onClick={handleDropdownToggle}
             disabled={isDisabled || isRecording || isConnecting}
-            className="flex items-center justify-center gap-1 border-l border-[#191919] px-[8px] py-[3px] text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:bg-white/5 active:bg-white/10 disabled:opacity-50"
+            className="flex items-center justify-center gap-1 border-l border-border px-[8px] py-[3px] text-[14px] font-medium leading-[22px] text-muted-foreground transition-colors hover:bg-accent active:bg-accent/80 disabled:opacity-50"
             aria-label="Select language"
           >
             <span className="text-xs md:inline">{selectedOption.label}</span>
@@ -182,7 +184,7 @@ export const MicrophoneButton = forwardRef<MicrophoneButtonHandle, MicrophoneBut
         {isDropdownOpen && !isRecording && !isConnecting && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-            <div className="absolute bottom-full left-0 z-20 mb-2 min-w-[140px] rounded-[12px] border border-[#191919] bg-[#0E0E0E] shadow-lg">
+            <div className="absolute bottom-full left-0 z-20 mb-2 min-w-[140px] rounded-[12px] border border-border bg-popover shadow-lg">
               {LANGUAGE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -190,8 +192,8 @@ export const MicrophoneButton = forwardRef<MicrophoneButtonHandle, MicrophoneBut
                   onClick={() => handleLanguageChange(option.value)}
                   className={`w-full px-3 py-2 text-left text-[14px] transition-colors first:rounded-t-[12px] last:rounded-b-[12px] ${
                     language === option.value
-                      ? 'bg-white/10 text-white'
-                      : 'text-[#777777] hover:bg-white/5'
+                      ? 'bg-accent text-foreground'
+                      : 'text-muted-foreground hover:bg-accent'
                   }`}
                 >
                   {option.label}

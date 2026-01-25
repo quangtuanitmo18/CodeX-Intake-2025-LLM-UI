@@ -1,6 +1,7 @@
 'use client'
 
 import RefreshToken from '@/components/refresh-token'
+import { ThemeProvider } from '@/contexts/theme-context'
 import {
   decodeToken,
   getAccessTokenFromLocalStorage,
@@ -63,10 +64,12 @@ export default function AppProvider({ children }: { children: React.ReactNode })
   }, [setRole])
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <RefreshToken />
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <RefreshToken />
+        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }

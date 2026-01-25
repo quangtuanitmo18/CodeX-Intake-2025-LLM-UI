@@ -43,7 +43,7 @@ export function LanguageSelector({ value, onChange, disabled }: LanguageSelector
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex items-center justify-center gap-1 rounded-[16px] border border-[#191919] px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-[#777777] transition-colors hover:border-[#777777] active:bg-white/5 disabled:opacity-50"
+        className="flex items-center justify-center gap-1 rounded-[16px] border border-border px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-muted-foreground transition-colors hover:border-foreground/20 active:bg-accent disabled:opacity-50"
         aria-label="Select language"
       >
         <span className="md:inline">{selectedOption.label}</span>
@@ -55,7 +55,7 @@ export function LanguageSelector({ value, onChange, disabled }: LanguageSelector
       {isOpen && !disabled && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute bottom-full left-0 z-20 mb-2 min-w-[120px] rounded-[12px] border border-[#191919] bg-[#0E0E0E] shadow-lg">
+          <div className="absolute bottom-full left-0 z-20 mb-2 min-w-[120px] rounded-[12px] border border-border bg-popover shadow-lg">
             {LANGUAGE_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -63,8 +63,8 @@ export function LanguageSelector({ value, onChange, disabled }: LanguageSelector
                 onClick={() => handleChange(option.value)}
                 className={`w-full px-3 py-2 text-left text-[14px] transition-colors first:rounded-t-[12px] last:rounded-b-[12px] ${
                   value === option.value
-                    ? 'bg-white/10 text-white'
-                    : 'text-[#777777] hover:bg-white/5'
+                    ? 'bg-accent text-foreground'
+                    : 'text-muted-foreground hover:bg-accent'
                 }`}
               >
                 {option.label}
