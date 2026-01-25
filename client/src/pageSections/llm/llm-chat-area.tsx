@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ZodError } from 'zod'
 
 import { useStreamingDisplay } from '@/hooks/useStreamingDisplay'
+import { useTranslation } from '@/hooks/use-translation'
 import {
   useConversation,
   useConversationMessages,
@@ -22,6 +23,7 @@ interface LLMChatAreaProps {
 }
 
 export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
+  const { t } = useTranslation()
   const [prompt, setPrompt] = useState('')
   const [attachments, setAttachments] = useState<Array<{ id: string; file: File }>>([])
   const [composerError, setComposerError] = useState<string | null>(null)
@@ -357,7 +359,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     if (!trimmedPrompt) return
 
     if (!conversationId) {
-      setComposerError('No active conversation. Please create a new chat.')
+      setComposerError(t('llm.chatArea.noActiveConversation'))
       return
     }
 
@@ -367,7 +369,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     try {
       const uploadedAttachments = []
       if (attachments.length > 0) {
-        setComposerError('Uploading files...')
+        setComposerError(t('llm.chatArea.uploadingFiles'))
         const tempMessageId = `temp-${Date.now()}`
 
         for (const attachment of attachments) {
@@ -459,10 +461,10 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
       start(trimmedPrompt, conversationId)
     } catch (error) {
       if (error instanceof ZodError) {
-        setComposerError(error.errors[0]?.message || 'Invalid message')
+        setComposerError(error.errors[0]?.message || t('llm.chatArea.invalidMessage'))
       } else {
         console.error('Failed to send message:', error)
-        setComposerError('Failed to send message. Please try again.')
+        setComposerError(t('llm.chatArea.failedToSendMessage'))
       }
     } finally {
       setTimeout(() => {
@@ -475,9 +477,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     return (
       <div className="flex h-full items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-sm text-white/60 md:text-lg">
-            Select a chat or create a new chat to begin
-          </p>
+          <p className="text-sm text-white/60 md:text-lg">{t('llm.chatArea.selectChatToBegin')}</p>
         </div>
       </div>
     )
@@ -487,17 +487,17 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
     <div className="flex h-full flex-col px-4 py-4 md:px-6 md:py-8">
       {/* Live region for streaming status announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {status === 'thinking' && 'AI is thinking'}
-        {status === 'streaming' && 'AI is responding'}
-        {status === 'complete' && 'AI response complete'}
-        {status === 'error' && `Error: ${streamError || 'Unknown error'}`}
+        {status === 'thinking' && t('llm.chatArea.aiThinking')}
+        {status === 'streaming' && t('llm.chatArea.aiResponding')}
+        {status === 'complete' && t('llm.chatArea.aiResponseComplete')}
+        {status === 'error' && `${t('errors.error')}: ${streamError || t('errors.unknownError')}`}
       </div>
 
       {/* Header */}
       <header className="mb-4 flex flex-col gap-2 border-b border-border pb-3 md:mb-6 md:flex-row md:items-center md:justify-between md:pb-4">
         <div>
           <h1 className="text-lg font-semibold text-foreground md:text-2xl">
-            {conversation?.title || 'New Chat'}
+            {conversation?.title || t('llm.chatArea.newChat')}
           </h1>
           <p className="mt-1 text-xs text-muted-foreground md:text-sm">
             {conversation?.model || 'openai/gpt-5-mini'}
@@ -524,7 +524,7 @@ export function LLMChatArea({ conversationId }: LLMChatAreaProps) {
           <div className="pad mx-auto flex w-full flex-col gap-4 pl-2 md:max-w-[600px] md:gap-[30px] md:py-[14px] md:pl-4 lg:max-w-[700px] xl:max-w-[800px] 2xl:max-w-[900px]">
             {allMessages.length === 0 && (
               <div className="flex h-full items-center justify-center text-muted-foreground">
-                <p className="text-sm">Start a conversation...</p>
+                <p className="text-sm">{t('llm.chatArea.startConversation')}</p>
               </div>
             )}
 

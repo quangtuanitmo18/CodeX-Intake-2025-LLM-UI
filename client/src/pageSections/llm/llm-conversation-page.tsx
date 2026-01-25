@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageSelector } from '@/components/language-selector'
 import { useViewport } from '@/hooks/useViewport'
 import { cn } from '@/lib/utils'
 import { useConversation } from '@/queries/useConversation'
@@ -152,7 +153,10 @@ export default function LLMConversationPage({
               </h1>
             </Link>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
         </header>
 
         <div className="relative flex flex-1 overflow-hidden">

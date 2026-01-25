@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { useState } from 'react'
 
 export function MediaUploadForm() {
+  const { t } = useTranslation()
   const [preview, setPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
@@ -21,13 +23,13 @@ export function MediaUploadForm() {
       const res = await mediaApiRequest.upload(formData)
       setPreview(res.payload.data)
       toast({
-        title: 'Upload complete',
+        title: t('media.uploadComplete'),
         description: res.payload.message,
       })
     } catch (error: any) {
       toast({
-        title: 'Upload failed',
-        description: error?.payload?.message ?? 'Unable to upload file',
+        title: t('media.uploadFailed'),
+        description: error?.payload?.message ?? t('media.unableToUploadFile'),
         variant: 'destructive',
       })
     } finally {
@@ -37,7 +39,7 @@ export function MediaUploadForm() {
 
   return (
     <div className="w-full max-w-2xl space-y-3">
-      <Label htmlFor="media-input">Upload sample image</Label>
+      <Label htmlFor="media-input">{t('media.uploadSampleImage')}</Label>
       <Input
         id="media-input"
         type="file"
@@ -47,7 +49,7 @@ export function MediaUploadForm() {
       />
       {preview && (
         <div className="rounded-lg border bg-muted p-3 md:p-4">
-          <p className="text-xs font-medium md:text-sm">Uploaded path</p>
+          <p className="text-xs font-medium md:text-sm">{t('media.uploadedPath')}</p>
           <a
             href={preview}
             className="break-all text-xs text-primary underline md:text-sm"
@@ -59,7 +61,7 @@ export function MediaUploadForm() {
         </div>
       )}
       <Button type="button" variant="ghost" onClick={() => setPreview(null)}>
-        Clear preview
+        {t('media.clearPreview')}
       </Button>
     </div>
   )

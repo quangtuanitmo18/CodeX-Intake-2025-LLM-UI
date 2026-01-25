@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công"
+  },
+  "auth": {
+    "login": {
+      "title": "Chào mừng trở lại",
+      "description": "Sử dụng thông tin đăng nhập admin để truy cập dashboard.",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "signIn": "Đăng nhập",
+      "signingIn": "Đang đăng nhập..."
+    },
+    "logout": {
+      "title": "Đăng xuất",
+      "confirm": "Bạn có chắc chắn muốn đăng xuất?"
+    }
+  },
+  "errors": {
+    "error": "Lỗi",
+    "required": "Trường này là bắt buộc",
+    "invalidEmail": "Địa chỉ email không hợp lệ",
+    "invalidPassword": "Mật khẩu không hợp lệ",
+    "networkError": "Lỗi kết nối. Vui lòng thử lại.",
+    "unknownError": "Đã xảy ra lỗi không xác định"
+  },
+  "toast": {
+    "signedIn": "Đăng nhập thành công",
+    "signedOut": "Đăng xuất thành công",
+    "saved": "Lưu thành công",
+    "deleted": "Xóa thành công",
+    "error": "Đã xảy ra lỗi"
+  },
+  "home": {
+    "title": "CodeX Intake 2025",
+    "description": "CodeX là một đội ngũ gồm các kỹ sư và nhà thiết kế đam mê, kết nối sinh viên, cựu sinh viên và các chuyên gia trẻ khác trên thế giới quan tâm đến việc tạo ra các dự án mã nguồn mở chất lượng cao và có được kinh nghiệm quý giá trong việc tạo ra các sản phẩm có giá trị trên thị trường toàn cầu. Mục tiêu của chúng tôi là tạo ra một đội ngũ với ngọn lửa trong mắt và tính cách lý tưởng.",
+    "loginButton": "Vào LLM UI",
+    "section1": "CodeX — một đội ngũ nhỏ gồm những người đam mê, tạo ra các sản phẩm mã nguồn mở. Hiện tại chúng tôi đang tìm kiếm không chỉ những người có kinh nghiệm, mà trước hết là những người có động lực, muốn phát triển kỹ năng kỹ thuật và sản phẩm của mình và làm việc cùng với đội ngũ về các công nghệ tiên tiến. Và những người sẵn sàng dành đủ thời gian cho công việc tại CodeX.",
+    "section2": "Chúng tôi có một bài tập thử nghiệm sẽ giúp hiểu rõ hơn về trình độ kỹ thuật và động lực của bạn. Nó cũng sẽ cho phép chúng tôi làm quen với nhau tốt hơn và bắt đầu tích hợp bạn vào quy trình làm việc. Trong quá trình thực hiện bài tập, chúng tôi sẽ giao tiếp và làm việc cùng nhau, và bạn sẽ có thể đánh giá mức độ quan tâm của mình đối với công việc tại CodeX.",
+    "section3": "Các mô hình LLM đang ngày càng được yêu cầu và được tích hợp vào nhiều lĩnh vực công nghệ và sản phẩm khác nhau. Chúng tôi đề xuất bạn làm việc ở tuyến đầu — thử tạo giao diện riêng của mình để tương tác với mô hình. Đây là một nhiệm vụ thú vị, cho phép bạn tìm hiểu các nguyên tắc hoạt động của giao diện LLM, thực hành làm việc với luồng, phân tích Markdown, hoạt ảnh và kết xuất các khối khác nhau. Chúng tôi hy vọng rằng trong quá trình thực hiện bài tập, bạn sẽ học được điều gì đó mới và có được kinh nghiệm hữu ích.",
+    "section4": "Đây là bài tập chung cho các nhà phát triển Frontend và Backend."
+  },
+  "llm": {
+    "sidebar": {
+      "newChat": "Cuộc trò chuyện mới",
+      "projects": "Dự án",
+      "chats": "Cuộc trò chuyện",
+      "loading": "Đang tải...",
+      "noChatsYet": "Chưa có cuộc trò chuyện nào",
+      "edit": "Sửa",
+      "addChat": "Thêm cuộc trò chuyện",
+      "delete": "Xóa",
+      "cancel": "Hủy",
+      "projectRenamed": "Đã đổi tên dự án",
+      "renameFailed": "Đổi tên thất bại",
+      "couldNotUpdateProjectName": "Không thể cập nhật tên dự án.",
+      "projectDeleted": "Đã xóa dự án",
+      "allChatsMovedToGeneral": "Tất cả cuộc trò chuyện đã được chuyển sang dự án Chung.",
+      "deleteFailed": "Xóa thất bại",
+      "pleaseTryAgain": "Vui lòng thử lại.",
+      "chatCreated": "Đã tạo cuộc trò chuyện",
+      "newChatAddedToProject": "Đã thêm cuộc trò chuyện mới vào dự án.",
+      "createFailed": "Tạo thất bại",
+      "couldNotCreateChat": "Không thể tạo cuộc trò chuyện.",
+      "deleteProjectWarning": "Hành động này sẽ xóa dự án. Tất cả cuộc trò chuyện sẽ được chuyển sang dự án Chung.",
+      "searchChats": "Tìm kiếm cuộc trò chuyện...",
+      "loadingChats": "Đang tải cuộc trò chuyện...",
+      "noConversationsFound": "Không tìm thấy cuộc trò chuyện nào.",
+      "noStandaloneChatsYet": "Chưa có cuộc trò chuyện độc lập nào.",
+      "loadMore": "Tải thêm",
+      "loadingProjects": "Đang tải dự án...",
+      "noProjectsYet": "Chưa có dự án nào. Sử dụng nút + để tạo một dự án."
+    },
+    "chatArea": {
+      "newChat": "Cuộc trò chuyện mới",
+      "selectChatToBegin": "Chọn một cuộc trò chuyện hoặc tạo cuộc trò chuyện mới để bắt đầu",
+      "aiThinking": "AI đang suy nghĩ",
+      "aiResponding": "AI đang phản hồi",
+      "aiResponseComplete": "AI đã phản hồi xong",
+      "startConversation": "Bắt đầu cuộc trò chuyện...",
+      "noActiveConversation": "Không có cuộc trò chuyện đang hoạt động. Vui lòng tạo cuộc trò chuyện mới.",
+      "uploadingFiles": "Đang tải lên tệp...",
+      "invalidMessage": "Tin nhắn không hợp lệ",
+      "failedToSendMessage": "Gửi tin nhắn thất bại. Vui lòng thử lại."
+    },
+    "composer": {
+      "messageInput": "Nhập tin nhắn",
+      "askAnything": "Hỏi bất cứ điều gì",
+      "attach": "Đính kèm",
+      "send": "Gửi",
+      "sendingMessage": "Đang gửi tin nhắn...",
+      "sendMessage": "Gửi tin nhắn"
+    },
+    "message": {
+      "thinking": "Đang suy nghĩ...",
+      "thoughtForSeconds": "Đã suy nghĩ trong {seconds} giây",
+      "thought": "Suy nghĩ",
+      "collapseReasoning": "Thu gọn lý do",
+      "expandReasoning": "Mở rộng lý do",
+      "processing": "Đang xử lý..."
+    }
+  },
+  "profile": {
+    "title": "Hồ sơ",
+    "displayName": "Tên hiển thị",
+    "avatarUrl": "URL ảnh đại diện",
+    "saveChanges": "Lưu thay đổi",
+    "profileUpdated": "Đã cập nhật hồ sơ"
+  },
+  "password": {
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "updatePassword": "Cập nhật mật khẩu",
+    "passwordUpdated": "Đã cập nhật mật khẩu",
+    "passwordUpdatedSuccessfully": "Đã cập nhật mật khẩu thành công"
+  },
+  "media": {
+    "uploadSampleImage": "Tải lên ảnh mẫu",
+    "uploadedPath": "Đường dẫn đã tải lên",
+    "clearPreview": "Xóa xem trước",
+    "uploadComplete": "Tải lên hoàn tất",
+    "uploadFailed": "Tải lên thất bại",
+    "unableToUploadFile": "Không thể tải lên tệp"
+  },
+  "pages": {
+    "profile": {
+      "title": "Cài đặt hồ sơ",
+      "back": "Quay lại",
+      "profileTab": "Hồ sơ",
+      "passwordTab": "Đổi mật khẩu",
+      "name": "Tên",
+      "email": "Email",
+      "emailCannotBeChanged": "Email không thể thay đổi",
+      "clickCameraToChangeAvatar": "Nhấp vào biểu tượng camera để thay đổi ảnh đại diện",
+      "saveChanges": "Lưu thay đổi",
+      "currentPassword": "Mật khẩu hiện tại",
+      "newPassword": "Mật khẩu mới",
+      "confirmNewPassword": "Xác nhận mật khẩu mới",
+      "changePassword": "Đổi mật khẩu",
+      "passwordChangedSuccessfully": "Đã đổi mật khẩu thành công"
+    },
+    "settings": {
+      "title": "Cài đặt",
+      "back": "Quay lại",
+      "general": {
+        "title": "Chung",
+        "language": "Ngôn ngữ",
+        "languageDescription": "Chọn ngôn ngữ ưa thích của bạn",
+        "theme": "Giao diện",
+        "themeDescription": "Chọn giao diện của bạn",
+        "dark": "Tối",
+        "light": "Sáng",
+        "system": "Hệ thống"
+      },
+      "llm": {
+        "title": "Tùy chọn LLM",
+        "defaultModel": "Mô hình mặc định",
+        "defaultModelDescription": "Chọn mô hình AI mặc định của bạn",
+        "temperature": "Temperature",
+        "temperatureDescription": "Điều khiển độ ngẫu nhiên phản hồi (0-1)",
+        "maxTokens": "Max Tokens",
+        "maxTokensDescription": "Độ dài phản hồi tối đa"
+      },
+      "privacy": {
+        "title": "Quyền riêng tư & Dữ liệu",
+        "saveConversationHistory": "Lưu lịch sử cuộc trò chuyện",
+        "saveConversationHistoryDescription": "Lưu trữ lịch sử chat của bạn để tham khảo sau",
+        "analytics": "Phân tích",
+        "analyticsDescription": "Giúp cải thiện dịch vụ của chúng tôi bằng dữ liệu sử dụng"
+      },
+      "dangerZone": {
+        "title": "Vùng nguy hiểm",
+        "deleteAllConversations": "Xóa tất cả cuộc trò chuyện",
+        "deleteAllConversationsDescription": "Xóa vĩnh viễn tất cả lịch sử chat của bạn",
+        "deleteAll": "Xóa tất cả",
+        "deleteAccount": "Xóa tài khoản",
+        "deleteAccountDescription": "Xóa vĩnh viễn tài khoản và tất cả dữ liệu của bạn",
+        "deleteAccountButton": "Xóa tài khoản"
+      }
+    },
+    "userMenu": {
+      "profile": "Hồ sơ",
+      "settings": "Cài đặt",
+      "logOut": "Đăng xuất",
+      "loggedOutSuccessfully": "Đã đăng xuất thành công",
+      "workspace": "Workspace",
+      "plus": "Plus",
+      "user": "Người dùng"
+    }
+  }
+}

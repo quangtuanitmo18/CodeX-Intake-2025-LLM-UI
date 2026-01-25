@@ -18,6 +18,7 @@ import { ZodError } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { cn } from '@/lib/utils'
 import { useConversations, useCreateConversation } from '@/queries/useConversation'
 import {
@@ -52,6 +53,7 @@ function ProjectItem({
   activeConversationId,
   activeProjectId,
 }: ProjectItemProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [showMenu, setShowMenu] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -87,14 +89,14 @@ function ProjectItem({
       setIsEditing(false)
       setShowMenu(false)
       toast({
-        title: 'Project renamed',
+        title: t('llm.sidebar.projectRenamed'),
         description: trimmed,
       })
     } catch (error) {
       console.error('Failed to update project:', error)
       toast({
-        title: 'Rename failed',
-        description: 'Could not update project name.',
+        title: t('llm.sidebar.renameFailed'),
+        description: t('llm.sidebar.couldNotUpdateProjectName'),
         variant: 'destructive',
       })
     }
@@ -105,8 +107,8 @@ function ProjectItem({
       await deleteProjectMutation.mutateAsync(project.id)
       setShowMenu(false)
       toast({
-        title: 'Project deleted',
-        description: 'All chats have been moved to General project.',
+        title: t('llm.sidebar.projectDeleted'),
+        description: t('llm.sidebar.allChatsMovedToGeneral'),
       })
       if (isActive) {
         router.push('/llm')
@@ -114,8 +116,8 @@ function ProjectItem({
     } catch (error) {
       console.error('Failed to delete project:', error)
       toast({
-        title: 'Delete failed',
-        description: 'Please try again.',
+        title: t('llm.sidebar.deleteFailed'),
+        description: t('llm.sidebar.pleaseTryAgain'),
         variant: 'destructive',
       })
     }
@@ -128,14 +130,14 @@ function ProjectItem({
       setShowMenu(false)
       router.push(resolveConversationPath(conversation))
       toast({
-        title: 'Chat created',
-        description: 'New chat added to project.',
+        title: t('llm.sidebar.chatCreated'),
+        description: t('llm.sidebar.newChatAddedToProject'),
       })
     } catch (error) {
       console.error('Failed to create chat:', error)
       toast({
-        title: 'Create failed',
-        description: 'Could not create chat.',
+        title: t('llm.sidebar.createFailed'),
+        description: t('llm.sidebar.couldNotCreateChat'),
         variant: 'destructive',
       })
     }
@@ -202,7 +204,7 @@ function ProjectItem({
                   className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-foreground/80 hover:bg-accent"
                 >
                   <Pencil className="h-4 w-4" />
-                  Edit
+                  {t('llm.sidebar.edit')}
                 </button>
                 <button
                   onClick={handleAddChat}
@@ -214,7 +216,7 @@ function ProjectItem({
                   ) : (
                     <MessageSquarePlus className="h-4 w-4" />
                   )}
-                  Add chat
+                  {t('llm.sidebar.addChat')}
                 </button>
                 <button
                   onClick={() => setIsConfirmingDelete((prev) => !prev)}
@@ -224,13 +226,13 @@ function ProjectItem({
                   )}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete
+                  {t('llm.sidebar.delete')}
                 </button>
 
                 {isConfirmingDelete && (
                   <div className="mt-2 space-y-2 rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-foreground/80">
                     <p className="text-xs text-destructive">
-                      This will delete the project. All chats will be moved to General project.
+                      {t('llm.sidebar.deleteProjectWarning')}
                     </p>
                     <div className="flex gap-2">
                       <Button
@@ -243,7 +245,7 @@ function ProjectItem({
                         {deleteProjectMutation.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          'Delete'
+                          t('llm.sidebar.delete')
                         )}
                       </Button>
                       <Button
@@ -253,7 +255,7 @@ function ProjectItem({
                         className="flex-1 text-xs"
                         onClick={() => setIsConfirmingDelete(false)}
                       >
-                        Cancel
+                        {t('llm.sidebar.cancel')}
                       </Button>
                     </div>
                   </div>
@@ -269,10 +271,12 @@ function ProjectItem({
           {isLoadingProjectChats ? (
             <div className="flex items-center justify-center py-2 text-xs text-muted-foreground">
               <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
-              Loading...
+              {t('llm.sidebar.loading')}
             </div>
           ) : projectConversations.length === 0 ? (
-            <div className="px-2 py-1.5 text-xs text-muted-foreground">No chats yet</div>
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">
+              {t('llm.sidebar.noChatsYet')}
+            </div>
           ) : (
             projectConversations.map((conversation: any) => (
               <ConversationItem
@@ -290,6 +294,7 @@ function ProjectItem({
 }
 
 export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebarProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [projectsOpen, setProjectsOpen] = useState(true)
   const [chatsOpen, setChatsOpen] = useState(true)
@@ -387,7 +392,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
           aria-label="Create new chat"
         >
           <MessageSquarePlus className="h-4 w-4" />
-          New Chat
+          {t('llm.sidebar.newChat')}
         </Button>
       </div>
 
@@ -398,7 +403,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
             className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground"
             onClick={() => setProjectsOpen((prev) => !prev)}
           >
-            <span>Projects</span>
+            <span>{t('llm.sidebar.projects')}</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={(e) => {
@@ -424,11 +429,11 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
               {isLoadingProjects ? (
                 <div className="flex items-center justify-center py-4 text-xs text-muted-foreground">
                   <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  Loading projects...
+                  {t('llm.sidebar.loadingProjects')}
                 </div>
               ) : projects.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                  No projects yet. Use the + button to create one.
+                  {t('llm.sidebar.noProjectsYet')}
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -454,7 +459,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
             className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground"
             onClick={() => setChatsOpen((prev) => !prev)}
           >
-            <span>Chats</span>
+            <span>{t('llm.sidebar.chats')}</span>
             <ChevronDown
               className={cn(
                 'h-4 w-4 text-muted-foreground transition-transform',
@@ -468,7 +473,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="Search chats..."
+                  placeholder={t('llm.sidebar.searchChats')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="border-border bg-background pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground"
@@ -486,11 +491,13 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
               {isLoadingConversations ? (
                 <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading chats...
+                  {t('llm.sidebar.loadingChats')}
                 </div>
               ) : conversations.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                  {search ? 'No conversations found.' : 'No standalone chats yet.'}
+                  {search
+                    ? t('llm.sidebar.noConversationsFound')
+                    : t('llm.sidebar.noStandaloneChatsYet')}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -510,7 +517,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
                       size="sm"
                       className="w-full text-muted-foreground hover:text-foreground"
                     >
-                      Load more
+                      {t('llm.sidebar.loadMore')}
                     </Button>
                   )}
                 </div>

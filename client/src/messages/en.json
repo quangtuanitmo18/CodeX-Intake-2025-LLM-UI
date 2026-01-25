@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "description": "Use your admin credentials to access the dashboard.",
+      "email": "Email",
+      "password": "Password",
+      "signIn": "Sign in",
+      "signingIn": "Signing in..."
+    },
+    "logout": {
+      "title": "Logout",
+      "confirm": "Are you sure you want to logout?"
+    }
+  },
+  "errors": {
+    "error": "Error",
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPassword": "Invalid password",
+    "networkError": "Network error. Please try again.",
+    "unknownError": "An unknown error occurred"
+  },
+  "toast": {
+    "signedIn": "Signed in successfully",
+    "signedOut": "Signed out successfully",
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "error": "An error occurred"
+  },
+  "home": {
+    "title": "CodeX Intake 2025",
+    "description": "CodeX is a team of passionate engineers and designers, unifying students, graduates, and other young specialists around the world interested in making high-quality open-source projects and getting a priceless experience of making full-valued products on a global market. Our goal is to make a team with fire in the eyes and idealistic tempers.",
+    "loginButton": "Enter LLM UI",
+    "section1": "CodeX is a small team of enthusiasts creating open-source products. We are currently looking for not just experienced, but above all motivated people who want to develop their technical and product skills and work together with the team on cutting-edge technologies. And who are ready to devote enough time to work at CodeX.",
+    "section2": "We have a trial assignment that will help better understand your technical level and motivation. It will also allow us to get to know each other better and start your integration into the workflow. During the assignment, we will communicate and work together, and you will be able to assess how interested you are in working at CodeX.",
+    "section3": "LLM models are becoming increasingly in demand and are being integrated into a wide variety of technological areas and products. We offer you to work on the cutting edge - try to create your own interface for interacting with the model. This is an exciting task that will allow you to understand the principles of LLM interfaces, practice working with streams, Markdown parsing, animations and rendering of various blocks. We hope that in the process of completing the assignment you will learn something new and gain useful experience.",
+    "section4": "This is a common assignment for Frontend and Backend developers."
+  },
+  "llm": {
+    "sidebar": {
+      "newChat": "New Chat",
+      "projects": "Projects",
+      "chats": "Chats",
+      "loading": "Loading...",
+      "noChatsYet": "No chats yet",
+      "edit": "Edit",
+      "addChat": "Add chat",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "projectRenamed": "Project renamed",
+      "renameFailed": "Rename failed",
+      "couldNotUpdateProjectName": "Could not update project name.",
+      "projectDeleted": "Project deleted",
+      "allChatsMovedToGeneral": "All chats have been moved to General project.",
+      "deleteFailed": "Delete failed",
+      "pleaseTryAgain": "Please try again.",
+      "chatCreated": "Chat created",
+      "newChatAddedToProject": "New chat added to project.",
+      "createFailed": "Create failed",
+      "couldNotCreateChat": "Could not create chat.",
+      "deleteProjectWarning": "This will delete the project. All chats will be moved to General project.",
+      "searchChats": "Search chats...",
+      "loadingChats": "Loading chats...",
+      "noConversationsFound": "No conversations found.",
+      "noStandaloneChatsYet": "No standalone chats yet.",
+      "loadMore": "Load more",
+      "loadingProjects": "Loading projects...",
+      "noProjectsYet": "No projects yet. Use the + button to create one."
+    },
+    "chatArea": {
+      "newChat": "New Chat",
+      "selectChatToBegin": "Select a chat or create a new chat to begin",
+      "aiThinking": "AI is thinking",
+      "aiResponding": "AI is responding",
+      "aiResponseComplete": "AI response complete",
+      "startConversation": "Start a conversation...",
+      "noActiveConversation": "No active conversation. Please create a new chat.",
+      "uploadingFiles": "Uploading files...",
+      "invalidMessage": "Invalid message",
+      "failedToSendMessage": "Failed to send message. Please try again."
+    },
+    "composer": {
+      "messageInput": "Message input",
+      "askAnything": "Ask anything",
+      "attach": "Attach",
+      "send": "Send",
+      "sendingMessage": "Sending message...",
+      "sendMessage": "Send message"
+    },
+    "message": {
+      "thinking": "Thinking...",
+      "thoughtForSeconds": "Thought for {seconds} seconds",
+      "thought": "Thought",
+      "collapseReasoning": "Collapse reasoning",
+      "expandReasoning": "Expand reasoning",
+      "processing": "Processing..."
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "displayName": "Display name",
+    "avatarUrl": "Avatar URL",
+    "saveChanges": "Save changes",
+    "profileUpdated": "Profile updated"
+  },
+  "password": {
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "updatePassword": "Update password",
+    "passwordUpdated": "Password updated",
+    "passwordUpdatedSuccessfully": "Password updated successfully"
+  },
+  "media": {
+    "uploadSampleImage": "Upload sample image",
+    "uploadedPath": "Uploaded path",
+    "clearPreview": "Clear preview",
+    "uploadComplete": "Upload complete",
+    "uploadFailed": "Upload failed",
+    "unableToUploadFile": "Unable to upload file"
+  },
+  "pages": {
+    "profile": {
+      "title": "Profile Settings",
+      "back": "Back",
+      "profileTab": "Profile",
+      "passwordTab": "Change Password",
+      "name": "Name",
+      "email": "Email",
+      "emailCannotBeChanged": "Email cannot be changed",
+      "clickCameraToChangeAvatar": "Click camera icon to change avatar",
+      "saveChanges": "Save Changes",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "changePassword": "Change Password",
+      "passwordChangedSuccessfully": "Password changed successfully"
+    },
+    "settings": {
+      "title": "Settings",
+      "back": "Back",
+      "general": {
+        "title": "General",
+        "language": "Language",
+        "languageDescription": "Select your preferred language",
+        "theme": "Theme",
+        "themeDescription": "Choose your interface theme",
+        "dark": "Dark",
+        "light": "Light",
+        "system": "System"
+      },
+      "llm": {
+        "title": "LLM Preferences",
+        "defaultModel": "Default Model",
+        "defaultModelDescription": "Choose your default AI model",
+        "temperature": "Temperature",
+        "temperatureDescription": "Control response randomness (0-1)",
+        "maxTokens": "Max Tokens",
+        "maxTokensDescription": "Maximum response length"
+      },
+      "privacy": {
+        "title": "Privacy & Data",
+        "saveConversationHistory": "Save conversation history",
+        "saveConversationHistoryDescription": "Store your chat history for future reference",
+        "analytics": "Analytics",
+        "analyticsDescription": "Help improve our service with usage data"
+      },
+      "dangerZone": {
+        "title": "Danger Zone",
+        "deleteAllConversations": "Delete all conversations",
+        "deleteAllConversationsDescription": "Permanently delete all your chat history",
+        "deleteAll": "Delete All",
+        "deleteAccount": "Delete account",
+        "deleteAccountDescription": "Permanently delete your account and all data",
+        "deleteAccountButton": "Delete Account"
+      }
+    },
+    "userMenu": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "logOut": "Log out",
+      "loggedOutSuccessfully": "Logged out successfully",
+      "workspace": "Workspace",
+      "plus": "Plus",
+      "user": "User"
+    }
+  }
+}

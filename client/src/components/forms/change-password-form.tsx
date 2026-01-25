@@ -6,6 +6,7 @@ import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { handleErrorApi, removeTokensFromLocalStorage } from '@/lib/utils'
 import { ChangePasswordBody, ChangePasswordBodyType } from '@/schemaValidations/account.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
 export function ChangePasswordForm() {
+  const { t } = useTranslation()
   const router = useRouter()
   const form = useForm<ChangePasswordBodyType>({
     resolver: zodResolver(ChangePasswordBody),
@@ -31,9 +33,10 @@ export function ChangePasswordForm() {
     try {
       const res = await mutation.mutateAsync(values)
       toast({
-        title: 'Password updated',
+        title: t('password.passwordUpdated'),
         description:
-          (res.payload as { message?: string })?.message || 'Password updated successfully',
+          (res.payload as { message?: string })?.message ||
+          t('password.passwordUpdatedSuccessfully'),
       })
       removeTokensFromLocalStorage()
       router.push('/login')
@@ -57,7 +60,7 @@ export function ChangePasswordForm() {
           name="oldPassword"
           render={({ field }) => (
             <FormItem>
-              <Label htmlFor="oldPassword">Current password</Label>
+              <Label htmlFor="oldPassword">{t('password.currentPassword')}</Label>
               <Input id="oldPassword" type="password" {...field} />
               <FormMessage />
             </FormItem>
@@ -68,7 +71,7 @@ export function ChangePasswordForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <Label htmlFor="password">New password</Label>
+              <Label htmlFor="password">{t('password.newPassword')}</Label>
               <Input id="password" type="password" {...field} />
               <FormMessage />
             </FormItem>
@@ -79,14 +82,14 @@ export function ChangePasswordForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t('password.confirmPassword')}</Label>
               <Input id="confirmPassword" type="password" {...field} />
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" disabled={mutation.isPending}>
-          Update password
+          {t('password.updatePassword')}
         </Button>
       </form>
     </Form>

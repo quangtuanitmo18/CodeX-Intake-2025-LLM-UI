@@ -6,6 +6,7 @@ import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { handleErrorApi } from '@/lib/utils'
 import { UpdateMeBody, UpdateMeBodyType } from '@/schemaValidations/account.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,6 +14,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 export function ProfileForm({ defaultValues }: { defaultValues: UpdateMeBodyType }) {
+  const { t } = useTranslation()
   const form = useForm<UpdateMeBodyType>({
     resolver: zodResolver(UpdateMeBody),
     defaultValues,
@@ -26,7 +28,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: UpdateMeBodyType
     try {
       const res = await mutation.mutateAsync(values)
       toast({
-        title: 'Profile updated',
+        title: t('profile.profileUpdated'),
         description: res.payload.message,
       })
     } catch (error) {
@@ -49,7 +51,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: UpdateMeBodyType
           name="name"
           render={({ field }) => (
             <FormItem>
-              <Label htmlFor="name">Display name</Label>
+              <Label htmlFor="name">{t('profile.displayName')}</Label>
               <Input id="name" {...field} />
               <FormMessage />
             </FormItem>
@@ -60,14 +62,14 @@ export function ProfileForm({ defaultValues }: { defaultValues: UpdateMeBodyType
           name="avatar"
           render={({ field }) => (
             <FormItem>
-              <Label htmlFor="avatar">Avatar URL</Label>
+              <Label htmlFor="avatar">{t('profile.avatarUrl')}</Label>
               <Input id="avatar" placeholder="https://…" {...field} value={field.value ?? ''} />
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" disabled={mutation.isPending}>
-          Save changes
+          {t('profile.saveChanges')}
         </Button>
       </form>
     </Form>

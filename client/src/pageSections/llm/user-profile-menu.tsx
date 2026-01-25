@@ -1,6 +1,7 @@
 'use client'
 
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { Role } from '@/constants/type'
 import { cn, handleErrorApi } from '@/lib/utils'
 import { useAccountMe } from '@/queries/useAccount'
@@ -17,6 +18,7 @@ interface UserProfileMenuProps {
 }
 
 export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: UserProfileMenuProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const { data: accountData, isLoading } = useAccountMe()
   const logoutMutation = useLogoutMutation()
@@ -46,7 +48,7 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
     try {
       const result = await logoutMutation.mutateAsync()
       toast({
-        description: 'Logged out successfully',
+        description: t('pages.userMenu.loggedOutSuccessfully'),
       })
       router.push('/login')
     } catch (error: any) {
@@ -75,7 +77,8 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
       .slice(0, 2)
   }
 
-  const planLabel = account?.role === Role.Admin ? 'Workspace' : 'Plus'
+  const planLabel =
+    account?.role === Role.Admin ? t('pages.userMenu.workspace') : t('pages.userMenu.plus')
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -92,7 +95,7 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={account.avatar}
-              alt={account.name || 'User'}
+              alt={account.name || t('pages.userMenu.user')}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -102,7 +105,7 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
 
         <div className="flex min-w-0 flex-1 flex-col leading-tight">
           <span className="truncate text-sm font-medium text-foreground">
-            {account?.name || 'User'}
+            {account?.name || t('pages.userMenu.user')}
           </span>
           <span className="text-xs text-emerald-300">{planLabel}</span>
         </div>
@@ -127,7 +130,9 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
         >
           {/* User Info */}
           <div className="px-3 py-2">
-            <p className="text-sm font-medium text-foreground">{account?.name || 'User'}</p>
+            <p className="text-sm font-medium text-foreground">
+              {account?.name || t('pages.userMenu.user')}
+            </p>
             <p className="text-xs text-muted-foreground">{account?.email}</p>
           </div>
 
@@ -144,7 +149,7 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
               className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm text-foreground transition-colors hover:bg-accent"
             >
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>{t('pages.userMenu.profile')}</span>
             </button>
             {/* 
             <button
@@ -177,7 +182,7 @@ export function UserProfileMenu({ className, dropdownPlacement = 'bottom' }: Use
               ) : (
                 <LogOut className="mr-2 h-4 w-4" />
               )}
-              <span>Log out</span>
+              <span>{t('pages.userMenu.logOut')}</span>
             </button>
           </div>
         </div>

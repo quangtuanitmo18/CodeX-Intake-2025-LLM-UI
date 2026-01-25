@@ -1,6 +1,7 @@
 'use client'
 
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { cn, handleErrorApi } from '@/lib/utils'
 import { useAccountMe, useChangePasswordMutation, useUpdateMeMutation } from '@/queries/useAccount'
 import {
@@ -16,6 +17,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 export default function ProfilePage() {
+  const { t } = useTranslation()
   const router = useRouter()
   const { data: accountData, isLoading } = useAccountMe()
   const updateMeMutation = useUpdateMeMutation()
@@ -93,7 +95,7 @@ export default function ProfilePage() {
     try {
       const result = await changePasswordMutation.mutateAsync(data)
       toast({
-        description: result.payload.message || 'Password changed successfully',
+        description: result.payload.message || t('pages.profile.passwordChangedSuccessfully'),
       })
       passwordForm.reset()
     } catch (error: any) {
@@ -133,14 +135,14 @@ export default function ProfilePage() {
             aria-label="Go back"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            {t('pages.profile.back')}
           </button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="mx-auto max-w-4xl px-4 py-6 md:py-8">
-        <h1 className="mb-6 text-2xl font-bold md:mb-8 md:text-3xl">Profile Settings</h1>
+        <h1 className="mb-6 text-2xl font-bold md:mb-8 md:text-3xl">{t('pages.profile.title')}</h1>
 
         {/* Tabs */}
         <div className="mb-4 flex gap-2 border-b border-border md:mb-6 md:gap-4">
@@ -153,7 +155,7 @@ export default function ProfilePage() {
                 : 'border-transparent text-muted-foreground hover:text-foreground active:text-foreground/80'
             )}
           >
-            Profile
+            {t('pages.profile.profileTab')}
           </button>
           <button
             onClick={() => setActiveTab('password')}
@@ -164,7 +166,7 @@ export default function ProfilePage() {
                 : 'border-transparent text-muted-foreground hover:text-foreground active:text-foreground/80'
             )}
           >
-            Change Password
+            {t('pages.profile.passwordTab')}
           </button>
         </div>
 
@@ -210,7 +212,7 @@ export default function ProfilePage() {
                   <h3 className="text-base font-medium md:text-lg">{account?.name}</h3>
                   <p className="text-xs text-muted-foreground md:text-sm">{account?.email}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Click camera icon to change avatar
+                    {t('pages.profile.clickCameraToChangeAvatar')}
                   </p>
                 </div>
               </div>
@@ -218,7 +220,7 @@ export default function ProfilePage() {
               {/* Name */}
               <div>
                 <label htmlFor="name" className="mb-2 block text-xs font-medium md:text-sm">
-                  Name
+                  {t('pages.profile.name')}
                 </label>
                 <input
                   id="name"
@@ -236,7 +238,7 @@ export default function ProfilePage() {
               {/* Email (read-only) */}
               <div>
                 <label htmlFor="email" className="mb-2 block text-xs font-medium md:text-sm">
-                  Email
+                  {t('pages.profile.email')}
                 </label>
                 <input
                   id="email"
@@ -245,7 +247,9 @@ export default function ProfilePage() {
                   disabled
                   className="min-h-[32px] w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground outline-none md:px-4"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">Email cannot be changed</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t('pages.profile.emailCannotBeChanged')}
+                </p>
               </div>
 
               {/* Submit Button */}
@@ -263,7 +267,7 @@ export default function ProfilePage() {
                   ) : (
                     <Save className="h-5 w-5" />
                   )}
-                  Save Changes
+                  {t('pages.profile.saveChanges')}
                 </button>
               </div>
             </form>
@@ -280,7 +284,7 @@ export default function ProfilePage() {
               {/* Old Password */}
               <div>
                 <label htmlFor="oldPassword" className="mb-2 block text-xs font-medium md:text-sm">
-                  Current Password
+                  {t('pages.profile.currentPassword')}
                 </label>
                 <input
                   id="oldPassword"
@@ -298,7 +302,7 @@ export default function ProfilePage() {
               {/* New Password */}
               <div>
                 <label htmlFor="password" className="mb-2 block text-xs font-medium md:text-sm">
-                  New Password
+                  {t('pages.profile.newPassword')}
                 </label>
                 <input
                   id="password"
@@ -319,7 +323,7 @@ export default function ProfilePage() {
                   htmlFor="confirmPassword"
                   className="mb-2 block text-xs font-medium md:text-sm"
                 >
-                  Confirm New Password
+                  {t('pages.profile.confirmNewPassword')}
                 </label>
                 <input
                   id="confirmPassword"
@@ -349,7 +353,7 @@ export default function ProfilePage() {
                   ) : (
                     <Save className="h-5 w-5" />
                   )}
-                  Change Password
+                  {t('pages.profile.changePassword')}
                 </button>
               </div>
             </form>

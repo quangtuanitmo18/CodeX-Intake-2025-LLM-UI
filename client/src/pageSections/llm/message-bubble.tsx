@@ -1,5 +1,6 @@
 import ThoughtIcon from '@/assets/icons/thought'
 import { type MarkdownBlock } from '@/lib/markdown'
+import { useTranslation } from '@/hooks/use-translation'
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
@@ -34,6 +35,7 @@ export const MessageBubble = memo(function MessageBubble({
   thinkingSeconds,
   savedThinkingSeconds,
 }: MessageBubbleProps) {
+  const { t } = useTranslation()
   const isUser = message.role === 'user'
   // When thinking is active, always expand. When thinking is done, default to collapsed
   const [isReasoningExpanded, setIsReasoningExpanded] = useState(isThinking)
@@ -78,17 +80,21 @@ export const MessageBubble = memo(function MessageBubble({
                 'flex min-h-[32px] items-center gap-[5px] py-1 text-left transition-opacity md:min-h-0 md:py-[1px]',
                 isThinking ? 'cursor-default opacity-100' : 'cursor-pointer hover:opacity-80'
               )}
-              aria-label={isReasoningExpanded ? 'Collapse reasoning' : 'Expand reasoning'}
+              aria-label={
+                isReasoningExpanded
+                  ? t('llm.message.collapseReasoning')
+                  : t('llm.message.expandReasoning')
+              }
             >
               <div className="flex h-[14px] w-[14px] shrink-0 items-center justify-center">
                 <ThoughtIcon />
               </div>
               <span className="text-xs leading-[20px] text-muted-foreground md:text-[14px] md:leading-[22px]">
                 {isThinking
-                  ? `Thinking...`
+                  ? t('llm.message.thinking')
                   : savedThinkingSeconds
-                    ? `Thought for ${savedThinkingSeconds} seconds`
-                    : 'Thought'}
+                    ? t('llm.message.thoughtForSeconds', { seconds: savedThinkingSeconds })
+                    : t('llm.message.thought')}
               </span>
               {isThinking ? null : isReasoningExpanded ? (
                 <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground md:h-[18px] md:w-[18px]" />
@@ -100,7 +106,7 @@ export const MessageBubble = memo(function MessageBubble({
             {/* Show reasoning only when expanded OR when thinking */}
             {(isReasoningExpanded || isThinking) && (message.reasoning || isThinking) && (
               <div className="text-xs leading-[20px] text-muted-foreground md:text-[14px] md:leading-[22px]">
-                {message.reasoning || (isThinking ? 'Processing...' : '')}
+                {message.reasoning || (isThinking ? t('llm.message.processing') : '')}
               </div>
             )}
           </div>

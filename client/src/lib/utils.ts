@@ -7,6 +7,13 @@ import { jwtDecode } from 'jwt-decode'
 import { UseFormSetError } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 
+// Lazy import for translations to avoid circular dependencies
+let getTranslation: (() => (key: string) => string) | null = null
+
+export function setTranslationGetter(fn: () => (key: string) => string) {
+  getTranslation = fn
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -32,9 +39,10 @@ export const handleErrorApi = ({
     return
   }
 
+  const t = getTranslation?.() || ((key: string) => key)
   toast({
-    title: 'Error',
-    description: error?.payload?.message ?? 'Something went wrong',
+    title: t('errors.error'),
+    description: error?.payload?.message ?? t('errors.unknownError'),
     variant: 'destructive',
     duration: duration ?? 5000,
   })

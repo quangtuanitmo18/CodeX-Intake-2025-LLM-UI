@@ -6,6 +6,7 @@ import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslation } from '@/hooks/use-translation'
 import { handleErrorApi } from '@/lib/utils'
 import { useLoginMutation } from '@/queries/useAuth'
 import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
@@ -15,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
 export function LoginForm() {
+  const { t } = useTranslation()
   const router = useRouter()
   const loginMutation = useLoginMutation()
   const form = useForm<LoginBodyType>({
@@ -30,7 +32,7 @@ export function LoginForm() {
     try {
       const res = await loginMutation.mutateAsync(values)
       toast({
-        title: 'Signed in successfully',
+        title: t('toast.signedIn'),
         description: res.payload.message,
       })
       router.push('/llm')
@@ -45,8 +47,8 @@ export function LoginForm() {
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardHeader>
-        <CardTitle>Welcome back</CardTitle>
-        <CardDescription>Use your admin credentials to access the dashboard.</CardDescription>
+        <CardTitle>{t('auth.login.title')}</CardTitle>
+        <CardDescription>{t('auth.login.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -60,7 +62,7 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.login.email')}</Label>
                   <Input id="email" type="email" autoComplete="email" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -71,7 +73,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('auth.login.password')}</Label>
                   <Input id="password" type="password" autoComplete="current-password" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -79,7 +81,7 @@ export function LoginForm() {
             />
             <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
               {loginMutation.isPending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-              Sign in
+              {loginMutation.isPending ? t('auth.login.signingIn') : t('auth.login.signIn')}
             </Button>
           </form>
         </Form>

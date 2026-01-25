@@ -2,6 +2,7 @@
 
 import RefreshToken from '@/components/refresh-token'
 import { ThemeProvider } from '@/contexts/theme-context'
+import { I18nProvider } from '@/i18n/provider'
 import {
   decodeToken,
   getAccessTokenFromLocalStorage,
@@ -64,12 +65,14 @@ export default function AppProvider({ children }: { children: React.ReactNode })
   }, [setRole])
 
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        {children}
-        <RefreshToken />
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
-      </QueryClientProvider>
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <RefreshToken />
+          {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+        </QueryClientProvider>
+      </ThemeProvider>
+    </I18nProvider>
   )
 }

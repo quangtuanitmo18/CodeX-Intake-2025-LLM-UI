@@ -4,6 +4,7 @@ import {
   MicrophoneButton,
   type MicrophoneButtonHandle,
 } from '@/components/speech/microphone-button'
+import { useTranslation } from '@/hooks/use-translation'
 import type { Language } from '@/hooks/useSpeechToText'
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
@@ -35,6 +36,7 @@ export const ChatComposer = memo(function ChatComposer({
   isStreaming,
   onSubmit,
 }: ChatComposerProps) {
+  const { t } = useTranslation()
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const microphoneRef = useRef<MicrophoneButtonHandle>(null)
   const [speechLanguage, setSpeechLanguage] = useState<Language>('vi')
@@ -113,14 +115,14 @@ export const ChatComposer = memo(function ChatComposer({
       {/* Input Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <label htmlFor="message-input" className="sr-only">
-          Message input
+          {t('llm.composer.messageInput')}
         </label>
         <textarea
           id="message-input"
           ref={textareaRef}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Ask anything"
+          placeholder={t('llm.composer.askAnything')}
           onKeyDown={handleKeydown}
           rows={1}
           disabled={isStreaming}
@@ -168,7 +170,7 @@ export const ChatComposer = memo(function ChatComposer({
             aria-label="Attach file"
           >
             <AttachIcon />
-            <span className="md:inline">Attach</span>
+            <span className="md:inline">{t('llm.composer.attach')}</span>
           </button>
         </div>
 
@@ -180,11 +182,13 @@ export const ChatComposer = memo(function ChatComposer({
             'flex items-center justify-center gap-1 rounded-[16px] bg-primary px-[11px] py-[3px] text-[14px] font-medium leading-[22px] text-primary-foreground transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-50 md:min-w-0 md:py-1',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
           )}
-          aria-label={isStreaming ? 'Sending message...' : 'Send message'}
+          aria-label={
+            isStreaming ? t('llm.composer.sendingMessage') : t('llm.composer.sendMessage')
+          }
           aria-busy={isStreaming}
         >
           {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendIcon />}
-          <span className="md:inline">Send</span>
+          <span className="md:inline">{t('llm.composer.send')}</span>
         </button>
       </div>
     </form>
