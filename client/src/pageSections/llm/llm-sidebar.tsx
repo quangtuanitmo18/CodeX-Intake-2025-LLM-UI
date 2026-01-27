@@ -396,7 +396,7 @@ export function LLMSidebar({ activeConversationId, activeProjectId }: LLMSidebar
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="custom-scrollbar flex-1 overflow-y-auto">
         {/* Projects Section */}
         <section className="border-b border-border/50 p-4">
           <header

@@ -1,6 +1,5 @@
 'use client'
 
-import { useI18n } from '@/i18n/provider'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,8 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Globe } from 'lucide-react'
+import { useI18n } from '@/i18n/provider'
 import { cn } from '@/lib/utils'
+import { Globe } from 'lucide-react'
 
 export function LanguageSelector() {
   const { locale, setLocale, locales } = useI18n()

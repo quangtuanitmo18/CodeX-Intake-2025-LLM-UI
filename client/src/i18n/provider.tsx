@@ -12,6 +12,7 @@ const STORAGE_KEY = 'locale'
 
 /**
  * Get locale from localStorage
+ * Falls back safely to DEFAULT_LOCALE on the server or on any failure.
  */
 function getStoredLocale(): SupportedLocale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE
@@ -97,18 +98,18 @@ export function I18nProvider({ children }: I18nProviderProps) {
   const [locale, setLocaleState] = useState<SupportedLocale>(DEFAULT_LOCALE)
   const [messages, setMessages] = useState<TranslationMessages>({})
   const [isLoading, setIsLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const [hasInitializedLocale, setHasInitializedLocale] = useState(false)
 
-  // Initialize locale from localStorage on mount
+  // Initialize locale from localStorage on client
   useEffect(() => {
     const storedLocale = getStoredLocale()
     setLocaleState(storedLocale)
-    setMounted(true)
+    setHasInitializedLocale(true)
   }, [])
 
-  // Load messages when locale changes
+  // Load messages when locale changes (or after first locale init)
   useEffect(() => {
-    if (!mounted) return
+    if (!hasInitializedLocale) return
 
     setIsLoading(true)
     loadMessages(locale)
@@ -120,7 +121,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
         console.error('Failed to load messages:', error)
         setIsLoading(false)
       })
-  }, [locale, mounted])
+  }, [locale, hasInitializedLocale])
 
   // Translation function
   const t = useCallback(
@@ -158,11 +159,6 @@ export function I18nProvider({ children }: I18nProviderProps) {
     setLocaleState(newLocale)
     saveLocale(newLocale)
   }, [])
-
-  // Don't render children until mounted (prevents hydration mismatch)
-  if (!mounted) {
-    return <>{children}</>
-  }
 
   const value: I18nContextType = {
     t,

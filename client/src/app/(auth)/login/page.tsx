@@ -8,7 +8,7 @@ export const metadata = buildPageMetadata('login')
 export default function Login() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-center lg:gap-20">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-12 sm:px-6 md:gap-12 md:py-16 lg:flex-row lg:items-center lg:gap-20">
         <div className="flex-1 space-y-6 text-center lg:text-left">
           <div className="flex items-center justify-center gap-3 lg:justify-start">
             <Image
